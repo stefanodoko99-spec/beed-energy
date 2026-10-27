@@ -5,6 +5,7 @@
 import Site from '../layouts/Site.astro';
 import TitleBlock from '../components/TitleBlock.astro';
 import CompatPairBlock from '../components/CompatPairBlock.astro';
+import PvArray from '../components/PvArray.astro';
 import '../styles/renewables.css';
 import '../styles/compat.css';
 import { href, other, type Lang } from '../lib/i18n';
@@ -124,11 +125,7 @@ const jsonld = {
             <a class="pk-plan__link" href={`#${d.pkg.id}`}>
               <span class="pk-plan__key mono">{pad(d.pkg.n)}</span>
               {d.layout ? (
-                <svg class="pk-plan__svg" viewBox={`0 0 ${planW} ${planH}`} style={`aspect-ratio:${planW} / ${planH}`} preserveAspectRatio="xMinYMax meet" aria-hidden="true" focusable="false">
-                  <g transform={`translate(0 ${planH - d.layout.height})`}>
-                    {d.layout.panels.map((r) => <rect x={r.x} y={r.y} width={d.layout!.w} height={d.layout!.h} />)}
-                  </g>
-                </svg>
+                <PvArray class="pk-plan__svg" uid={`plan-${d.pkg.id}`} layout={d.layout} viewBox={`0 ${d.layout.height - planH} ${planW} ${planH}`} style={`aspect-ratio:${planW} / ${planH}`} preserveAspectRatio="xMinYMax meet" />
               ) : <span class="pk-plan__svg" aria-hidden="true"></span>}
               <span class="pk-plan__name">{d.pkg.name[lang]}</span>
               <span class="pk-plan__kwp mono">{d.result ? `${num(d.result.kwp, 2, lang)} kWp` : '—'}</span>
@@ -174,14 +171,7 @@ const jsonld = {
 
           <figure class="pk__fig">
             {d.layout && (
-              <svg class="pk__svg" data-rn-array viewBox={`-120 -120 ${d.layout.width + 240} ${d.layout.height + 240}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-                {d.layout.panels.map((pt) => (
-                  <g class="pk__panel" transform={`translate(${pt.x} ${pt.y})`}>
-                    <rect width={d.layout!.w} height={d.layout!.h} />
-                    <line x1="0" x2={d.layout!.w} y1={d.layout!.h / 2} y2={d.layout!.h / 2} />
-                  </g>
-                ))}
-              </svg>
+              <PvArray class="pk__svg" data-rn-array uid={`card-${d.pkg.id}`} layout={d.layout} roof viewBox={`-240 -240 ${d.layout.width + 480} ${d.layout.height + 480}`} />
             )}
             {r && <p class="pk__stamp mono">{num(r.kwp, 2, lang)}<span> kWp</span></p>}
             {r && (

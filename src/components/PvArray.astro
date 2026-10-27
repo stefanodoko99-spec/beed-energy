@@ -1,0 +1,120 @@
+---
+// A solar array seen from above, drawn to scale in millimetres from arrayLayout() (src/lib/packages.ts):
+// the real number of modules in the real arrangement, each one drawn like the module it stands for —
+// anodised frame, dark cells with their gaps and the half-cut split, a glass sheen. `roof` adds what the
+// array sits on (tiled roof, mounting rails, clamps, one soft shadow) for the package cards; the overview
+// leaves it out and draws the cells plain, since cell lines at thumbnail size only turn into moiré.
+// Each module is a .pk__panel group, which src/scripts/renewables.ts fades in one after another.
+import type { ArrayLayout } from '../lib/packages';
+
+interface Props {
+  layout: ArrayLayout;
+  /** Unique on the page: the gradient and pattern ids are suffixed with it. */
+  uid: string;
+  roof?: boolean;
+  class?: string;
+  viewBox: string;
+  preserveAspectRatio?: string;
+  style?: string;
+  'data-rn-array'?: boolean;
+}
+const { layout: L, uid, roof = false, class: cls, viewBox, preserveAspectRatio = 'xMidYMid meet', style, ...rest } = Astro.props;
+const { w, h } = L;
+const F = Math.round(Math.min(w, h) * 0.028); // frame: ~32 mm on a 1134 mm module
+const iw = w - 2 * F;
+const ih = h - 2 * F;
+// Half-cut layout of a 108-cell module: 6 columns, 18 rows of half cells, split across the middle.
+const cols = w < h ? 6 : 18;
+const rows = w < h ? 18 : 6;
+const cw = iw / cols;
+const ch = ih / rows;
+const gapCell = Math.max(3, cw * 0.035);
+const id = (k: string) => `${k}-${uid}`;
+// Rails run under each row at a quarter and three quarters of the module, past both ends of the row.
+const rowYs = [...new Set(L.panels.map((p) => p.y))];
+const railH = Math.round(h * 0.024);
+const railYs = (y: number) => (w < h ? [y + h * 0.22, y + h * 0.78] : [y + h * 0.25, y + h * 0.75]);
+const rowSpan = (y: number) => {
+  const xs = L.panels.filter((p) => p.y === y).map((p) => p.x);
+  return { x0: Math.min(...xs), x1: Math.max(...xs) + w };
+};
+---
+<svg class={cls} viewBox={viewBox} preserveAspectRatio={preserveAspectRatio} style={style} aria-hidden="true" focusable="false" {...rest}>
+  <defs>
+    <linearGradient id={id('frame')} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f1f4f5" />
+      <stop offset="0.5" stop-color="#c3cacd" />
+      <stop offset="1" stop-color="#8f999e" />
+    </linearGradient>
+    <linearGradient id={id('sheen')} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.26" />
+      <stop offset="0.32" stop-color="#fff" stop-opacity="0.06" />
+      <stop offset="0.55" stop-color="#fff" stop-opacity="0" />
+      <stop offset="0.82" stop-color="#fff" stop-opacity="0.08" />
+      <stop offset="1" stop-color="#fff" stop-opacity="0" />
+    </linearGradient>
+    {roof ? (
+      <>
+        <linearGradient id={id('cell')} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#18304e" />
+          <stop offset="1" stop-color="#0d1f33" />
+        </linearGradient>
+        <pattern id={id('cells')} patternUnits="userSpaceOnUse" x={F} y={F} width={cw} height={ch}>
+          <rect width={cw} height={ch} fill="#0a1626" />
+          <rect x={gapCell / 2} y={gapCell / 2} width={cw - gapCell} height={ch - gapCell} rx={gapCell} fill={`url(#${id('cell')})`} />
+        </pattern>
+        <linearGradient id={id('rail')} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#a9b2b7" />
+          <stop offset="1" stop-color="#5d686f" />
+        </linearGradient>
+        <linearGradient id={id('tile')} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#a24e2d" />
+          <stop offset="0.35" stop-color="#d4835b" />
+          <stop offset="0.7" stop-color="#bf6640" />
+          <stop offset="1" stop-color="#9a472a" />
+        </linearGradient>
+        <pattern id={id('roof')} patternUnits="userSpaceOnUse" width="230" height="380">
+          <rect width="230" height="380" fill="#b85d38" />
+          <rect x="4" y="0" width="222" height="372" rx="70" fill={`url(#${id('tile')})`} />
+          <rect x="0" y="352" width="230" height="28" fill="#7f3a22" opacity="0.55" />
+        </pattern>
+        <filter id={id('shadow')} x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="28" />
+        </filter>
+      </>
+    ) : null}
+  </defs>
+
+  {roof && (
+    <g>
+      <rect x="-20000" y="-20000" width="40000" height="40000" fill={`url(#${id('roof')})`} />
+      {rowYs.map((y) => {
+        const { x0, x1 } = rowSpan(y);
+        return railYs(y).map((ry) => <rect x={x0 - 90} y={ry - railH / 2} width={x1 - x0 + 180} height={railH} rx={railH / 3} fill={`url(#${id('rail')})`} />);
+      })}
+      <g filter={`url(#${id('shadow')})`} opacity="0.45">
+        {L.panels.map((p) => <rect x={p.x + 26} y={p.y + 38} width={w} height={h} fill="#2a1408" />)}
+      </g>
+    </g>
+  )}
+
+  {L.panels.map((p) => (
+    <g class="pk__panel" transform={`translate(${p.x} ${p.y})`}>
+      <rect width={w} height={h} rx={F * 0.35} fill={`url(#${id('frame')})`} />
+      <rect x={F} y={F} width={iw} height={ih} fill={roof ? `url(#${id('cells')})` : '#10243a'} />
+      {w < h
+        ? <rect x={F} y={F + ih / 2 - gapCell} width={iw} height={gapCell * 2} fill="#0a1626" />
+        : <rect x={F + iw / 2 - gapCell} y={F} width={gapCell * 2} height={ih} fill="#0a1626" />}
+      <rect x={F} y={F} width={iw} height={ih} fill={`url(#${id('sheen')})`} />
+    </g>
+  ))}
+
+  {roof && rowYs.map((y) => {
+    // Clamps hold the frames to the rails: an end clamp at each end of a row, a middle clamp in each gap.
+    const xs = L.panels.filter((p) => p.y === y).map((p) => p.x).sort((a, b) => a - b);
+    const cwid = Math.max(L.gap * 1.6, 34);
+    const ends = [xs[0] - cwid * 0.55, xs[xs.length - 1] + w - cwid * 0.45];
+    const mids = xs.slice(1).map((x) => x - L.gap / 2 - cwid / 2);
+    return railYs(y).map((ry) => [...ends, ...mids].map((x) => <rect x={x} y={ry - railH * 1.1} width={cwid} height={railH * 2.2} rx="6" fill="#4f5a61" />));
+  })}
+</svg>
