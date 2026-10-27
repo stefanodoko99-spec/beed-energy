@@ -68,7 +68,7 @@ Home, sticky sheet beside the scrolling chapters (CSS sticky, no pin; chapters t
 | # | Technique (winner) | Here |
 |---|---|---|
 | 1 | Phase-by-phase build (NRG) + pinned product (Caeli) | Exploded parts lift out of the realistic house, chapter by chapter (signature) |
-| 2 | Word-swap preloader (Marvell) + % curtain (Belgrade Arbor) | Loader: "Ndërtim → Construction → Energji → Energy → BeeD Energy", the ground line of the house draws as progress; skip button; ≤ 1.6 s; once per session; hard 2.5 s time-out; never on a product URL |
+| 2 | % curtain (Belgrade Arbor), as a battery | Loader: a battery charges cell by cell while the % counts to 100, flashes full, then the curtain lifts; decided in `<head>` before the first paint (no flash of the page); skip button; ≤ 1.6 s; once per session; hard 2.2 s time-out; home only |
 | 3 | Energy-saving mode (Enpower) + Stop animations (Vazzi) | "Kursim energjie" switch in the header and footer = `html[data-motion=off]` + no pin, no smooth scroll |
 | 4 | One product → many (ON Energy) | Product page: the drawing card fans out into the seller offer cards, which settle into the offers table sorted by price |
 | 5 | Live counts in the menu (Decor Systems) | Full-screen menu: 14 categories with real product counts and "nga 12 400 L" |

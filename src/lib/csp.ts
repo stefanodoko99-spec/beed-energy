@@ -1,5 +1,5 @@
-// Content-Security-Policy for HTML pages. The only inline script is the motion-state snippet that has
-// to run before first paint; it lives here as one string so the layouts emit exactly the text we hash.
+// Content-Security-Policy for HTML pages. The only inline scripts are the two snippets that have to run
+// before first paint; they live here as strings so the layouts emit exactly the text we hash.
 // Every other script is a file ('self'): astro.config sets assetsInlineLimit 0 so the build never
 // inlines a bundled script into the page. JSON and JSON-LD <script> blocks are data, not code.
 import { createHash } from 'node:crypto';
@@ -11,8 +11,18 @@ export const MOTION_SCRIPT =
   "if(!off&&window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)off=true;" +
   "d.setAttribute('data-motion',off?'off':'on')})();";
 
+/**
+ * On the page with the intro (home): decides before the first paint whether it plays, so the page is never
+ * seen first and covered a moment later. Once per session, never with motion off or when the address
+ * points into the page. Runs after MOTION_SCRIPT; src/scripts/site.ts plays it when <html data-preloader="on">.
+ */
+export const LOADER_SCRIPT =
+  "(function(){var d=document.documentElement,s=false;if(d.getAttribute('data-motion')==='off'||location.hash)return;" +
+  "try{s=sessionStorage.getItem('beed-loader')==='1';sessionStorage.setItem('beed-loader','1')}catch(e){}" +
+  "if(!s)d.setAttribute('data-preloader','on')})();";
+
 const sha = (s: string) => `'sha256-${createHash('sha256').update(s, 'utf8').digest('base64')}'`;
-const SCRIPT_HASHES = [sha(MOTION_SCRIPT)];
+const SCRIPT_HASHES = [sha(MOTION_SCRIPT), sha(LOADER_SCRIPT)];
 
 /** The POK card form is on pokpay.io; the checkout's 303 to it is a form submission redirect. */
 export function contentSecurityPolicy(opts: { pok: boolean }): string {

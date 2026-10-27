@@ -14,7 +14,7 @@ export const common = {
     compareCount: (n: number) => (n === 1 ? '1 produkt për krahasim' : `${n} produkte për krahasim`),
     tray: { title: 'Krahasimi', go: 'Krahaso tani', clear: 'Pastro', remove: 'Hiq', full: 'Mund të krahasoni deri në 4 produkte. Hiqni një për të shtuar këtë.', reset: 'Krahasimi filloi nga e para: krahasohen vetëm produkte të së njëjtës kategori.' },
     toast: { added: 'U shtua në shportë', view: 'Shiko shportën', error: 'Diçka nuk shkoi. Provoni përsëri.', compared: 'U shtua për krahasim' },
-    loader: { words: ['Ndërtim', 'Construction', 'Energji', 'Energy'], skip: 'Kalo', loading: 'Duke u ngarkuar' },
+    loader: { skip: 'Kalo', loading: 'Duke u karikuar' },
     footer: {
       shop: 'Dyqani', company: 'Kompania', help: 'Ndihmë', legal: 'Ligjore',
       about: 'BeeD Energy është treg online për energjinë e rinovueshme në Shqipëri: furnitorët dhe instaluesit shesin panele diellore, bateri, pompa nxehtësie dhe karikues për makina elektrike, krah për krah me kompanitë e ndërtimit që shesin izolim dhe materiale ndërtimi.',
@@ -39,7 +39,7 @@ export const common = {
     compareCount: (n: number) => (n === 1 ? '1 product to compare' : `${n} products to compare`),
     tray: { title: 'Compare', go: 'Compare now', clear: 'Clear', remove: 'Remove', full: 'You can compare up to 4 products. Remove one to add this.', reset: 'Comparison restarted: only products from the same category can be compared.' },
     toast: { added: 'Added to the basket', view: 'View basket', error: 'Something went wrong. Please try again.', compared: 'Added to compare' },
-    loader: { words: ['Ndërtim', 'Construction', 'Energji', 'Energy'], skip: 'Skip', loading: 'Loading' },
+    loader: { skip: 'Skip', loading: 'Charging' },
     footer: {
       shop: 'Shop', company: 'Company', help: 'Help', legal: 'Legal',
       about: 'BeeD Energy is an online marketplace for renewable energy in Albania: suppliers and installers sell solar panels, batteries, heat pumps and EV chargers, side by side with construction companies selling insulation and building materials.',

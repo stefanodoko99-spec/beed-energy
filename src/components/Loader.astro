@@ -1,6 +1,8 @@
 ---
-// Brand loader (Marvell's word swap + Belgrade Arbor's ground line): Ndërtim → Construction → Energji → Energy → BeeD Energy.
-// Shown once per session, only on the home page, skippable, hard time-out in site.ts. Hidden without scripts.
+// Brand loader: a battery charges cell by cell while the % counts to 100, flashes full, then the curtain
+// lifts (Belgrade Arbor's % curtain, made electric). Home page only, once per session, skippable, hard
+// time-out in site.ts. Whether it plays is decided in <head> before the first paint (LOADER_SCRIPT in
+// src/lib/csp.ts); `hidden` keeps it away without scripts.
 import { type Lang } from '../lib/i18n';
 import { tc } from '../i18n/common';
 interface Props { lang: Lang; }
@@ -8,10 +10,12 @@ const t = tc(Astro.props.lang);
 ---
 <div class="loader" data-loader hidden aria-hidden="true">
   <button class="btn btn--ghost loader__skip" type="button" data-loader-skip>{t.loader.skip}</button>
-  <div class="loader__word" data-loader-word>
-    {t.loader.words.map((w) => <span>{w}</span>)}
-    <span>Bee<b>D</b></span>
+  <div class="loader__stage">
+    <div class="loader__batt">
+      <div class="loader__cells" data-loader-cells>{Array.from({ length: 10 }, () => <i></i>)}</div>
+      <svg class="loader__bolt" data-loader-bolt viewBox="0 0 32 48" aria-hidden="true" focusable="false"><path d="M20 2 4 27h10l-3 19 17-27H17z" /></svg>
+    </div>
+    <p class="loader__pct"><span data-loader-pct>0</span><b>%</b></p>
   </div>
-  <div class="loader__ground"><i data-loader-line></i></div>
-  <div class="loader__meta"><span>{t.loader.loading}</span><span data-loader-pct>0%</span></div>
+  <div class="loader__meta"><span>{t.loader.loading}</span><span translate="no">Bee<b>D</b> Energy</span></div>
 </div>

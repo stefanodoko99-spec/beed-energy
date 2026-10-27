@@ -182,34 +182,32 @@ onMotionChange((on) => {
   }
 });
 
-// ---------- loader: home only, once per session, ≤ 1.6 s, hard time-out 2.5 s ----------
+// ---------- loader: home only, once per session, ≤ 1.6 s, hard time-out 2.2 s ----------
+// Whether it plays was decided in <head> before the first paint (LOADER_SCRIPT, src/lib/csp.ts), which
+// already shows the cover; this only animates it and takes it away.
 const loader = document.querySelector<HTMLElement>('[data-loader]');
-if (loader) {
-  let seen = false;
-  try { seen = sessionStorage.getItem('beed-loader') === '1'; } catch { /* ignore */ }
-  if (!seen && motionOn() && !location.hash) runLoader(loader);
-}
+if (loader && root.getAttribute('data-preloader') === 'on') runLoader(loader);
 function runLoader(el: HTMLElement) {
-  try { sessionStorage.setItem('beed-loader', '1'); } catch { /* ignore */ }
   el.hidden = false;
   el.removeAttribute('aria-hidden');
   root.style.overflow = 'hidden';
-  const words = [...el.querySelectorAll<HTMLElement>('[data-loader-word] span')];
+  const cells = [...el.querySelectorAll<HTMLElement>('[data-loader-cells] i')];
   const pct = el.querySelector<HTMLElement>('[data-loader-pct]');
-  const line = el.querySelector<HTMLElement>('[data-loader-line]');
+  const bolt = el.querySelector<SVGElement>('[data-loader-bolt]');
   const counter = { v: 0 };
+  let lit = 0;
+  const charge = () => {
+    if (pct) pct.textContent = String(Math.round(counter.v));
+    const n = Math.min(cells.length, Math.ceil((counter.v / 100) * cells.length - 1e-6));
+    while (lit < n) cells[lit++].classList.add('is-on');
+    cells.forEach((c, i) => c.classList.toggle('is-next', i === lit));
+  };
   const tl = gsap.timeline({ onComplete: finish });
-  gsap.set(words, { yPercent: 100 });
-  gsap.set(words[0], { yPercent: 0 });
-  // Whole intro ≤ 1.4 s: 1.0 s count, then a 0.35 s wipe (DESIGN.md caps the loader at 1.6 s).
-  tl.to(counter, { v: 100, duration: 1.0, ease: 'power2.inOut', onUpdate: () => { if (pct) pct.textContent = `${Math.round(counter.v)}%`; } }, 0);
-  tl.to(line, { scaleX: 1, duration: 1.0, ease: 'power2.inOut' }, 0);
-  words.forEach((w, i) => {
-    if (i === 0) return;
-    tl.to(words[i - 1], { yPercent: -100, duration: 0.2, ease: 'power3.in' }, 0.17 * i);
-    tl.to(w, { yPercent: 0, duration: 0.24, ease: 'power3.out' }, 0.17 * i + 0.06);
-  });
-  tl.to(el, { clipPath: 'inset(0 0 100% 0)', duration: 0.35, ease: 'power3.inOut' }, '+=0.05');
+  // ≤ 1.6 s in all (DESIGN.md): a 1.0 s charge, the full battery flashes, then a 0.35 s curtain.
+  tl.to(counter, { v: 100, duration: 1.0, ease: 'power2.inOut', onUpdate: charge }, 0);
+  tl.add(() => el.classList.add('is-full'), 1.0);
+  if (bolt) tl.to(bolt, { scale: 1.2, duration: 0.11, yoyo: true, repeat: 1, ease: 'power2.out', transformOrigin: '50% 50%' }, 1.0);
+  tl.to(el, { clipPath: 'inset(0 0 100% 0)', duration: 0.35, ease: 'power3.inOut' }, 1.24);
   const timeout = setTimeout(finish, 2200);
   const skip = el.querySelector<HTMLButtonElement>('[data-loader-skip]');
   skip?.addEventListener('click', finish);
@@ -219,6 +217,7 @@ function runLoader(el: HTMLElement) {
     tl.kill();
     el.hidden = true;
     el.setAttribute('aria-hidden', 'true');
+    root.removeAttribute('data-preloader');
     root.style.overflow = '';
     document.dispatchEvent(new Event('beed:loaded'));
     ScrollTrigger.refresh();

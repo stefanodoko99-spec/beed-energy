@@ -370,19 +370,31 @@ html[data-header="hidden"] .site-header:not(:focus-within) { transform: translat
 .footer__bottom { max-width: var(--max); margin: 1.5rem auto 0; padding-top: 1.25rem; border-top: 1px solid var(--line-on-teal); display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; justify-content: space-between; align-items: center; font: 400 0.75rem var(--font-mono); color: var(--on-teal-2); }
 @media (max-width: 760px) { .site-footer { padding-bottom: calc(2rem + var(--stack-clear)); } } /* its last row stays clear of the dock, action bar and tray */
 
-/* ---------- loader ---------- */
+/* ---------- loader: a battery charging ---------- */
+/* <head> marks <html data-preloader="on"> before the first paint (LOADER_SCRIPT, src/lib/csp.ts), so the cover is
+   there from the very first frame; `hidden` alone keeps it away without scripts. */
 .loader { position: fixed; inset: 0; z-index: 90; background: var(--teal); color: var(--paper); display: grid; place-items: center; }
 .loader[hidden] { display: none; }
-.loader__word { font-stretch: 62%; font-weight: 800; text-transform: uppercase; font-size: clamp(3.5rem, 1rem + 11vw, 11rem); line-height: 0.9; letter-spacing: -0.02em; height: 1em; overflow: hidden; position: relative; min-width: 8ch; text-align: center; }
-.loader__word span { display: block; }
-.loader__word b { color: var(--sun); font-weight: 800; }
-/* the site line of the drawing (dashed, with dimension ticks) is the progress line; sun amber draws along it left to right */
-.loader__ground { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 22%; height: 2px; background: repeating-linear-gradient(90deg, rgb(244 248 247 / 0.5) 0 2px, transparent 2px 7px) center / 100% 1px no-repeat; }
-.loader__ground::before, .loader__ground::after { content: ''; position: absolute; bottom: -9px; width: 1px; height: 20px; background: rgb(244 248 247 / 0.7); }
-.loader__ground::before { left: 0; }
-.loader__ground::after { right: 0; }
-.loader__ground i { position: absolute; inset: 0; background: var(--sun); transform-origin: left; transform: scaleX(0); }
-.loader__meta { position: absolute; left: var(--gutter); right: var(--gutter); bottom: calc(22% - 2rem); display: flex; justify-content: space-between; font: 400 0.75rem var(--font-mono); color: var(--on-teal-2); }
+html[data-preloader="on"] .loader[hidden] { display: grid; }
+/* if the page script never arrives, the cover still steps aside after 3 s */
+html[data-preloader="on"] .loader { animation: loader-gone 0.01s 3s forwards; }
+@keyframes loader-gone { to { visibility: hidden; } }
+.loader__stage { display: grid; justify-items: center; gap: clamp(1.25rem, 0.75rem + 2vw, 2.25rem); }
+/* the casing and its + terminal; ten cells light amber left to right as the % counts */
+.loader__batt { position: relative; width: clamp(14rem, 9rem + 30vw, 26rem); aspect-ratio: 2.5; padding: clamp(5px, 0.6vw, 8px); border: 3px solid rgb(244 248 247 / 0.85); border-radius: clamp(12px, 1.4vw, 20px); transition: border-color 0.2s, box-shadow 0.3s; }
+.loader__batt::after { content: ''; position: absolute; left: calc(100% + 6px); top: 32%; width: clamp(7px, 0.8vw, 11px); height: 36%; background: rgb(244 248 247 / 0.85); border-radius: 0 6px 6px 0; transition: background 0.2s; }
+.loader__cells { display: grid; grid-template-columns: repeat(10, 1fr); gap: clamp(3px, 0.5vw, 6px); height: 100%; }
+.loader__cells i { border-radius: clamp(3px, 0.5vw, 6px); background: rgb(244 248 247 / 0.07); }
+.loader__cells i.is-on { background: linear-gradient(180deg, var(--glow), var(--sun)); box-shadow: 0 0 14px rgb(245 165 36 / 0.45); }
+.loader__cells i.is-next { animation: loader-cell 0.3s ease-in-out infinite alternate; }
+@keyframes loader-cell { to { background: rgb(245 165 36 / 0.35); } }
+.loader__bolt { position: absolute; inset: 0; margin: auto; height: 70%; width: auto; aspect-ratio: 32 / 48; fill: var(--paper); stroke: var(--teal); stroke-width: 2.5; stroke-linejoin: round; paint-order: stroke; filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.3)); }
+.loader.is-full .loader__batt { border-color: var(--sun); box-shadow: 0 0 0 6px rgb(245 165 36 / 0.16), 0 0 70px rgb(245 165 36 / 0.4); }
+.loader.is-full .loader__batt::after { background: var(--sun); }
+.loader__pct { margin: 0; font-stretch: 62%; font-weight: 800; font-size: clamp(3rem, 2rem + 5vw, 6.5rem); line-height: 0.9; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.loader__pct b { color: var(--sun); font-weight: 800; }
+.loader__meta { position: absolute; left: var(--gutter); right: var(--gutter); bottom: max(1.5rem, env(safe-area-inset-bottom)); display: flex; justify-content: space-between; font: 400 0.75rem var(--font-mono); letter-spacing: 0.04em; color: var(--on-teal-2); }
+.loader__meta b { color: var(--sun); font-weight: 400; }
 .loader__skip { position: absolute; right: var(--gutter); top: 1rem; }
 
 /* ---------- compare tray ---------- */

@@ -15,7 +15,7 @@ import { categories } from '../lib/catalog';
 import { LOCALE, type Lang, type RouteKey } from '../lib/i18n';
 import { tc } from '../i18n/common';
 import { jsonForScript } from '../lib/html';
-import { MOTION_SCRIPT } from '../lib/csp';
+import { MOTION_SCRIPT, LOADER_SCRIPT } from '../lib/csp';
 
 interface Props {
   lang: Lang;
@@ -81,6 +81,7 @@ const org = {
     <link rel="preload" href="/fonts/geist-mono-latin.v1.woff2" as="font" type="font/woff2" crossorigin />
     <style is:inline>@view-transition { navigation: auto; }</style>
     <script is:inline set:html={MOTION_SCRIPT} />
+    {loader && <script is:inline set:html={LOADER_SCRIPT} />}
     <script type="application/ld+json" set:html={jsonForScript(org)} />
     {jsonld.map((j) => <script type="application/ld+json" set:html={jsonForScript(j)} />)}
     <slot name="head" />

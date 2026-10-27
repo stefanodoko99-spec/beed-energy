@@ -521,7 +521,7 @@ function build() {
   }
   // Poster lines step in on arrival (opacity + small rise; the CTAs below never move).
   const lines = document.querySelectorAll('.stage__line');
-  gsap.fromTo(lines, { opacity: 0, yPercent: 40 }, { opacity: 1, yPercent: 0, duration: 0.9, stagger: 0.09, ease: 'power3.out', delay: document.querySelector('[data-loader]:not([hidden])') ? 1.7 : 0.1 });
+  gsap.fromTo(lines, { opacity: 0, yPercent: 40 }, { opacity: 1, yPercent: 0, duration: 0.9, stagger: 0.09, ease: 'power3.out', delay: document.documentElement.getAttribute('data-preloader') === 'on' ? 1.6 : 0.1 });
   // Manifesto: words ink in as the paragraph crosses the screen.
   const words = gsap.utils.toArray<HTMLElement>('[data-manifesto] .w');
   if (words.length) {
