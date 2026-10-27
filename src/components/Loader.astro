@@ -1,10 +1,11 @@
 ---
-// Brand loader: a battery charges cell by cell while the % counts to 100, flashes full, then the curtain
-// lifts (Belgrade Arbor's % curtain, made electric). Home page only, once per session, skippable, hard
-// time-out in site.ts. Whether it plays is decided in <head> before the first paint (LOADER_SCRIPT in
-// src/lib/csp.ts); `hidden` keeps it away without scripts.
+// Brand loader: a battery charges cell by cell in the logo's green while the % counts to 100, flashes full,
+// then the curtain lifts (Belgrade Arbor's % curtain, made electric). Home page only, once per session,
+// skippable, hard time-out in site.ts. Whether it plays is decided in <head> before the first paint
+// (LOADER_SCRIPT in src/lib/csp.ts); `hidden` keeps it away without scripts.
 import { type Lang } from '../lib/i18n';
 import { tc } from '../i18n/common';
+import Logo from './Logo.astro';
 interface Props { lang: Lang; }
 const t = tc(Astro.props.lang);
 ---
@@ -17,5 +18,5 @@ const t = tc(Astro.props.lang);
     </div>
     <p class="loader__pct"><span data-loader-pct>0</span><b>%</b></p>
   </div>
-  <div class="loader__meta"><span>{t.loader.loading}</span><span translate="no">Bee<b>D</b> Energy</span></div>
+  <div class="loader__meta"><span>{t.loader.loading}</span><Logo height={18} /></div>
 </div>

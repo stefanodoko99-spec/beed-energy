@@ -238,7 +238,7 @@ html[data-header="hidden"] .site-header:not(:focus-within) { transform: translat
 .brand { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; min-height: 44px; font-weight: 800; font-stretch: 75%; font-size: 1.375rem; letter-spacing: -0.01em; white-space: nowrap; flex: none; }
 /* the logo (Logo.astro): green label with white letters on light grounds, bright label with dark letters on teal */
 .logo { display: block; flex: none; --logo-label: var(--leaf); --logo-on-label: #fff; }
-:is(.on-ink, .on-teal, [data-tone="ink"], .menu, .rail, .login__poster) .logo { --logo-label: var(--leaf-bright); --logo-on-label: var(--teal-deep); }
+:is(.on-ink, .on-teal, [data-tone="ink"], .menu, .rail, .login__poster, .loader) .logo { --logo-label: var(--leaf-bright); --logo-on-label: var(--teal-deep); }
 .nav { display: flex; align-items: center; gap: 0.25rem; margin-left: auto; }
 .nav a, .nav button.navbtn { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; padding: 0 var(--nav-pad, 0.7rem); text-decoration: none; font-weight: 550; font-size: 0.9375rem; background: none; border: 0; color: inherit; cursor: pointer; white-space: nowrap; flex: none; }
 /* a hairline between the energy links and the basket side of the bar */
@@ -369,7 +369,7 @@ html[data-header="hidden"] .site-header:not(:focus-within) { transform: translat
 .footer__bottom { max-width: var(--max); margin: 1.5rem auto 0; padding-top: 1.25rem; border-top: 1px solid var(--line-on-teal); display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; justify-content: space-between; align-items: center; font: 400 0.75rem var(--font-mono); color: var(--on-teal-2); }
 @media (max-width: 760px) { .site-footer { padding-bottom: calc(2rem + var(--stack-clear)); } } /* its last row stays clear of the dock, action bar and tray */
 
-/* ---------- loader: a battery charging ---------- */
+/* ---------- loader: a battery charging, in the logo's green ---------- */
 /* <head> marks <html data-preloader="on"> before the first paint (LOADER_SCRIPT, src/lib/csp.ts), so the cover is
    there from the very first frame; `hidden` alone keeps it away without scripts. */
 .loader { position: fixed; inset: 0; z-index: 90; background: var(--teal); color: var(--paper); display: grid; place-items: center; }
@@ -384,16 +384,17 @@ html[data-preloader="on"] .loader { animation: loader-gone 0.01s 3s forwards; }
 .loader__batt::after { content: ''; position: absolute; left: calc(100% + 6px); top: 32%; width: clamp(7px, 0.8vw, 11px); height: 36%; background: rgb(243 248 245 / 0.85); border-radius: 0 6px 6px 0; transition: background 0.2s; }
 .loader__cells { display: grid; grid-template-columns: repeat(10, 1fr); gap: clamp(3px, 0.5vw, 6px); height: 100%; }
 .loader__cells i { border-radius: clamp(3px, 0.5vw, 6px); background: rgb(243 248 245 / 0.07); }
-.loader__cells i.is-on { background: linear-gradient(180deg, var(--glow), var(--sun)); box-shadow: 0 0 14px rgb(245 165 36 / 0.45); }
+.loader__cells i.is-on { background: linear-gradient(180deg, var(--leaf-bright), var(--leaf)); box-shadow: 0 0 14px rgb(61 220 151 / 0.45); }
 .loader__cells i.is-next { animation: loader-cell 0.3s ease-in-out infinite alternate; }
-@keyframes loader-cell { to { background: rgb(245 165 36 / 0.35); } }
+@keyframes loader-cell { to { background: rgb(61 220 151 / 0.35); } }
 .loader__bolt { position: absolute; inset: 0; margin: auto; height: 70%; width: auto; aspect-ratio: 32 / 48; fill: var(--paper); stroke: var(--teal); stroke-width: 2.5; stroke-linejoin: round; paint-order: stroke; filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.3)); }
-.loader.is-full .loader__batt { border-color: var(--sun); box-shadow: 0 0 0 6px rgb(245 165 36 / 0.16), 0 0 70px rgb(245 165 36 / 0.4); }
-.loader.is-full .loader__batt::after { background: var(--sun); }
+.loader.is-full .loader__batt { border-color: var(--leaf-bright); box-shadow: 0 0 0 6px rgb(61 220 151 / 0.16), 0 0 70px rgb(61 220 151 / 0.4); }
+.loader.is-full .loader__batt::after { background: var(--leaf-bright); }
 .loader__pct { margin: 0; font-stretch: 62%; font-weight: 800; font-size: clamp(3rem, 2rem + 5vw, 6.5rem); line-height: 0.9; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.loader__pct b { color: var(--sun); font-weight: 800; }
+.loader__pct b { color: var(--leaf-bright); font-weight: 800; }
 .loader__meta { position: absolute; left: var(--gutter); right: var(--gutter); bottom: max(1.5rem, env(safe-area-inset-bottom)); display: flex; justify-content: space-between; font: 400 0.75rem var(--font-mono); letter-spacing: 0.04em; color: var(--on-teal-2); }
-.loader__meta b { color: var(--sun); font-weight: 400; }
+.loader__meta { align-items: center; }
+.loader__meta .logo { color: var(--paper); }
 .loader__skip { position: absolute; right: var(--gutter); top: 1rem; }
 
 /* ---------- compare tray ---------- */
