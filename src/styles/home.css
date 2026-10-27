@@ -17,7 +17,7 @@
   padding-bottom: 3rem;
   position: relative; z-index: 2;
 }
-/* every poster line stays on one line ("SWITCH ON." is the widest, in half the stage), and on a desktop the hero
+/* every poster line stays on one line (sized for "SWITCH ON.", wider than today's widest, "PRODUCE.", in half the stage), and on a desktop the hero
    buttons and the quote link stay above the fold: capped by the viewport's height and width */
 .stage__poster { display: grid; font-size: min(clamp(4.5rem, 0.6rem + 11.2vw, 15.5rem), 19svh, 20vw); padding-top: 0.08em; }
 @media (min-width: 901px) {
