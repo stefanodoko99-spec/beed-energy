@@ -100,8 +100,8 @@ html.js[data-motion="on"] .rh__dusk { display: block; opacity: 0; }
    over teal turns olive); the warm light is the dusk render's lit windows. Faded in under the dusk render. */
 html.js[data-motion="on"] .stage__night { display: block; position: absolute; inset: 0; opacity: 0; background:
   radial-gradient(ellipse 60% 52% at 52% 56%, rgb(22 94 105 / 0.85), rgb(22 94 105 / 0.3) 55%, transparent 85%),
-  linear-gradient(rgb(244 248 247 / 0.11) 1px, transparent 1px) 0 0 / 32px 32px,
-  linear-gradient(90deg, rgb(244 248 247 / 0.11) 1px, transparent 1px) 0 0 / 32px 32px; background-color: var(--teal-deep); }
+  linear-gradient(rgb(243 248 245 / 0.11) 1px, transparent 1px) 0 0 / 32px 32px,
+  linear-gradient(90deg, rgb(243 248 245 / 0.11) 1px, transparent 1px) 0 0 / 32px 32px; background-color: var(--teal-deep); }
 html.js[data-motion="on"] .stage__sheet[data-dusk] .stage__stamp { color: var(--on-teal-2); }
 html.js[data-motion="on"] .rp { position: absolute; left: 0; top: 0; z-index: 3; opacity: 0; pointer-events: none; container-type: normal; }
 html.js[data-motion="on"] .rp img { position: static; display: block; width: 100%; height: auto; }
@@ -109,7 +109,7 @@ html.js[data-motion="on"] .rp::after, html.js[data-motion="on"] .rp__key { displ
 
 /* HUD (Igloo): a sun-amber ring on the equipment, a leader to the part, and the label beside it. home.ts places them. */
 html.js[data-motion="on"] .hud { display: block; position: absolute; inset: 0; pointer-events: none; }
-.hud__ring { --ring: 30px; position: absolute; left: 0; top: 0; z-index: 2; width: var(--ring); height: var(--ring); margin: calc(var(--ring) / -2) 0 0 calc(var(--ring) / -2); border: 2.5px solid var(--sun); border-radius: 50%; background: rgb(245 165 36 / 0.22); box-shadow: 0 0 0 2px rgb(244 248 247 / 0.8), 0 0 0 3px rgb(146 87 0 / 0.35); opacity: 0; visibility: hidden; }
+.hud__ring { --ring: 30px; position: absolute; left: 0; top: 0; z-index: 2; width: var(--ring); height: var(--ring); margin: calc(var(--ring) / -2) 0 0 calc(var(--ring) / -2); border: 2.5px solid var(--sun); border-radius: 50%; background: rgb(245 165 36 / 0.22); box-shadow: 0 0 0 2px rgb(243 248 245 / 0.8), 0 0 0 3px rgb(146 87 0 / 0.35); opacity: 0; visibility: hidden; }
 .hud__ring::after { content: ''; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--amber-deep); }
 .hud__leader { position: absolute; left: 0; top: 0; z-index: 2; height: 2px; margin-top: -1px; background: var(--sun); box-shadow: 0 0 0 0.5px rgb(146 87 0 / 0.45); transform-origin: 0 50%; opacity: 0; visibility: hidden; }
 .hud__label { position: absolute; left: 0; top: 0; z-index: 4; display: grid; gap: 0.2rem; width: max-content; max-width: min(17rem, 48cqw); padding: 0.55rem 0.7rem 0.6rem; background: var(--paper); border: 1px solid var(--teal); box-shadow: inset 0 3px 0 var(--sun); color: var(--text); text-decoration: none; opacity: 0; visibility: hidden; pointer-events: auto; }

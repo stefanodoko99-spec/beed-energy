@@ -1,7 +1,7 @@
 ---
 // Full-screen menu: every category with its live product count and lowest price (Decor Systems' counts, see DESIGN.md),
 // in two groups: renewable energy, then efficiency and building (docs/renewable-focus-plan.md §2).
-import BrandMark from './BrandMark.astro';
+import Logo from './Logo.astro';
 import type { Category } from '../lib/catalog';
 import { href, type Lang } from '../lib/i18n';
 import { lek } from '../lib/money';
@@ -18,7 +18,7 @@ let n = 0;
 ---
 <div class="menu on-ink" id="site-menu" hidden data-menu role="dialog" aria-modal="true" aria-label={t.nav.menu}>
   <div class="menu__top">
-    <a class="brand" href={href(lang, 'home')}><BrandMark /><span translate="no">Bee<b>D</b> Energy</span></a>
+    <a class="brand" href={href(lang, 'home')} aria-label={lang === 'sq' ? 'BeeD Energy, kreu' : 'BeeD Energy, home'}><Logo /></a>
     <button class="btn btn--ghost btn--s" type="button" data-menu-close>{t.nav.close} <span aria-hidden="true">✕</span></button>
   </div>
   <div class="menu__grid">

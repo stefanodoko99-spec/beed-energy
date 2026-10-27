@@ -2,7 +2,7 @@
 // Staff sign-in. Email + password (scrypt), or on 127.0.0.1 with DEV_LOGIN=1 two developer buttons
 // (local admin, first sample seller). ?next= is honoured only for /admin paths.
 import Admin from '../../layouts/Admin.astro';
-import BrandMark from '../../components/BrandMark.astro';
+import Logo from '../../components/Logo.astro';
 import Field from './_parts/Field.astro';
 import { adminCtx, langHref, fstr } from '../../lib/admin-panel';
 import { createSession, devLoginAllowed, verifyPassword } from '../../lib/auth';
@@ -86,7 +86,7 @@ const other = lang === 'sq' ? 'en' : 'sq';
 <Admin lang={lang} t={t} user={null} url={url} title={t.login.title} bare hideHead>
   <div class="login">
     <section class="login__poster" aria-hidden="true">
-      <p class="rail__brand"><BrandMark size={28} /><span><span translate="no">Bee<b>D</b> Energy</span><small>{t.brandSub}</small></span></p>
+      <p class="rail__brand"><span><Logo height={24} /><small>{t.brandSub}</small></span></p>
       <p class="login__word">{lang === 'sq' ? 'Paneli' : 'Admin'}<span>A-00</span></p>
       <p class="login__meta"><span>{t.sheet.no} A-00</span><span>{t.panel}</span><span>127.0.0.1 · noindex</span></p>
     </section>

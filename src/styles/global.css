@@ -236,9 +236,9 @@ img.ph { object-fit: contain; background: #fff; }
 .site-header[data-tone="ink"] { background: var(--teal); color: var(--paper); border-bottom-color: var(--line-on-teal); }
 html[data-header="hidden"] .site-header:not(:focus-within) { transform: translateY(-100%); }
 .brand { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; min-height: 44px; font-weight: 800; font-stretch: 75%; font-size: 1.375rem; letter-spacing: -0.01em; white-space: nowrap; flex: none; }
-.brand svg { width: 30px; height: 30px; }
-.brand b { color: var(--amber-deep); font-weight: 800; }
-.site-header[data-tone="ink"] .brand b { color: var(--sun); }
+/* the logo (Logo.astro): green label with white letters on light grounds, bright label with dark letters on teal */
+.logo { display: block; flex: none; --logo-label: var(--leaf); --logo-on-label: #fff; }
+:is(.on-ink, .on-teal, [data-tone="ink"], .menu, .rail, .login__poster) .logo { --logo-label: var(--leaf-bright); --logo-on-label: var(--teal-deep); }
 .nav { display: flex; align-items: center; gap: 0.25rem; margin-left: auto; }
 .nav a, .nav button.navbtn { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; padding: 0 var(--nav-pad, 0.7rem); text-decoration: none; font-weight: 550; font-size: 0.9375rem; background: none; border: 0; color: inherit; cursor: pointer; white-space: nowrap; flex: none; }
 /* a hairline between the energy links and the basket side of the bar */
@@ -297,7 +297,6 @@ html[data-header="hidden"] .site-header:not(:focus-within) { transform: translat
 .menu { position: fixed; inset: 0; z-index: 60; background: var(--teal); color: var(--paper); display: grid; grid-template-rows: auto 1fr auto; overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--gutter) 2rem; }
 .menu[hidden] { display: none; }
 .menu__top { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line-on-teal); }
-.menu__top .brand b { color: var(--sun); }
 .menu__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2rem var(--gutter); padding-top: 2rem; }
 .menu__cats { grid-column: span 8; display: grid; gap: 2rem; align-content: start; }
 .menu .menu__group-h { display: flex; gap: 0.4rem; align-items: baseline; padding-bottom: 0.55rem; border-bottom: 3px solid var(--sun); color: var(--paper); }
@@ -381,10 +380,10 @@ html[data-preloader="on"] .loader { animation: loader-gone 0.01s 3s forwards; }
 @keyframes loader-gone { to { visibility: hidden; } }
 .loader__stage { display: grid; justify-items: center; gap: clamp(1.25rem, 0.75rem + 2vw, 2.25rem); }
 /* the casing and its + terminal; ten cells light amber left to right as the % counts */
-.loader__batt { position: relative; width: clamp(14rem, 9rem + 30vw, 26rem); aspect-ratio: 2.5; padding: clamp(5px, 0.6vw, 8px); border: 3px solid rgb(244 248 247 / 0.85); border-radius: clamp(12px, 1.4vw, 20px); transition: border-color 0.2s, box-shadow 0.3s; }
-.loader__batt::after { content: ''; position: absolute; left: calc(100% + 6px); top: 32%; width: clamp(7px, 0.8vw, 11px); height: 36%; background: rgb(244 248 247 / 0.85); border-radius: 0 6px 6px 0; transition: background 0.2s; }
+.loader__batt { position: relative; width: clamp(14rem, 9rem + 30vw, 26rem); aspect-ratio: 2.5; padding: clamp(5px, 0.6vw, 8px); border: 3px solid rgb(243 248 245 / 0.85); border-radius: clamp(12px, 1.4vw, 20px); transition: border-color 0.2s, box-shadow 0.3s; }
+.loader__batt::after { content: ''; position: absolute; left: calc(100% + 6px); top: 32%; width: clamp(7px, 0.8vw, 11px); height: 36%; background: rgb(243 248 245 / 0.85); border-radius: 0 6px 6px 0; transition: background 0.2s; }
 .loader__cells { display: grid; grid-template-columns: repeat(10, 1fr); gap: clamp(3px, 0.5vw, 6px); height: 100%; }
-.loader__cells i { border-radius: clamp(3px, 0.5vw, 6px); background: rgb(244 248 247 / 0.07); }
+.loader__cells i { border-radius: clamp(3px, 0.5vw, 6px); background: rgb(243 248 245 / 0.07); }
 .loader__cells i.is-on { background: linear-gradient(180deg, var(--glow), var(--sun)); box-shadow: 0 0 14px rgb(245 165 36 / 0.45); }
 .loader__cells i.is-next { animation: loader-cell 0.3s ease-in-out infinite alternate; }
 @keyframes loader-cell { to { background: rgb(245 165 36 / 0.35); } }

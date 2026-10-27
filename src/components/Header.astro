@@ -4,7 +4,7 @@
 // in the menu and the product action bar. The bar never wraps: as it narrows, the shelf links leave first, then the
 // three tools (global.css, widths measured in both languages); everything stays reachable from the menu.
 // No entrance animation on any of these links.
-import BrandMark from './BrandMark.astro';
+import Logo from './Logo.astro';
 import { href, type Lang, type RouteKey } from '../lib/i18n';
 import type { Category } from '../lib/catalog';
 import { HEADER_SHELVES, categoryHref } from '../lib/energy-nav';
@@ -40,7 +40,7 @@ const tools = (['packages', 'guide', 'calculator'] as const).map((key) => ({ key
 ---
 <header class="site-header" data-tone={tone} data-header>
   <a class="brand" href={href(lang, 'home')} aria-label={lang === 'sq' ? 'BeeD Energy, kreu' : 'BeeD Energy, home'}>
-    <BrandMark /><span translate="no">Bee<b>D</b> Energy</span>
+    <Logo />
   </a>
   <nav class="nav" aria-label={lang === 'sq' ? 'Navigimi kryesor' : 'Main navigation'}>
     {shelves.map((s) => <a class="nav-shelf" href={s.href} aria-current={s.here ? (s.page ? 'page' : 'true') : undefined}>{s.label}</a>)}

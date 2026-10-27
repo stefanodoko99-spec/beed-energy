@@ -14,22 +14,27 @@ Refused on purpose (the category's defaults, see research §5.1): blue-sky panel
 - **Water + Sun** (Luca, 2026-10-27, replacing ink + copper, which "seemed dead"): Albania's two renewable sources. **Deep Adriatic teal is water** — the country's hydropower: it is the structure (colour bands, primary buttons, the menu, the dock, links, heavy rules). **Sun amber is energy** — solar: it marks what is live (the ring and leader on the house, the active key, the active state, prices and figures on teal, the moment the house switches on). The page alternates paper and teal bands so it has rhythm; amber is an accent, never a wash.
 - **Things are assembled, not faded in.** Motion comes from a site: parts lift out of the house like an exploded assembly drawing and go back in; lines are drawn, not revealed; numbers are stamped.
 
-## Colour: Water + Sun (two colours + tinted neutrals) — tokens in `src/styles/tokens.css`
+## Logo
+The BeeD Energy logo (chosen 2026-10-27, `src/components/Logo.astro`): "BeeD" in white on a green label, "Energy" beside it, both in Plus Jakarta Sans (Tokotype, SIL Open Font License) outlined to paths, so it never waits for a font. On light grounds the label is `--leaf` with white letters; on teal grounds (menu, admin rail, ink header, sign-in poster) it is `--leaf-bright` with teal-deep letters; "Energy" follows the text colour. Favicon: the white B on the green label (`public/favicon.svg`, `favicon.ico`); phone icon: "BeeD" on green (`public/apple-touch-icon.png`).
+
+## Colour: Forest + Sun (two colours + tinted neutrals) — tokens in `src/styles/tokens.css`
+Retuned on 2026-10-27 from Water + Sun to sit with the green logo: every step keeps its lightness and only the hue moves from Adriatic teal to forest green, so each contrast pair below holds. The `--teal*` token names stay and now hold the greens.
 | token | value | use |
 |---|---|---|
-| `--paper` | #f4f8f7 | pale sky paper: the page ground |
-| `--sheet` | #e8f1f0 | the house stage's drafting sheet (paper with a light teal tint), product drawing frames |
-| `--teal-tint` | #dcebea | panels, rows, chosen options, notices (old `--paper-2`) |
-| `--teal-tint-2` | #c8dedc | a step deeper: drawing faces (old `--paper-3`) |
-| `--teal` | #0e4b55 | deep Adriatic teal: colour bands, primary buttons, menu, dock, tray, toasts, admin rail, links, 3 px rules, focus ring on light grounds |
-| `--teal-deep` | #0a3a42 | hover on teal buttons, the footer, the finale's night, the active admin row |
-| `--teal-2` | #165e69 | lifted teal: hover rows on teal grounds, the night's halo |
+| `--paper` | #f3f8f5 | pale green-white paper: the page ground |
+| `--sheet` | #e6f2eb | the house stage's drafting sheet (paper with a light green tint), product drawing frames |
+| `--teal-tint` | #d9ede2 | panels, rows, chosen options, notices (old `--paper-2`) |
+| `--teal-tint-2` | #c4e1d1 | a step deeper: drawing faces (old `--paper-3`) |
+| `--teal` | #0c4c37 | deep forest green: colour bands, primary buttons, menu, dock, tray, toasts, admin rail, links, 3 px rules, focus ring on light grounds |
+| `--teal-deep` | #083a2a | hover on teal buttons, the footer, the finale's night, the active admin row |
+| `--teal-2` | #145f46 | lifted green: hover rows on teal grounds, the night's halo |
 | `--sun` | #f5a524 | sun amber: energy highlights, prices and figures on teal, the live part of the house (ring, leader, keys), active states, focus on teal, amber chips, the loader line |
 | `--glow` | #ffd166 | energy glow: amber button hover on teal, lit windows, subtle highlights |
 | `--amber-deep` | #925700 | amber text on light grounds (5.5:1 on paper, 4.8:1 on tint): drawing keys 01–14, HUD meta, errors, the brand's "D" |
-| `--text` | #10262b | ink-teal text (old `--ink`) |
-| `--text-2` | #3f5b61 | secondary text (6.8:1 on paper, 5.9:1 on tint) (old `--ink-2`) |
-| `--on-teal-2` | #bcd6d5 | secondary text on teal (6.4:1) and teal-deep (8.1:1) |
+| `--text` | #0f2a20 | ink-green text (old `--ink`) |
+| `--leaf` / `--leaf-bright` | #009e5c / #3ddc97 | the logo's label on light / on teal grounds |
+| `--text-2` | #3b5c4e | secondary text (6.9:1 on paper, 6.1:1 on tint) (old `--ink-2`) |
+| `--on-teal-2` | #b8d9c8 | secondary text on teal (6.6:1) and teal-deep (8.4:1) |
 | `--line` / `--line-strong` | text at 16 % / 42 % | hairlines |
 | `--line-ui` | text at 56 % | form control boundaries (3.7:1 on paper, 3.5:1 on tint) |
 | `--line-on-teal` / `-strong` / `-ui` | paper at 20 % / 36 % / 50 % | the same three on teal grounds |

@@ -319,7 +319,7 @@ html[data-motion="off"] .fan-layer { display: none; }
 .history { margin: 0; display: grid; gap: 0.5rem; }
 .history__chart { width: 100%; height: clamp(160px, 22vw, 240px); border-bottom: 1px solid var(--text); overflow: visible; }
 .history__grid line { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 3 4; }
-.history__area { fill: rgb(14 75 85 / 0.1); }
+.history__area { fill: rgb(12 76 55 / 0.1); }
 .history__line { fill: none; stroke: var(--teal); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
 .history__lo { fill: var(--sun); stroke: var(--amber-deep); stroke-width: 2; vector-effect: non-scaling-stroke; }
 .history__now { fill: var(--teal); }

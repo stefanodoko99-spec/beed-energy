@@ -42,30 +42,33 @@
 }
 
 :root {
-  --brand-hue: 190;
+  --brand-hue: 155;
 
-  /* Water + Sun (2026-10-27). Contrast pairs: DESIGN.md "Colour". */
-  --paper: #f4f8f7;        /* pale sky paper: the page ground */
-  --sheet: #e8f1f0;        /* the house stage's drafting sheet: paper with a light teal tint */
-  --teal-tint: #dcebea;    /* panels, rows, chosen options */
-  --teal-tint-2: #c8dedc;  /* a step deeper: drawing faces, chart tracks */
-  --teal: #0e4b55;         /* deep Adriatic teal: colour bands, primary buttons, menu, dock, links */
-  --teal-deep: #0a3a42;    /* hover on teal, footer, the finale's night */
-  --teal-2: #165e69;       /* lifted teal: hover rows on teal grounds */
+  /* Forest + Sun (2026-10-27), retuned from Water + Sun to sit with the green logo: the same lightness at every
+     step, so each contrast pair holds (DESIGN.md "Colour"). The --teal-* names stay; they now hold forest greens. */
+  --paper: #f3f8f5;        /* pale green-white paper: the page ground */
+  --sheet: #e6f2eb;        /* the house stage's drafting sheet: paper with a light green tint */
+  --teal-tint: #d9ede2;    /* panels, rows, chosen options */
+  --teal-tint-2: #c4e1d1;  /* a step deeper: drawing faces, chart tracks */
+  --teal: #0c4c37;         /* deep forest green: colour bands, primary buttons, menu, dock, links */
+  --teal-deep: #083a2a;    /* hover on teal, footer, the finale's night */
+  --teal-2: #145f46;       /* lifted green: hover rows on green grounds */
   --sun: #f5a524;          /* sun amber: energy, prices on teal, live parts, active, focus on teal */
   --glow: #ffd166;         /* energy glow: lit windows, amber hover on teal, subtle highlights */
+  --leaf: #009e5c;         /* the logo's label green (white letters on it: 3.5:1, large bold) */
+  --leaf-bright: #3ddc97;  /* the label on dark grounds, with teal-deep letters (7.2:1) */
   --amber-deep: #925700;   /* amber text, keys and errors on light grounds (5.5:1 on paper, 4.8:1 on tint) */
-  --text: #10262b;         /* ink-teal text */
-  --text-2: #3f5b61;       /* secondary text (6.8:1 on paper, 5.9:1 on tint) */
-  --text-3: #587378;       /* tertiary labels (4.7:1 on paper) */
+  --text: #0f2a20;         /* ink-green text */
+  --text-2: #3b5c4e;       /* secondary text (6.9:1 on paper, 6.1:1 on tint) */
+  --text-3: #537463;       /* tertiary labels (4.8:1 on paper) */
   --on-teal: var(--paper);
-  --on-teal-2: #bcd6d5;    /* secondary text on teal (6.4:1) and teal-deep (8.1:1) */
-  --line: rgb(16 38 43 / 0.16);         /* hairlines: text colour at low alpha */
-  --line-strong: rgb(16 38 43 / 0.42);
-  --line-ui: rgb(16 38 43 / 0.56);      /* form control boundaries (≥ 3:1 on paper and tint) */
-  --line-on-teal: rgb(244 248 247 / 0.2);
-  --line-on-teal-strong: rgb(244 248 247 / 0.36);
-  --line-on-teal-ui: rgb(244 248 247 / 0.5); /* control boundaries on teal (≥ 3:1) */
+  --on-teal-2: #b8d9c8;    /* secondary text on teal (6.6:1) and teal-deep (8.4:1) */
+  --line: rgb(15 42 32 / 0.16);         /* hairlines: text colour at low alpha */
+  --line-strong: rgb(15 42 32 / 0.42);
+  --line-ui: rgb(15 42 32 / 0.56);      /* form control boundaries (≥ 3:1 on paper and tint) */
+  --line-on-teal: rgb(243 248 245 / 0.2);
+  --line-on-teal-strong: rgb(243 248 245 / 0.36);
+  --line-on-teal-ui: rgb(243 248 245 / 0.5); /* control boundaries on teal (≥ 3:1) */
   --ok: var(--teal);
   --warn: var(--amber-deep);
   --bad: var(--amber-deep);
@@ -108,10 +111,10 @@
   --radius-l: 0px;
   --pill: 999px;
 
-  /* shadows in the teal hue (teal-deep #0a3a42), never base.css's generic 265: ambient + direct, like the dock and tray */
+  /* shadows in the brand hue (teal-deep #083a2a), never base.css's generic 265: ambient + direct, like the dock and tray */
   --shadow-1: 0 1px 0 var(--line);
-  --shadow-2: 0 2px 6px rgb(10 58 66 / 0.08), 0 14px 40px rgb(10 58 66 / 0.16);
-  --border-soft: 1px solid rgb(10 58 66 / 0.12);
+  --shadow-2: 0 2px 6px rgb(8 58 42 / 0.08), 0 14px 40px rgb(8 58 42 / 0.16);
+  --border-soft: 1px solid rgb(8 58 42 / 0.12);
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);

@@ -6,7 +6,7 @@ import '../styles/base.css';
 import '../styles/tokens.css';
 import '../styles/global.css';
 import '../styles/admin.css';
-import BrandMark from '../components/BrandMark.astro';
+import Logo from '../components/Logo.astro';
 import TitleBlock from '../components/TitleBlock.astro';
 import AdminHelp from '../components/AdminHelp.astro';
 import { isHelpKey, type HelpKey } from '../i18n/admin-help';
@@ -50,7 +50,7 @@ const today = new Date().toISOString().slice(0, 10);
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{`${docTitle ?? title} · ${t.panel} · BeeD Energy`}</title>
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="theme-color" content="#0e4b55" />
+    <meta name="theme-color" content="#0c4c37" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href="/fonts/archivo-latin.v1.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/geist-mono-latin.v1.woff2" as="font" type="font/woff2" crossorigin />
@@ -63,8 +63,7 @@ const today = new Date().toISOString().slice(0, 10);
         <aside class="rail" aria-label={t.panel}>
           <div class="rail__top">
             <a class="rail__brand" href="/admin">
-              <BrandMark size={28} />
-              <span><span translate="no">Bee<b>D</b> Energy</span><small>{t.brandSub}</small></span>
+              <span><Logo height={24} label="BeeD Energy" /><small>{t.brandSub}</small></span>
             </a>
             <div class="rail__quick">
               <a class="rail__lang" href={langHref(url, other)} hreflang={other} lang={other} title={t.langOtherLabel}><span class="visually-hidden">{t.langOtherLabel}: </span>{t.langOther}</a>
