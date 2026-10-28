@@ -89,6 +89,7 @@ Home, sticky sheet beside the scrolling chapters (CSS sticky, no pin; chapters t
 
 ## Motion rules
 - UI 150–250 ms ease-out; choreography (loader, house, offers fan-out, page transition) only, skippable.
+- Micro-interactions (2026-10-28, global.css "micro-interactions" + src/scripts/micro.ts), all off with `html[data-motion=off]`: buttons lift on hover with a light sweep on filled ones and press down to 95 %; a pressed filled button throws a small burst of leaf-green and amber sparks; the basket button turns `--leaf` with a ✓ once the item is in; product cards rise 4 px, the photo zooms 4.5 % and the energy key turns into a diamond; category thumbnails tilt; the logo's label tips over on hover; menu links draw a green underline; dock icons squash when pressed and the current one hops on arrival; toasts pop in with a green line counting down their 4.2 s; a leaf-to-sun charge line along the top edge fills with scroll (scroll-driven, hidden where unsupported).
 - GSAP ticker drives Lenis (`autoRaf: false`) and every tween; no other rAF. `gsap.ticker.lagSmoothing(0)`.
 - Never animate width/height/top/left; transform + opacity only; SVG groups use `transform-box: fill-box`.
 - Entrance animations never move tap targets (opacity only on nav and buttons).

@@ -237,7 +237,7 @@ img.ph { object-fit: contain; background: #fff; }
 html[data-header="hidden"] .site-header:not(:focus-within) { transform: translateY(-100%); }
 .brand { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; min-height: 44px; font-weight: 800; font-stretch: 75%; font-size: 1.375rem; letter-spacing: -0.01em; white-space: nowrap; flex: none; }
 /* the logo (Logo.astro): green label with white letters on light grounds, bright label with dark letters on teal */
-.logo { display: block; flex: none; --logo-label: var(--leaf); --logo-on-label: #fff; }
+.logo { display: block; flex: none; overflow: visible; --logo-label: var(--leaf); --logo-on-label: #fff; }
 :is(.on-ink, .on-teal, [data-tone="ink"], .menu, .rail, .login__poster, .loader) .logo { --logo-label: var(--leaf-bright); --logo-on-label: var(--teal-deep); }
 .nav { display: flex; align-items: center; gap: 0.25rem; margin-left: auto; }
 .nav a, .nav button.navbtn { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; padding: 0 var(--nav-pad, 0.7rem); text-decoration: none; font-weight: 550; font-size: 0.9375rem; background: none; border: 0; color: inherit; cursor: pointer; white-space: nowrap; flex: none; }
@@ -444,3 +444,65 @@ html[data-motion="off"] .js-reveal, html:not(.js) .js-reveal { opacity: 1 !impor
 .between { justify-content: space-between; }
 .visually-hidden-focusable:not(:focus):not(:focus-within) { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .empty { border: 1px dashed var(--line-strong); padding: clamp(2rem, 1rem + 4vw, 4rem); text-align: center; display: grid; gap: 1rem; justify-items: center; }
+
+/* ---------- micro-interactions (2026-10-28) ----------
+   Small, quick and playful, and only with motion on: the Stop-animations switch and reduced motion both set
+   html[data-motion=off]. The scripted ones (the spark burst, the basket button's tick) are src/scripts/micro.ts. */
+.btn.is-done { --b-bg: var(--leaf); --b-bd: var(--leaf); --b-fg: #fff; --b-arrow: #fff; }
+.btn.is-done::before { content: '✓' / ''; font-weight: 800; }
+.toast { position: relative; overflow: hidden; }
+.spark-burst { position: fixed; z-index: 96; width: 0; height: 0; pointer-events: none; }
+.spark-burst i { position: absolute; left: -3px; top: -3px; width: 6px; height: 6px; border-radius: 50%; animation: spark 560ms var(--ease-out) forwards; }
+@keyframes spark { to { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; } }
+@keyframes btn-pop { 40% { transform: scale(1.06); } }
+@keyframes dock-hop { 40% { transform: translateY(-5px); } }
+@keyframes toast-pop { from { opacity: 0; transform: translateY(-10px) scale(0.96); } }
+@keyframes toast-time { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes charge-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* buttons: press down; filled ones carry a light sweep for the hover below */
+  html[data-motion="on"] .btn { transition: transform 200ms var(--ease-spring), box-shadow 200ms var(--ease-out), background-color 160ms var(--ease-out), color 160ms var(--ease-out), border-color 160ms var(--ease-out); }
+  html[data-motion="on"] .btn:not(.btn--ghost) { position: relative; overflow: hidden; isolation: isolate; }
+  html[data-motion="on"] .btn:not(.btn--ghost)::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(105deg, transparent 30%, rgb(255 255 255 / 0.3) 50%, transparent 70%); transform: translateX(-120%); transition: transform 650ms var(--ease-out); }
+  html[data-motion="on"] .btn:active { transform: scale(0.95); }
+  html[data-motion="on"] .btn.is-done { animation: btn-pop 420ms var(--ease-spring); }
+
+  /* product cards and category rows */
+  html[data-motion="on"] .pcard { transition: border-color 200ms var(--ease-out), transform 280ms var(--ease-out), box-shadow 280ms var(--ease-out); }
+  html[data-motion="on"] .pcard img.ph { transition: transform 600ms var(--ease-out); }
+  html[data-motion="on"] .pcard__energy::before { transition: transform 360ms var(--ease-spring); }
+  html[data-motion="on"] .catrow__fig > * { transition: transform 320ms var(--ease-spring); }
+
+  /* the logo's label tips over a little, "Energy" leans after it (Logo.astro: rect, BeeD, Energy) */
+  html[data-motion="on"] .brand .logo > :is(rect, path) { transform-box: view-box; transform-origin: 1523px 582px; transition: transform 420ms var(--ease-spring); }
+
+  /* phone dock: icons squash when pressed; the current page's icon hops once on arrival */
+  html[data-motion="on"] .dock :is(a, button) svg { transition: transform 260ms var(--ease-spring); }
+  html[data-motion="on"] .dock :is(a, button):active svg { transform: scale(0.8); }
+  html[data-motion="on"] .dock a[aria-current="page"] svg { animation: dock-hop 700ms var(--ease-spring) 250ms both; }
+
+  /* toasts pop in and show the time they have left */
+  html[data-motion="on"] .toast { animation: toast-pop 420ms var(--ease-spring) both; }
+  html[data-motion="on"] .toast::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--leaf-bright); transform-origin: 0 50%; animation: toast-time 4200ms linear forwards; }
+
+  /* a charge line along the top edge fills as the page is read (scroll-driven; scaled to 0 where unsupported) */
+  @supports (animation-timeline: scroll()) {
+    html[data-motion="on"] body::after { content: ''; position: fixed; z-index: 55; top: 0; left: 0; right: 0; height: 3px; pointer-events: none; transform: scaleX(0); transform-origin: 0 50%; background: linear-gradient(90deg, var(--leaf-bright), var(--sun)); animation: charge-bar linear both; animation-timeline: scroll(root); }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-motion="on"] .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgb(8 58 42 / 0.55); }
+    html[data-motion="on"] .btn:active { transform: scale(0.95); box-shadow: none; }
+    html[data-motion="on"] .btn:not(.btn--ghost):hover::after { transform: translateX(120%); }
+    html[data-motion="on"] .pcard:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); }
+    html[data-motion="on"] .pcard:hover img.ph { transform: scale(1.045); }
+    html[data-motion="on"] .pcard:hover .pcard__energy::before { transform: rotate(45deg) scale(0.9); }
+    html[data-motion="on"] .catrow:hover .catrow__fig > * { transform: scale(1.08) rotate(-2deg); }
+    html[data-motion="on"] .brand:hover .logo > :is(rect, path:nth-of-type(1)) { transform: rotate(-4deg) scale(1.05); }
+    html[data-motion="on"] .brand:hover .logo > path:nth-of-type(2) { transform: translateX(90px); }
+    /* menu links draw a green underline from the left */
+    html[data-motion="on"] .nav :is(.nav-shelf, .nav-tool):not([aria-current]) { background: linear-gradient(var(--leaf), var(--leaf)) no-repeat left var(--nav-pad, 0.7rem) bottom 10px / 0 2px; transition: background-size 260ms var(--ease-out); }
+    html[data-motion="on"] .nav :is(.nav-shelf, .nav-tool):not([aria-current]):hover { text-decoration: none; background-size: calc(100% - 2 * var(--nav-pad, 0.7rem)) 2px; }
+  }
+}

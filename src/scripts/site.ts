@@ -2,6 +2,7 @@
 // basket and compare forms without reloads, toasts, the once-per-session loader and simple reveals.
 import { gsap, motionOn, setMotion, onMotionChange, ScrollTrigger } from './motion';
 import { setCount } from './counts';
+import { confirmButton } from './micro';
 
 const root = document.documentElement;
 const toasts = document.querySelector<HTMLElement>('[data-toasts]');
@@ -119,7 +120,10 @@ document.addEventListener('submit', async (e) => {
     if (isCart) {
       setCount('cart', data.count);
       document.dispatchEvent(new CustomEvent('beed:cart', { detail: data }));
-      if (body.action === 'add' || body.action === 'add-many' || !body.action) toast(msg.added, { href: msg.cartHref, label: msg.view });
+      if (body.action === 'add' || body.action === 'add-many' || !body.action) {
+        toast(msg.added, { href: msg.cartHref, label: msg.view });
+        confirmButton(btn);
+      }
     } else {
       setCount('compare', data.ids.length);
       renderTray(data);
