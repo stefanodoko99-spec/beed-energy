@@ -1,21 +1,19 @@
-/* BeeD Energy tokens — Water + Sun: deep Adriatic teal (hydropower) and sun amber (solar) on pale sky paper,
-   text in ink-teal. See DESIGN.md. The old ink + copper names stay as aliases. */
+/* BeeD Energy tokens — Mist + Volt (2026-11-01): a misty sage-slate world (the glowing house at dusk) with a lemon
+   "volt" accent, on light mist paper for the shop pages. See DESIGN.md. The old names stay as aliases. */
 @font-face {
-  font-family: 'Archivo';
+  font-family: 'Plus Jakarta Sans';
   font-style: normal;
   font-display: swap;
-  font-weight: 100 900;
-  font-stretch: 62% 125%;
-  src: url('/fonts/archivo-latin.v1.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  src: url('/fonts/plus-jakarta-latin.v1.woff2') format('woff2-variations');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: 'Archivo';
+  font-family: 'Plus Jakarta Sans';
   font-style: normal;
   font-display: swap;
-  font-weight: 100 900;
-  font-stretch: 62% 125%;
-  src: url('/fonts/archivo-latin-ext.v1.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  src: url('/fonts/plus-jakarta-latin-ext.v1.woff2') format('woff2-variations');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
@@ -34,41 +32,45 @@
   src: url('/fonts/geist-mono-latin-ext.v1.woff2') format('woff2-variations');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-/* Fallback metrics so the swap does not shift the poster lines much. */
+/* Fallback metrics so the swap does not shift the headlines much. */
 @font-face {
-  font-family: 'Archivo Fallback';
-  src: local('Arial Narrow'), local('Arial');
-  size-adjust: 96%;
+  font-family: 'Plus Jakarta Fallback';
+  src: local('Arial');
+  size-adjust: 102%;
 }
 
 :root {
-  --brand-hue: 155;
+  --brand-hue: 160;
 
-  /* Forest + Sun (2026-10-27), retuned from Water + Sun to sit with the green logo: the same lightness at every
-     step, so each contrast pair holds (DESIGN.md "Colour"). The --teal-* names stay; they now hold forest greens. */
-  --paper: #f3f8f5;        /* pale green-white paper: the page ground */
-  --sheet: #e6f2eb;        /* the house stage's drafting sheet: paper with a light green tint */
-  --teal-tint: #d9ede2;    /* panels, rows, chosen options */
-  --teal-tint-2: #c4e1d1;  /* a step deeper: drawing faces, chart tracks */
-  --teal: #0c4c37;         /* deep forest green: colour bands, primary buttons, menu, dock, links */
-  --teal-deep: #083a2a;    /* hover on teal, footer, the finale's night */
-  --teal-2: #145f46;       /* lifted green: hover rows on green grounds */
-  --sun: #f5a524;          /* sun amber: energy, prices on teal, live parts, active, focus on teal */
-  --glow: #ffd166;         /* energy glow: lit windows, amber hover on teal, subtle highlights */
-  --leaf: #009e5c;         /* the logo's label green (white letters on it: 3.5:1, large bold) */
-  --leaf-bright: #3ddc97;  /* the label on dark grounds, with teal-deep letters (7.2:1) */
-  --amber-deep: #925700;   /* amber text, keys and errors on light grounds (5.5:1 on paper, 4.8:1 on tint) */
-  --text: #0f2a20;         /* ink-green text */
-  --text-2: #3b5c4e;       /* secondary text (6.9:1 on paper, 6.1:1 on tint) */
-  --text-3: #537463;       /* tertiary labels (4.8:1 on paper) */
-  --on-teal: var(--paper);
-  --on-teal-2: #b8d9c8;    /* secondary text on teal (6.6:1) and teal-deep (8.4:1) */
-  --line: rgb(15 42 32 / 0.16);         /* hairlines: text colour at low alpha */
-  --line-strong: rgb(15 42 32 / 0.42);
-  --line-ui: rgb(15 42 32 / 0.56);      /* form control boundaries (≥ 3:1 on paper and tint) */
-  --line-on-teal: rgb(243 248 245 / 0.2);
-  --line-on-teal-strong: rgb(243 248 245 / 0.36);
-  --line-on-teal-ui: rgb(243 248 245 / 0.5); /* control boundaries on teal (≥ 3:1) */
+  /* Mist + Volt (2026-11-01), after the glowing-house reference: deep sage slate for bands, the menu and the header
+     glass; light mist paper under the shop; lemon volt for what is live; orange ember for glowing lines. The --teal-*
+     names stay (they hold the sage slates now). Contrast pairs: DESIGN.md "Colour". */
+  --paper: #e8ede9;        /* light mist: the page ground */
+  --sheet: #dde5e0;        /* the house stage's sheet, product frames */
+  --teal-tint: #d2dbd5;    /* panels, rows, chosen options */
+  --teal-tint-2: #bfcac4;  /* a step deeper: drawing faces, chart tracks */
+  --teal: #33423e;         /* deep sage slate: bands, primary buttons on light, menu, dock, links */
+  --teal-deep: #242f2c;    /* the night: footer, hero shade, hover on slate */
+  --teal-2: #43534e;       /* lifted slate: hover rows on slate grounds */
+  --sun: #ece44c;          /* volt lemon: live parts, CTAs, active states, figures on slate (7.9:1 on teal) */
+  --glow: #f7f08c;         /* volt glow: hover on lemon, highlights */
+  --ember: #ff9a3c;        /* the glowing edge lines of the house: leaders and outlines only, never text */
+  --leaf: #ece44c;         /* the logo's label: lemon with dark letters on every ground */
+  --leaf-bright: #ece44c;
+  --amber-deep: #5f5600;   /* volt text on light grounds (6.3:1 on paper, 5.3:1 on tint) */
+  --text: #18221f;         /* ink */
+  --text-2: #45524d;       /* secondary text (6.9:1 on paper, 5.8:1 on tint) */
+  --text-3: #525e59;       /* tertiary labels (5.7:1 on paper, 4.8:1 on tint) */
+  --on-teal: #eef2ef;       /* text on slate */
+  --on-teal-2: #b7c4be;    /* secondary text on slate (5.9:1) and slate-deep (7.7:1) */
+  --line: rgb(24 34 31 / 0.14);
+  --line-strong: rgb(24 34 31 / 0.38);
+  --line-ui: rgb(24 34 31 / 0.56);
+  --line-on-teal: rgb(238 242 239 / 0.16);
+  --line-on-teal-strong: rgb(238 242 239 / 0.32);
+  --line-on-teal-ui: rgb(238 242 239 / 0.5);
+  --glass: rgb(51 66 62 / 0.62);   /* the floating header and hero cards over photographs */
+  --glass-line: rgb(255 255 255 / 0.16);
   --ok: var(--teal);
   --warn: var(--amber-deep);
   --bad: var(--amber-deep);
@@ -94,7 +96,7 @@
   --c-brand-2: var(--sun);
   --c-focus: var(--teal);
 
-  --font-text: 'Archivo', 'Archivo Fallback', system-ui, sans-serif;
+  --font-text: 'Plus Jakarta Sans', 'Plus Jakarta Fallback', system-ui, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
 
   /* Poster: 64px at 360 → 300px at 1440 */
@@ -102,19 +104,19 @@
   --step-poster-s: clamp(3rem, 0.6rem + 10.5vw, 10rem);
 
   --gutter: clamp(1.25rem, 0.8rem + 2vw, 2.5rem);
-  --header-h: 4.5rem;
+  --header-h: 5.25rem; /* the floating glass bar (4.25rem) and its 12px gap above */
   --section-gap: clamp(5rem, 3rem + 6vw, 8rem);
-  --max: 1440px;
+  --max: 1600px;
 
-  --radius-s: 0px;
-  --radius-m: 0px;
-  --radius-l: 0px;
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 24px;
   --pill: 999px;
 
-  /* shadows in the brand hue (teal-deep #083a2a), never base.css's generic 265: ambient + direct, like the dock and tray */
+  /* shadows in the brand hue (teal-deep #242f2c), never base.css's generic 265: ambient + direct, like the dock and tray */
   --shadow-1: 0 1px 0 var(--line);
-  --shadow-2: 0 2px 6px rgb(8 58 42 / 0.08), 0 14px 40px rgb(8 58 42 / 0.16);
-  --border-soft: 1px solid rgb(8 58 42 / 0.12);
+  --shadow-2: 0 2px 6px rgb(36 47 44 / 0.08), 0 18px 44px rgb(36 47 44 / 0.18);
+  --border-soft: 1px solid rgb(36 47 44 / 0.12);
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);

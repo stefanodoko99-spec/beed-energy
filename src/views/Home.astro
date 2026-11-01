@@ -9,6 +9,7 @@ import { BASE, PARTS, partsOf, srcset, type PartId } from '../lib/house-render';
 import { ts } from '../i18n/stage';
 import { categories, featuredProducts } from '../lib/catalog';
 import ProductPhoto from '../components/ProductPhoto.astro';
+import VoltMark from '../components/VoltMark.astro';
 import HomeTeasers from '../components/HomeTeasers.astro';
 import { energyLines } from '../lib/energy-line';
 import { keepAcronyms } from '../lib/nobreak';
@@ -94,6 +95,13 @@ const featured = await featuredProducts(8);
 const catOf = new Map(cats.map((c) => [c.id, c]));
 const energy = await energyLines(featured, (id) => catOf.get(id)?.slug_en, { url: Astro.url, cookies: Astro.cookies, locals: Astro.locals }, lang);
 const manifestoWords = t.manifesto.split(' ');
+// The hero: a solar panel for the glass card (the most-offered one), the battery shelf and Tirana's yield.
+const panelPick = featured.find((p) => catOf.get(p.category_id)?.slug_en === 'solar-panels') ?? featured[0];
+const panelsCat = bySlug.get('solar-panels');
+const batteriesCat = bySlug.get('batteries');
+const catHref = (c: Cat) => href(lang, 'category', { slug: lang === 'sq' ? c.slug_sq : c.slug_en });
+const yieldTxt = tirana ? num(tirana.pv_yield, 0, lang) : '';
+const scene = (name: string) => [960, 1440, 2048].map((w) => `/scenes/${name}-${w}.webp ${w}w`).join(', ');
 
 const jsonld = [
   {
@@ -106,17 +114,89 @@ const jsonld = [
 ];
 ---
 <Site lang={lang} title={t.title} description={t.description} alternate={href(other, 'home')} current="home" loader jsonld={jsonld}>
+  {/* The hero (after the glowing-house reference): the house at dusk under three words and two volt marks, two
+      leader tags on the house, a glass card and three cards along the bottom. Images: public/scenes/ (ASSETS.md). */}
+  <section class="vhero" data-vhero aria-labelledby="vhero-title">
+    <div class="vhero__scene" aria-hidden="true">
+      <div class="vhero__frame" data-vhero-frame>
+        <img class="vhero__img" src="/scenes/hero-house-1440.webp" srcset={scene('hero-house')} sizes="max(100vw, 178svh)" width="2048" height="1152" alt="" fetchpriority="high" decoding="async" />
+        {/* leader lines in the photo's own coordinates (1600 × 900 = the frame), from a point on the house to its tag */}
+        <svg class="vhero__leads" viewBox="0 0 1600 900">
+          <line x1="720" y1="360" x2="880" y2="306" pathLength="1" />
+          <line x1="1008" y1="531" x2="928" y2="432" pathLength="1" />
+          <circle class="vhero__ping" cx="720" cy="360" r="7" /><circle class="vhero__dot" cx="720" cy="360" r="5" />
+          <circle class="vhero__ping" cx="1008" cy="531" r="7" style="animation-delay:1.2s" /><circle class="vhero__dot" cx="1008" cy="531" r="5" />
+        </svg>
+        <span class="vtag" style="--x:55%;--y:34%">{t.hero.tagPanels}</span>
+        {yieldTxt && <span class="vtag" style="--x:58%;--y:48%">{t.hero.tagYield(yieldTxt)}</span>}
+      </div>
+      <div class="vhero__shade"></div>
+    </div>
+
+    <div class="vhero__top">
+      <p class="eyebrow vhero__eyebrow" data-vhero-in>{t.eyebrow}</p>
+      <h1 class="vhero__title" id="vhero-title">
+        {t.hero.words.map((w, i) => (
+          <>
+            {i > 0 && <span class="vhero__volt-wrap" style={`--d:${(i * 0.18 + 0.32).toFixed(2)}s`}><VoltMark class="vhero__volt" /></span>}
+            <span class="vhero__word"><span data-vhero-word style={`--d:${(i * 0.18).toFixed(2)}s`}>{w}</span></span>
+          </>
+        ))}
+      </h1>
+    </div>
+
+    <div class="vhero__mid">
+      {panelPick && (
+        <a class="vhero__card" href={panelsCat ? catHref(panelsCat) : href(lang, 'shop')} data-vhero-in>
+          <span class="vhero__card-fig"><ProductPhoto src={panelPick.image} brand={panelPick.brand} model={panelPick.model} /></span>
+          <span class="vhero__card-body">
+            <span class="vhero__code mono">{panelPick.model.split(' (')[0]}</span>
+            <span class="vhero__card-text">{t.hero.cardText}</span>
+            <span class="vhero__card-cta">{t.hero.cardCta}</span>
+          </span>
+        </a>
+      )}
+      <div class="vhero__side" data-vhero-in>
+        <p class="vhero__claim">{t.hero.side} <span class="vhero__sun"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor" /><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" /></g></svg>{t.hero.sun}</span></p>
+        <div class="row vhero__cta">
+          <a class="btn" href={href(lang, 'calculator')}>{t.calcCta} <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn btn--ghost" href={href(lang, 'shop')}>{t.shop}</a>
+        </div>
+      </div>
+    </div>
+
+    <ul class="vhero__cards">
+      <li class="vcard vcard--a" style="--d:0.75s">
+        <a href={href(lang, 'packages')}>
+          <span class="vcard__title">{t.hero.packages}</span>
+          <span class="vcard__text">{t.hero.packagesText}</span>
+          <span class="vcard__cta">{t.hero.packagesCta}</span>
+          <img class="vcard__img" src="/scenes/dusk-house-960.webp" width="960" height="540" alt="" loading="lazy" decoding="async" />
+        </a>
+      </li>
+      <li class="vcard vcard--b" style="--d:0.87s">
+        <a href={batteriesCat ? catHref(batteriesCat) : href(lang, 'shop')}>
+          <span class="vcard__title">{t.hero.battery}</span>
+          {batteriesCat && <span class="vcard__meta mono">{t.products(batteriesCat.product_count ?? 0)}{batteriesCat.min_price ? ` · ${t.from} ${lek(batteriesCat.min_price, lang)}` : ''}</span>}
+          <img class="vcard__img" src="/scenes/battery-grass-1024.webp" srcset="/scenes/battery-grass-640.webp 640w, /scenes/battery-grass-1024.webp 1024w, /scenes/battery-grass-1536.webp 1536w" sizes="(max-width: 900px) 90vw, 33vw" width="1024" height="1024" alt="" loading="lazy" decoding="async" />
+        </a>
+      </li>
+      <li class="vcard vcard--c" style="--d:0.99s">
+        <a href={href(lang, 'calculator')}>
+          <span class="vcard__title">{t.hero.calc}</span>
+          {tirana && <span class="vcard__big figure">{yieldTxt}</span>}
+          {tirana && <span class="vcard__text">{t.hero.calcText(yieldTxt, lang === 'sq' ? tirana.name_sq : tirana.name_en)}</span>}
+          <span class="vcard__cta">{t.hero.calcCta}</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+
   <section class="stage" data-stage aria-labelledby="stage-title">
     <div class="stage__intro" data-intro>
-      <p class="eyebrow">{t.eyebrow}</p>
-      <h1 class="poster stage__poster" id="stage-title">
-        {t.poster.map((w, i) => <span class="stage__line" style={`--i:${i}`}>{w}</span>)}
-      </h1>
+      <p class="eyebrow">{t.hero.stageEyebrow}</p>
+      <h2 class="title title--xl stage__title" id="stage-title">{t.hero.stageTitle}</h2>
       <p class="lede">{t.lede}</p>
-      <div class="row stage__cta">
-        <a class="btn" href={href(lang, 'calculator')}>{t.calcCta} <span class="arrow" aria-hidden="true">→</span></a>
-        <a class="btn btn--ghost" href={href(lang, 'shop')}>{t.shop}</a>
-      </div>
       <a class="link-arrow stage__quote" href={href(lang, 'quote')}><span>{t.quote}</span><span class="arrow" aria-hidden="true">→</span></a>
       <p class="mono small stage__stats">{t.stats(cats.length, counts.products, counts.offers)}</p>
       <p class="mono small stage__hint" aria-hidden="true">↓ {t.scrollHint}</p>

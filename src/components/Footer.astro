@@ -1,8 +1,10 @@
 ---
-// Footer: about, the shop in its two groups (renewable energy with the packages and the guide; efficiency and
-// building with the whole shop), the company and the legal pages.
+// Footer as a mini website (2026-11-01): a closing hero over the dusk house with the two main actions, the shop at
+// a glance (every category with its live count and lowest price, in its two groups), the three free tools, then the
+// map of the site with the contact card, the big wordmark and the bottom bar.
 import type { Category } from '../lib/catalog';
 import { href, type Lang } from '../lib/i18n';
+import { lek } from '../lib/money';
 import { categoryHref, categoryName, groupCategories } from '../lib/energy-nav';
 import { tc } from '../i18n/common';
 import { tr } from '../i18n/renewables';
@@ -10,68 +12,117 @@ import { contactSettings } from '../lib/pages-db';
 interface Props { lang: Lang; cats: Category[]; }
 const { lang, cats } = Astro.props;
 const t = tc(lang);
+const f = t.footer;
 const r = tr(lang).nav;
 const groups = groupCategories(cats);
 const heading = { energy: t.groups.energy, 'efficiency-build': r.efficiencyBuild } as const;
 const year = new Date().getFullYear();
+const products = cats.reduce((n, c) => n + (c.product_count ?? 0), 0);
 // Contact details only when settings.contact has them (no visible placeholders); NIPT and the operator line always.
 const contact = await contactSettings();
 const tel = contact.phone ? contact.phone.replace(/[^+\d]/g, '') : '';
+const tools = [
+  { key: 'packages', href: href(lang, 'packages'), text: f.tools.packages },
+  { key: 'guide', href: href(lang, 'guide'), text: f.tools.guide },
+  { key: 'calc', href: href(lang, 'calculator'), text: f.tools.calc },
+] as const;
 ---
 <footer class="site-footer" data-tone="ink">
-  <div class="footer__grid">
-    <div class="footer__about">
-      <p class="lede" style="color:inherit">{t.footer.about}</p>
+  <section class="fhero" aria-labelledby="fhero-title">
+    <img class="fhero__img" src="/scenes/dusk-house-1440.webp" srcset="/scenes/dusk-house-960.webp 960w, /scenes/dusk-house-1440.webp 1440w, /scenes/dusk-house-2048.webp 2048w" sizes="(max-width: 1600px) 100vw, 1600px" width="1440" height="810" alt="" loading="lazy" decoding="async" />
+    <div class="fhero__body">
+      <p class="eyebrow fhero__eyebrow">{f.heroEyebrow}</p>
+      <h2 class="fhero__title" id="fhero-title">{f.heroTitle}</h2>
+      <p class="fhero__text">{f.heroText}</p>
+      <div class="row fhero__cta">
+        <a class="btn" href={href(lang, 'calculator')}>{t.nav.calculator} <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href={href(lang, 'quote')}>{t.nav.quote}</a>
+      </div>
     </div>
-    <div class="stack-s footer__facts">
-      <p class="small mono">{t.footer.operator}{contact.address && <>, {contact.address}</>}{contact.email && <> · <a href={`mailto:${contact.email}`}>{contact.email}</a></>}{contact.phone && <> · <a href={`tel:${tel}`}>{contact.phone}</a></>}</p>
-      <p class="small mono">{t.footer.prices}</p>
+    <p class="fhero__stats mono">{f.stats(cats.length, products)}</p>
+  </section>
+
+  <section class="fshop" aria-labelledby="fshop-title">
+    <div class="fsec__head">
+      <h2 class="fsec__title" id="fshop-title">{f.shopTitle}</h2>
+      <a class="link-arrow small" href={href(lang, 'shop')}><span>{t.menu.allShop}</span><span class="arrow" aria-hidden="true">→</span></a>
     </div>
     {groups.map((g) => (
-      <div class="footer__col">
-        <h2>{heading[g.key]}</h2>
-        <ul>
-          {g.cats.map((c) => <li><a href={categoryHref(lang, c)}>{categoryName(lang, c)}</a></li>)}
-          {g.key === 'energy' ? (
-            <>
-              <li class="footer__more"><a href={href(lang, 'packages')}>{r.packages}</a></li>
-              <li><a href={href(lang, 'guide')}>{r.guide}</a></li>
-            </>
-          ) : (
-            <li class="footer__more"><a href={href(lang, 'shop')}>{t.menu.allShop} →</a></li>
-          )}
+      <div class="fshop__group">
+        <h3 class="eyebrow">{heading[g.key]}</h3>
+        <ul class="fshop__grid">
+          {g.cats.map((c) => (
+            <li>
+              <a class="fcat" href={categoryHref(lang, c)}>
+                <span class="fcat__name">{categoryName(lang, c)}</span>
+                <span class="fcat__meta mono">{t.menu.products(c.product_count ?? 0)}{c.min_price ? <> · {t.menu.from} {lek(c.min_price, lang)}</> : <> · {t.menu.empty}</>}</span>
+                <span class="fcat__arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
     ))}
+  </section>
+
+  <section class="ftools" aria-labelledby="ftools-title">
+    <h2 class="fsec__title" id="ftools-title">{f.toolsTitle}</h2>
+    <ul class="ftools__grid">
+      {tools.map((x) => (
+        <li class={`ftool ftool--${x.key}`}>
+          <a href={x.href}>
+            <span class="ftool__title">{x.text[0]}</span>
+            <span class="ftool__text">{x.text[1]}</span>
+            <span class="ftool__cta" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <div class="footer__grid">
+    <div class="footer__about">
+      <p class="footer__lede">{f.about}</p>
+      <p class="small mono footer__facts">{f.operator}</p>
+      <p class="small mono footer__facts">{f.prices}</p>
+    </div>
     <div class="footer__col">
-      <h2>{t.footer.company}</h2>
+      <h2>{f.company}</h2>
       <ul>
         <li><a href={href(lang, 'about')}>{t.nav.about}</a></li>
         <li><a href={href(lang, 'sellers')}>{t.nav.sellers}</a></li>
         <li><a href={href(lang, 'sell')}>{t.nav.sell}</a></li>
         <li><a href={href(lang, 'quote')}>{t.nav.quote}</a></li>
-        <li><a href={href(lang, 'calculator')}>{t.nav.calculator}</a></li>
         <li><a href={href(lang, 'contact')}>{t.nav.contact}</a></li>
       </ul>
     </div>
     <div class="footer__col">
-      <h2>{t.footer.legal}</h2>
+      <h2>{f.legal}</h2>
       <ul>
-        <li><a href={href(lang, 'terms')}>{t.footer.terms}</a></li>
-        <li><a href={href(lang, 'terms') + '#kthimet'}>{t.footer.returns}</a></li>
-        <li><a href={href(lang, 'terms') + '#dergesa'}>{t.footer.delivery}</a></li>
-        <li><a href={href(lang, 'terms') + '#pagesat'}>{t.footer.payments}</a></li>
-        <li><a href={href(lang, 'privacy')}>{t.footer.privacy}</a></li>
+        <li><a href={href(lang, 'terms')}>{f.terms}</a></li>
+        <li><a href={href(lang, 'terms') + '#kthimet'}>{f.returns}</a></li>
+        <li><a href={href(lang, 'terms') + '#dergesa'}>{f.delivery}</a></li>
+        <li><a href={href(lang, 'terms') + '#pagesat'}>{f.payments}</a></li>
+        <li><a href={href(lang, 'privacy')}>{f.privacy}</a></li>
       </ul>
     </div>
+    <div class="fcontact">
+      <h2>{f.contactTitle}</h2>
+      <p>{f.contactText}</p>
+      {contact.email && <a class="fcontact__line" href={`mailto:${contact.email}`}>{contact.email}</a>}
+      {contact.phone && <a class="fcontact__line" href={`tel:${tel}`}>{contact.phone}</a>}
+      {contact.address && <p class="small mono">{contact.address}</p>}
+      <a class="btn btn--s" href={href(lang, 'contact')}>{t.nav.contact} <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
   </div>
+
   <p class="footer__word" aria-hidden="true">Bee<b>D</b> Energy</p>
   <div class="footer__bottom">
     <span>© {year} BeeD Consulting sh.p.k.</span>
-    <span>{t.footer.demo}</span>
+    <span>{f.demo}</span>
     <span class="row" style="gap:.25rem">
       <button class="saver" type="button" aria-pressed="false" data-saver><span class="saver__track" aria-hidden="true"></span><span>{t.saver.label}</span></button>
-      <a href="#top" class="link-arrow small">{t.footer.top} ↑</a>
+      <a href="#top" class="link-arrow small">{f.top} ↑</a>
     </span>
   </div>
 </footer>

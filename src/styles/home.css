@@ -11,12 +11,11 @@
 .stage__intro {
   grid-column: 1 / span 6;
   grid-row: 1;
-  min-height: 100svh;
   display: flex; flex-direction: column; justify-content: center; gap: 1.4rem;
-  padding-top: calc(var(--header-h) + var(--space-l));
-  padding-bottom: 3rem;
+  padding-block: var(--section-gap) 3rem;
   position: relative; z-index: 2;
 }
+.stage__title { max-width: 14ch; }
 /* every poster line stays on one line (sized for "SWITCH ON.", wider than today's widest, "PRODUCE.", in half the stage), and on a desktop the hero
    buttons and the quote link stay above the fold: capped by the viewport's height and width */
 .stage__poster { display: grid; font-size: min(clamp(4.5rem, 0.6rem + 11.2vw, 15.5rem), 19svh, 20vw); padding-top: 0.08em; }
@@ -43,7 +42,7 @@
   padding-block: 1.25rem 1rem;
 }
 /* The sheet: the realistic house (AI illustration, public/house/, ASSETS.md) on the drafting grid. */
-.stage__sheet { --pad: clamp(0.5rem, 2vw, 2rem); --gap: clamp(0.5rem, 1.2vw, 1rem); position: relative; min-height: 0; border: 1px solid var(--line); background:
+.stage__sheet { --pad: clamp(0.5rem, 2vw, 2rem); --gap: clamp(0.5rem, 1.2vw, 1rem); position: relative; min-height: 0; border: 1px solid var(--line); border-radius: var(--radius-l); background:
   linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 32px 32px,
   linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 32px 32px; background-color: var(--sheet); overflow: hidden; }
 .stage__stamp { position: absolute; right: 8px; bottom: 6px; z-index: 2; margin: 0; font-size: 10px; line-height: 1.2; letter-spacing: 0.02em; color: var(--ink-2); transition: color 400ms var(--ease-out); }
@@ -195,9 +194,9 @@ html.js[data-motion="on"] .stage[data-active] .chapter:not(.is-active) :is(.chap
 /* ---------- teasers: solar packages + guide (src/components/HomeTeasers.astro), static in every mode ---------- */
 .teasers { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(26rem, 100%), 1fr)); gap: var(--gutter); align-items: stretch; }
 /* two sheets of the drawing set: the double rule on top (3 px + 1 px), a hairline frame */
-.teaser { position: relative; display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; padding: clamp(1.25rem, 0.8rem + 1.8vw, 2.5rem); border: 1px solid var(--line-strong); border-top: 3px solid var(--teal); background: var(--paper); }
-.teaser::before { content: ''; position: absolute; left: 0; right: 0; top: 3px; border-top: 1px solid var(--teal); }
-.teaser--packages { background: var(--sheet); }
+.teaser { position: relative; display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; padding: clamp(1.25rem, 0.8rem + 1.8vw, 2.5rem); border-radius: var(--radius-l); background: #fff; border: 1px solid var(--line); border-top: 0px solid var(--teal); background: var(--paper); }
+.teaser::before { content: none; }
+.teaser--packages { background: #fff; }
 .teaser__eyebrow { display: flex; align-items: center; gap: 0.6rem; }
 .teaser__key { font: 600 11px/1 var(--font-mono); padding: 3px 5px; background: var(--sun); color: var(--text); letter-spacing: 0; }
 .teaser__title { font-size: clamp(2.1rem, 1.3rem + 2.4vw, 3.75rem); max-width: 15ch; }
@@ -235,7 +234,7 @@ html.js[data-motion="on"] .stage[data-active] .chapter:not(.is-active) :is(.chap
 @media (hover: hover) and (pointer: fine) { .teaser__sections a:hover span:last-child { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; } }
 
 /* ---------- manifesto ---------- */
-.manifesto__text { font-size: clamp(1.75rem, 1rem + 2.6vw, 3.75rem); line-height: 1.12; font-weight: 600; font-stretch: 85%; letter-spacing: -0.015em; max-width: 26ch; }
+.manifesto__text { font-size: clamp(1.9rem, 1rem + 3vw, 4.4rem); line-height: 1.1; font-weight: 300; letter-spacing: -0.035em; max-width: 28ch; }
 html.js[data-motion="on"] .manifesto__text .w { opacity: var(--o, 1); }
 
 /* ---------- how it works ---------- */
@@ -280,7 +279,10 @@ html.js[data-motion="on"] .manifesto__text .w { opacity: var(--o, 1); }
 .calc-teaser__bar i { display: block; height: 6px; background: var(--sun); transform-origin: left; transform: scaleX(var(--w)); }
 
 /* ---------- seller band ---------- */
-.sell-band { padding-block: var(--section-gap); }
+.sell-band { padding-block: var(--section-gap); position: relative; isolation: isolate; overflow: hidden; }
+/* the dusk house behind the seller band, darkened so the type stays the hero (public/scenes/, ASSETS.md) */
+.sell-band::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(28 37 34 / 0.92) 0%, rgb(28 37 34 / 0.7) 45%, rgb(28 37 34 / 0.35) 100%), url('/scenes/dusk-house-1440.webp') center 40% / cover no-repeat; }
+@media (min-width: 1600px) { .sell-band::before { background-image: linear-gradient(90deg, rgb(28 37 34 / 0.92) 0%, rgb(28 37 34 / 0.7) 45%, rgb(28 37 34 / 0.35) 100%), url('/scenes/dusk-house-2048.webp'); } }
 .sell-band__inner { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(2rem, 1rem + 3vw, 3.5rem) var(--gutter); }
 /* the longest word ("SHQIPËRINË.") must fit the line: full width, fitted size, and room above the Ë */
 .sell-band .sell-band__title { grid-column: 1 / -1; color: var(--paper); font-size: min(var(--step-display), 15vw); line-height: 0.98; }
@@ -288,4 +290,129 @@ html.js[data-motion="on"] .manifesto__text .w { opacity: var(--o, 1); }
 @media (min-width: 900px) {
   .sell-band .sell-band__title { font-size: min(var(--step-display), 11vw); overflow-wrap: normal; hyphens: none; }
   .sell-band__copy { grid-column: 7 / -1; }
+}
+
+/* ---------- the hero (2026-11-01, after the glowing-house reference) ----------
+   The house at dusk fills the screen; three thin words with volt marks across the sky; two leader tags on the house;
+   a glass card and the claim either side; three cards along the bottom (slanted, arched, slanted). The photo frame
+   keeps the picture's 16:9 so the tags stay on the roof and the eave at any window size. */
+.vhero {
+  position: relative; isolation: isolate; overflow: hidden;
+  height: max(100svh, 46rem);
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto; row-gap: clamp(1rem, 2.5svh, 2rem);
+  padding: calc(var(--header-h) + clamp(0.5rem, 3svh, 2.5rem)) max(var(--gutter), calc((100vw - var(--max)) / 2)) 0;
+  background: var(--teal-deep); color: #fff;
+}
+.vhero__scene { position: absolute; inset: 0; z-index: -1; overflow: hidden; container-type: size; }
+.vhero__frame { position: absolute; left: 50%; top: 50%; width: max(100cqw, 100cqh * 16 / 9); aspect-ratio: 16 / 9; translate: -50% -50%; }
+.vhero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.vhero__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(24 32 30 / 0.66) 0%, rgb(24 32 30 / 0.2) 30%, rgb(24 32 30 / 0) 50%, rgb(24 32 30 / 0.5) 78%, rgb(24 32 30 / 0.85) 100%); }
+.vhero__leads { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.vhero__leads line { stroke: #fff; stroke-width: 1.6; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.vhero__dot { fill: #fff; filter: drop-shadow(0 0 6px var(--ember)); }
+.vhero__ping { fill: none; stroke: #fff; stroke-width: 1.5; opacity: 0; transform-box: fill-box; transform-origin: center; }
+/* the tags: white, bold capitals, the right side cut on a slant (the reference's SUN POWER / 50W) */
+.vtag { position: absolute; left: var(--x); top: var(--y); translate: 0 -100%; padding: 0.5rem 1.15rem 0.5rem 0.75rem; background: #fff; color: var(--text);
+  font: 750 clamp(0.62rem, 0.5rem + 0.25vw, 0.78rem)/1 var(--font-text); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 9px) 100%, 0 100%); border-radius: 3px 0 0 3px; box-shadow: 0 8px 20px rgb(0 0 0 / 0.25); }
+
+.vhero__top { text-align: center; }
+.vhero__eyebrow { color: rgb(255 255 255 / 0.78); margin-bottom: clamp(0.5rem, 1.5svh, 1.25rem); }
+.vhero__title { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 0.14em; margin: 0;
+  font-weight: 200; font-size: min(clamp(3.25rem, 8.6vw, 11.5rem), 16svh); line-height: 1; letter-spacing: -0.055em; color: #fff;
+  text-shadow: 0 2px 30px rgb(0 0 0 / 0.25); }
+.vhero__word { display: inline-block; overflow: hidden; padding: 0.04em 0.02em 0.1em; margin-block: -0.04em -0.1em; }
+.vhero__word > span { display: inline-block; }
+.vhero__volt-wrap { display: inline-grid; }
+.vhero__volt { width: 0.6em; height: 0.6em; filter: drop-shadow(0 0.08em 0.14em rgb(0 0 0 / 0.35)); }
+
+.vhero__mid { display: grid; grid-template-columns: minmax(0, 22rem) minmax(0, 1fr) minmax(0, 26rem); align-items: center; gap: var(--gutter); min-height: 0; }
+.vhero__card { grid-column: 1; display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 1rem; align-items: stretch; padding: 0.9rem; border-radius: 22px;
+  color: #fff; text-decoration: none; background: var(--glass); -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: inset 0 0 0 1px var(--glass-line), 0 18px 40px rgb(0 0 0 / 0.25); }
+.vhero__card-fig { display: grid; aspect-ratio: 3 / 4; border-radius: 14px; overflow: hidden; background: #fff; }
+.vhero__card-body { display: grid; align-content: start; gap: 0.45rem; padding-block: 0.2rem; }
+.vhero__code { color: var(--sun); font-size: 0.8rem; letter-spacing: 0.02em; }
+.vhero__card-text { font-size: 0.9rem; line-height: 1.35; color: rgb(255 255 255 / 0.88); }
+.vhero__card-cta { justify-self: start; margin-top: auto; font-size: 0.7rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; padding-bottom: 0.2rem; border-bottom: 1.5px solid currentColor; }
+.vhero__side { grid-column: 3; }
+.vhero__claim { margin: 0 0 1.4rem; font-size: clamp(1.4rem, 0.9rem + 1.05vw, 2.2rem); font-weight: 400; line-height: 1.16; letter-spacing: -0.025em; color: #fff; text-shadow: 0 2px 20px rgb(0 0 0 / 0.3); }
+.vhero__sun { color: var(--sun); white-space: nowrap; }
+.vhero__sun svg { display: inline-block; width: 0.78em; height: 0.78em; vertical-align: -0.08em; margin-right: 0.2em; }
+.vhero__cta { gap: 0.6rem; }
+.vhero .btn--ghost { --b-fg: #fff; --b-bd: rgb(255 255 255 / 0.7); }
+
+.vhero__cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(0.6rem, 1vw, 1rem); align-items: end; height: clamp(12rem, 27svh, 19rem); }
+.vcard { height: 100%; }
+.vcard--b { height: 112%; }
+.vcard a { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; height: 100%; overflow: hidden; padding: clamp(1.1rem, 1.8vw, 2rem); text-decoration: none; color: #fff; }
+.vcard__title { position: relative; z-index: 1; font-size: clamp(1.25rem, 0.85rem + 0.9vw, 1.9rem); font-weight: 400; line-height: 1.08; letter-spacing: -0.025em; max-width: 14ch; }
+.vcard__text { position: relative; z-index: 1; font-size: 0.875rem; line-height: 1.35; max-width: 24ch; opacity: 0.9; }
+.vcard__meta { position: relative; z-index: 1; font-size: 0.75rem; color: rgb(255 255 255 / 0.85); }
+.vcard__cta { position: relative; z-index: 1; margin-top: auto; font-size: 0.7rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sun); padding-bottom: 0.2rem; border-bottom: 1.5px solid currentColor; }
+.vcard__big { font-size: clamp(2.6rem, 1.6rem + 2.4vw, 4.6rem); line-height: 0.9; }
+.vcard--a a { background: #5b6d67; border-radius: 26px 26px 0 0; clip-path: polygon(clamp(2rem, 4vw, 4.5rem) 0, 100% 0, 100% 100%, 0 100%); padding-left: clamp(2.6rem, 5vw, 5.5rem); }
+.vcard--a .vcard__img { position: absolute; right: 0; bottom: 0; width: 52%; height: 64%; object-fit: cover; border-top-left-radius: 18px; }
+.vcard--a .vcard__text { max-width: 46%; }
+.vcard--b a { background: #7c8e87; border-radius: 30px 30px 0 0; align-items: center; text-align: center; }
+.vcard--b .vcard__img { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 72%; object-fit: cover; object-position: 50% 26%;
+  -webkit-mask-image: linear-gradient(to top, #000 72%, transparent); mask-image: linear-gradient(to top, #000 72%, transparent); }
+.vcard--c a { background: #f3f5f2; color: var(--text); border-radius: 26px 26px 0 0; clip-path: polygon(0 0, calc(100% - clamp(2rem, 4vw, 4.5rem)) 0, 100% 100%, 0 100%); padding-right: clamp(2.6rem, 5vw, 5.5rem); }
+.vcard--c .vcard__cta { color: var(--text); }
+.vcard--c .vcard__text { opacity: 1; color: var(--text-2); }
+
+/* phones and narrow tablets: the words stack, the tags step aside (the frame no longer maps), the cards follow */
+@media (max-width: 900px) {
+  .vhero { height: auto; min-height: 100svh; grid-template-rows: auto auto auto; row-gap: 1.75rem; padding-bottom: 1.25rem; }
+  .vhero__frame { inset: 0; left: 0; top: 0; width: auto; height: 100svh; aspect-ratio: auto; translate: none; }
+  .vhero__img { object-position: 42% 50%; }
+  .vhero__leads, .vtag { display: none; }
+  .vhero__scene::after { content: ''; position: absolute; inset: 100svh 0 0; background: var(--teal-deep); }
+  .vhero__title { flex-direction: column; font-size: clamp(3.4rem, 17vw, 6.5rem); gap: 0; }
+  .vhero__volt { width: 0.42em; height: 0.42em; }
+  .vhero__mid { grid-template-columns: minmax(0, 1fr); margin-top: 22svh; }
+  .vhero__side, .vhero__card { grid-column: 1; }
+  .vhero__side { grid-row: 1; }
+  .vhero__cards { grid-template-columns: minmax(0, 1fr); height: auto; gap: 0.75rem; }
+  .vcard, .vcard--b { height: 12.5rem; }
+  .vcard--b a { border-radius: 26px; }
+}
+
+/* the entrance and the scroll depth: CSS only, with motion on; html.preloaded waits for the battery loader */
+@keyframes vrise { from { transform: translateY(112%); } }
+@keyframes vpop { from { transform: scale(0.2) rotate(-50deg); opacity: 0; } }
+@keyframes vfloat { from { transform: translateY(-5%) rotate(-3deg); } to { transform: translateY(5%) rotate(3deg); } }
+@keyframes vfade { from { opacity: 0; transform: translateY(18px); } }
+@keyframes vzoom { from { transform: scale(1.1); } }
+@keyframes vdraw { from { stroke-dashoffset: 1; } }
+@keyframes vtag-in { from { opacity: 0; transform: translateY(8px) scale(0.92); } }
+@keyframes vping { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(3.2); } }
+@keyframes vpar { to { transform: translateY(12%); } }
+@keyframes vlift { to { transform: translateY(-18%); opacity: 0.3; } }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-motion="on"] .vhero { --pre: 0s; }
+  html[data-motion="on"].preloaded .vhero { --pre: 1.45s; }
+  html[data-motion="on"] .vhero__img { animation: vzoom 2.6s var(--ease-out) var(--pre) both; }
+  html[data-motion="on"] [data-vhero-word] { animation: vrise 1.15s var(--ease-out) calc(var(--pre) + 0.1s + var(--d, 0s)) both; }
+  html[data-motion="on"] .vhero__volt { animation: vpop 0.9s var(--ease-spring) calc(var(--pre) + var(--d, 0s)) both, vfloat 3.2s ease-in-out calc(var(--pre) + 1.6s) infinite alternate; }
+  html[data-motion="on"] .vhero [data-vhero-in] { animation: vfade 0.9s var(--ease-out) calc(var(--pre) + 0.55s) both; }
+  html[data-motion="on"] .vhero__side[data-vhero-in] { animation-delay: calc(var(--pre) + 0.7s); }
+  html[data-motion="on"] .vhero__leads line { animation: vdraw 0.9s var(--ease-out) calc(var(--pre) + 1s) both; }
+  html[data-motion="on"] .vhero__leads line + line { animation-delay: calc(var(--pre) + 1.2s); }
+  html[data-motion="on"] .vtag { animation: vtag-in 0.6s var(--ease-spring) calc(var(--pre) + 1.5s) both; }
+  html[data-motion="on"] .vtag + .vtag { animation-delay: calc(var(--pre) + 1.7s); }
+  html[data-motion="on"] .vhero__ping { animation: vping 2.4s var(--ease-out) calc(var(--pre) + 2s) infinite; }
+  html[data-motion="on"] .vcard { animation: vfade 0.9s var(--ease-out) calc(var(--pre) + var(--d, 0.8s)) both; }
+  html[data-motion="on"] .vcard a { transition: transform 360ms var(--ease-spring); }
+  html[data-motion="on"] .vcard__img { transition: transform 700ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    html[data-motion="on"] .vcard a:hover { transform: translateY(-8px); }
+    html[data-motion="on"] .vcard a:hover .vcard__img { transform: scale(1.06); }
+    html[data-motion="on"] .vhero__card { transition: transform 360ms var(--ease-spring), background-color 200ms var(--ease-out); }
+    html[data-motion="on"] .vhero__card:hover { transform: translateY(-4px); background: rgb(61 78 73 / 0.72); }
+  }
+  @supports (animation-timeline: view()) {
+    html[data-motion="on"] .vhero__frame { animation: vpar linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; }
+    html[data-motion="on"] .vhero__top { animation: vlift linear both; animation-timeline: view(); animation-range: exit 0% exit 80%; }
+  }
 }

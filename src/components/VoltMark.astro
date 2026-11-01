@@ -1,0 +1,18 @@
+---
+// The volt mark: a chunky lemon lightning bolt with a darker extruded side, as in the glowing-house reference
+// ("Solar ⚡ Power"). Decorative only; the hero sets it between its words and home.ts floats it.
+interface Props { class?: string }
+const { class: cls } = Astro.props;
+---
+<svg class:list={['volt', cls]} viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="volt-face" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff7a8" />
+      <stop offset="0.55" stop-color="#ece44c" />
+      <stop offset="1" stop-color="#d6c92a" />
+    </linearGradient>
+  </defs>
+  <path d="M44 3 15 37h17l-8 25 32-36H38l9-23Z" fill="#9e9411" />
+  <path d="M41 1 12 35h17l-8 25 32-36H35l9-23Z" fill="url(#volt-face)" />
+  <path d="M41 1 12 35h3L41 4h3Z" fill="#fffbd1" opacity="0.7" />
+</svg>

@@ -8,7 +8,7 @@ body {
   line-height: 1.45;
   color: var(--ink);
   background: var(--paper);
-  -webkit-tap-highlight-color: rgb(245 165 36 / 0.25);
+  -webkit-tap-highlight-color: rgb(236 228 76 / 0.3);
 }
 ::selection { background: var(--sun); color: var(--text); }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
@@ -24,26 +24,23 @@ hr { border: 0; border-top: 1px solid var(--line); }
 .mono, .eyebrow, .key, .price, .num, .tag, .dim { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .eyebrow { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); font-weight: 500; }
 .key { font-size: 0.75rem; letter-spacing: 0.04em; }
-/* Big display numbers (facts, counters, "Pse tani"): Archivo condensed, tabular, keeps the no-break and narrow spaces as set */
-.figure { font-family: var(--font-text); font-stretch: 75%; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+/* Big display numbers (facts, counters, "Pse tani"): thin and tabular, keeps the no-break and narrow spaces as set */
+.figure { font-family: var(--font-text); font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
 .poster {
   font-family: var(--font-text);
   font-size: var(--step-display);
-  font-stretch: 66%;
-  font-weight: 800;
-  line-height: 0.86;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
+  font-weight: 200;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
   overflow-wrap: anywhere;
   hyphens: manual;
 }
 .poster--s { font-size: var(--step-poster-s); }
 .title {
-  font-stretch: 72%;
-  font-weight: 750;
+  font-weight: 300;
   font-size: var(--step-5);
-  line-height: 0.95;
-  letter-spacing: -0.015em;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
 }
 .title--xl { font-size: clamp(2.75rem, 1.4rem + 6vw, 7rem); }
 .lede { font-size: var(--step-1); line-height: 1.35; max-width: 46ch; color: var(--ink); }
@@ -52,7 +49,7 @@ hr { border: 0; border-top: 1px solid var(--line); }
 .small { font-size: var(--step--1); }
 .prose { max-width: 66ch; }
 .prose > * + * { margin-top: 0.9em; }
-.prose h2 { font-stretch: 75%; font-weight: 750; font-size: var(--step-3); margin-top: 1.6em; }
+.prose h2 { font-weight: 500; letter-spacing: -0.02em; font-size: var(--step-3); margin-top: 1.6em; }
 .prose h3 { font-weight: 650; font-size: var(--step-1); margin-top: 1.3em; }
 .prose ul, .prose ol { padding-left: 1.2em; }
 .prose a { color: var(--teal); }
@@ -65,7 +62,7 @@ hr { border: 0; border-top: 1px solid var(--line); }
 .rule-double { position: relative; border-top: 3px solid var(--teal); padding-top: 1.25rem; }
 .rule-double::before { content: ''; position: absolute; left: 0; right: 0; top: 3px; border-top: 1px solid var(--teal); }
 /* Teal bands (.on-ink keeps its old name): paper text, sun accents, lines and secondary text re-tinted for the ground */
-.on-ink, .on-teal, [data-tone="ink"] { background: var(--teal); color: var(--paper); --line: var(--line-on-teal); --line-strong: var(--line-on-teal-strong); --line-ui: var(--line-on-teal-ui); --ink-2: var(--on-teal-2); --text-2: var(--on-teal-2); }
+.on-ink, .on-teal, [data-tone="ink"] { background: radial-gradient(120% 90% at 50% 0%, var(--teal-2), var(--teal) 60%); color: var(--on-teal); --line: var(--line-on-teal); --line-strong: var(--line-on-teal-strong); --line-ui: var(--line-on-teal-ui); --ink-2: var(--on-teal-2); --text-2: var(--on-teal-2); }
 :is(.on-ink, .on-teal, [data-tone="ink"]) .eyebrow { color: var(--on-teal-2); }
 :is(.on-ink, .on-teal) .rule-double, :is(.on-ink, .on-teal) .rule-double::before { border-color: var(--sun); }
 
@@ -88,14 +85,20 @@ hr { border: 0; border-top: 1px solid var(--line); }
 
 /* ---------- buttons ---------- */
 .btn {
-  --b-bg: var(--teal); --b-fg: var(--paper); --b-bd: var(--teal); --b-arrow: var(--sun);
+  --b-bg: var(--teal); --b-fg: var(--on-teal); --b-bd: var(--teal); --b-arrow: var(--sun); --b-cut: 12px;
+  position: relative; isolation: isolate;
   display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
-  min-height: 48px; padding: 0 1.25rem;
-  font: 600 0.9375rem/1 var(--font-text); letter-spacing: 0.01em;
-  color: var(--b-fg); background: var(--b-bg); border: 1px solid var(--b-bd);
+  min-height: 48px; padding: 0 calc(1.35rem + var(--b-cut) / 2) 0 1.35rem;
+  font: 650 0.8125rem/1 var(--font-text); letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--b-fg); background: none; border: 0;
   text-decoration: none; cursor: pointer; white-space: nowrap;
-  transition: transform 100ms var(--ease-out), background-color 160ms var(--ease-out), color 160ms var(--ease-out), border-color 160ms var(--ease-out);
+  transition: transform 100ms var(--ease-out), color 160ms var(--ease-out);
 }
+/* The shape is drawn behind the label, so the focus ring is never clipped: filled buttons end in a slanted cut (the
+   reference's GET STARTED), outlined ones stay a plain rounded box so their whole border shows. */
+.btn::before { content: ''; position: absolute; inset: 0; z-index: -2; border-radius: 10px 3px 3px 10px; background: var(--b-bg); clip-path: polygon(0 0, 100% 0, calc(100% - var(--b-cut)) 100%, 0 100%); transition: background-color 160ms var(--ease-out); }
+.btn--ghost { padding-inline: 1.35rem; }
+.btn--ghost::before { border-radius: 10px; clip-path: none; box-shadow: inset 0 0 0 1px var(--b-bd); }
 .btn:active { transform: scale(0.97); }
 /* Primary: teal fill + paper text on light grounds, with a sun arrow; on teal grounds every filled button is sun amber
    with ink-teal text (amber on paper is 1.9:1, so .btn--copper / .btn--sun on paper stay teal). */
@@ -193,7 +196,7 @@ hr { border: 0; border-top: 1px solid var(--line); }
 .ph { display: block; width: 100%; height: 100%; }
 img.ph { object-fit: contain; background: #fff; }
 .ph--none { container-type: inline-size; display: grid; place-content: center; justify-items: center; gap: 0.35em; padding: 8%; text-align: center; background: var(--teal-tint); color: var(--text-2); }
-.ph--none b { font-weight: 800; font-stretch: 66%; text-transform: uppercase; line-height: 0.92; color: var(--teal); font-size: clamp(0.7rem, 14cqi, 2.25rem); overflow-wrap: anywhere; }
+.ph--none b { font-weight: 300; letter-spacing: -0.03em; line-height: 0.95; color: var(--teal); font-size: clamp(0.7rem, 14cqi, 2.25rem); overflow-wrap: anywhere; }
 .ph--none span { font: 400 clamp(0.55rem, 6cqi, 0.8125rem) / 1.25 var(--font-mono); letter-spacing: 0.03em; overflow-wrap: anywhere; }
 :is(.pcard__fig, .bline__fig, .compare__fig, .sheet__paper, .catrow__fig):has(.ph) { padding: 0; place-items: stretch; background: #fff;
   /* one track that cannot grow: a grid item's minimum is its content's size, so a 900 × 1200 photo would
@@ -202,7 +205,7 @@ img.ph { object-fit: contain; background: #fff; }
 .ph { min-width: 0; min-height: 0; }
 
 /* ---------- product card ---------- */
-.pcard { position: relative; display: grid; grid-template-rows: auto 1fr; border: 1px solid var(--line); background: var(--paper); transition: border-color 200ms var(--ease-out); }
+.pcard { position: relative; display: grid; grid-template-rows: auto 1fr; border: 1px solid var(--line); border-radius: var(--radius-l); overflow: hidden; background: #fff; transition: border-color 200ms var(--ease-out); }
 .pcard__fig { aspect-ratio: 4 / 3; display: grid; place-items: center; padding: 1.25rem; border-bottom: 1px solid var(--line); color: var(--ink); background:
   linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 24px 24px,
   linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 24px 24px; background-color: var(--paper); }
@@ -226,28 +229,29 @@ img.ph { object-fit: contain; background: #fff; }
 
 /* ---------- header ---------- */
 .site-header {
-  position: fixed; inset: 0 0 auto; z-index: 50; height: var(--header-h);
-  display: flex; align-items: center; gap: 1rem; padding-inline: var(--gutter);
-  /* opaque: at 94 % the body copy scrolling under it showed through behind the logo */
-  color: var(--text); background: var(--paper);
-  border-bottom: 1px solid var(--line);
+  position: fixed; z-index: 50; height: calc(var(--header-h) - 1rem);
+  inset: 12px max(var(--gutter), calc((100vw - var(--max)) / 2)) auto;
+  display: flex; align-items: center; gap: 1rem;
+  /* floating glass with slanted ends (the reference's top bar); blur keeps the copy behind it unreadable */
+  padding-inline: clamp(1.5rem, 1rem + 1.5vw, 2.25rem);
+  color: var(--on-teal); background: var(--glass); -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: inset 0 1px 0 var(--glass-line);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 22px) 100%, 22px 100%);
   transition: transform 260ms var(--ease-out), background-color 200ms var(--ease-out), color 200ms var(--ease-out);
 }
-.site-header[data-tone="ink"] { background: var(--teal); color: var(--paper); border-bottom-color: var(--line-on-teal); }
-html[data-header="hidden"] .site-header:not(:focus-within) { transform: translateY(-100%); }
-.brand { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; min-height: 44px; font-weight: 800; font-stretch: 75%; font-size: 1.375rem; letter-spacing: -0.01em; white-space: nowrap; flex: none; }
-/* the logo (Logo.astro): green label with white letters on light grounds, bright label with dark letters on teal */
-.logo { display: block; flex: none; overflow: visible; --logo-label: var(--leaf); --logo-on-label: #fff; }
-:is(.on-ink, .on-teal, [data-tone="ink"], .menu, .rail, .login__poster, .loader) .logo { --logo-label: var(--leaf-bright); --logo-on-label: var(--teal-deep); }
+.site-header { --line: var(--line-on-teal); --line-strong: var(--line-on-teal-strong); --ink-2: var(--on-teal-2); --text-2: var(--on-teal-2); }
+html[data-header="hidden"] .site-header:not(:focus-within) { transform: translateY(calc(-100% - 16px)); }
+.brand { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; min-height: 44px; font-weight: 700; font-size: 1.375rem; letter-spacing: -0.01em; white-space: nowrap; flex: none; }
+/* the logo (Logo.astro): the lemon label with dark letters on every ground; "Energy" follows the text colour */
+.logo { display: block; flex: none; overflow: visible; --logo-label: var(--leaf); --logo-on-label: var(--text); }
 .nav { display: flex; align-items: center; gap: 0.25rem; margin-left: auto; }
 .nav a, .nav button.navbtn { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; padding: 0 var(--nav-pad, 0.7rem); text-decoration: none; font-weight: 550; font-size: 0.9375rem; background: none; border: 0; color: inherit; cursor: pointer; white-space: nowrap; flex: none; }
 /* a hairline between the energy links and the basket side of the bar */
 .nav__rule { flex: none; width: 1px; height: 1.5rem; margin-inline: 0.35rem; background: var(--line-strong); }
 @media (hover: hover) and (pointer: fine) { .nav :is(.nav-shelf, .nav-tool):not([aria-current]):hover { text-decoration: underline; text-decoration-color: var(--line-strong); text-decoration-thickness: 1px; text-underline-offset: 0.4em; } }
-.nav a:is([aria-current="page"], [aria-current="true"]) { text-decoration: underline; text-decoration-color: var(--amber-deep); text-decoration-thickness: 2px; text-underline-offset: 0.4em; }
-.site-header[data-tone="ink"] .nav a:is([aria-current="page"], [aria-current="true"]) { text-decoration-color: var(--sun); }
+.nav a:is([aria-current="page"], [aria-current="true"]) { text-decoration: underline; text-decoration-color: var(--sun); text-decoration-thickness: 2px; text-underline-offset: 0.4em; }
 .count { display: inline-grid; place-items: center; min-width: 1.6rem; height: 1.35rem; padding: 0 0.35rem; border-radius: var(--pill); font: 500 0.75rem/1 var(--font-mono); background: var(--teal); color: var(--paper); }
-.site-header[data-tone="ink"] .count { background: var(--sun); color: var(--text); }
+.site-header .count { background: var(--sun); color: var(--text); }
 .count[data-zero="true"] { background: transparent; color: inherit; box-shadow: inset 0 0 0 1px currentColor; }
 .lang a { font-family: var(--font-mono); font-size: 0.8125rem !important; letter-spacing: 0.04em; }
 .menu-btn { margin-left: 0.25rem; }
@@ -256,30 +260,29 @@ html[data-header="hidden"] .site-header:not(:focus-within) { transform: translat
 @media (max-width: 960px) {
   .nav .nav-wide { display: none; }
 }
-/* The bar never wraps (renewable-focus plan §2). Widths measured 2026-10-27 with Archivo loaded (scratch
-   measure-header.mjs): everything at full spacing needs 1523 px in Albanian, 1405 in English; with the saver's word
-   tucked away and tighter links, 1329 / 1226; without the four shelf links, 893 / 876. Each step below keeps ≥ 30 px
-   of slack. Order of leaving: the saver's word, then the four shelf links, then Paketa · Udhëzuesi · Kalkulatori
-   (all of them stay in the menu). The phone dock (≤ 760 px) takes compare and basket, as before.
-   The saver's word comes back once the shelf links have gone: with the word and without the shelves the bar needs
-   about 1017 / 985 px (measured 2026-10-27, scratch saver-fit.mjs), so it shows from 1048 / 1016 px, keeping the 30 px. */
-@media (max-width: 1559.98px) {
+/* The bar never wraps (renewable-focus plan §2). Widths re-measured 2026-11-01 for the floating glass bar with Plus
+   Jakarta loaded (viewport width the bar needs, nothing shrinking): everything at full spacing needs 1648 px in
+   Albanian, 1538 in English; with the saver's word tucked away and tighter links, 1433 / 1336; without the four shelf
+   links but with the word, 1119 / 1086; without the word too, 974 / 963. Each step below keeps ≥ 30 px of slack.
+   Order of leaving: the saver's word, then the four shelf links, then Paketa · Udhëzuesi · Kalkulatori (all of them
+   stay in the menu). The phone dock (≤ 760 px) takes compare and basket, as before. */
+@media (max-width: 1679.98px) {
   html[lang="sq"] .site-header { --nav-pad: 0.5rem; }
   html[lang="sq"] .site-header .saver { padding-inline: 0.5rem; }
 }
-@media (max-width: 1459.98px) {
+@media (max-width: 1569.98px) {
   html[lang="en"] .site-header { --nav-pad: 0.5rem; }
   html[lang="en"] .site-header .saver { padding-inline: 0.5rem; }
 }
-@media (min-width: 1360px) and (max-width: 1559.98px), (max-width: 1047.98px) {
+@media (min-width: 1470px) and (max-width: 1679.98px), (max-width: 1149.98px) {
   html[lang="sq"] .site-header .saver__word { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 }
-@media (min-width: 1260px) and (max-width: 1459.98px), (max-width: 1015.98px) {
+@media (min-width: 1370px) and (max-width: 1569.98px), (max-width: 1119.98px) {
   html[lang="en"] .site-header .saver__word { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 }
-@media (max-width: 1359.98px) { html[lang="sq"] .nav .nav-shelf { display: none; } }
-@media (max-width: 1259.98px) { html[lang="en"] .nav .nav-shelf { display: none; } }
-@media (max-width: 879.98px) { .nav .nav-tool { display: none; } }
+@media (max-width: 1469.98px) { html[lang="sq"] .nav .nav-shelf { display: none; } }
+@media (max-width: 1369.98px) { html[lang="en"] .nav .nav-shelf { display: none; } }
+@media (max-width: 1009.98px) { .nav .nav-tool { display: none; } }
 /* very narrow phones: the menu button keeps its bars and its name for screen readers, the word goes */
 @media (max-width: 359.98px) {
   .menu-btn__word { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
@@ -304,11 +307,11 @@ html[data-header="hidden"] .site-header:not(:focus-within) { transform: translat
 .menu__group-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr)); column-gap: var(--gutter); }
 .menu__cat { display: grid; grid-template-columns: 2.5rem 1fr auto; align-items: baseline; gap: 0.75rem; padding: 0.8rem 0; border-bottom: 1px solid var(--line-on-teal); text-decoration: none; min-height: 44px; }
 .menu__cat .n { font: 500 0.75rem var(--font-mono); color: var(--sun); }
-.menu__cat .name { font-weight: 650; font-size: 1.125rem; font-stretch: 85%; }
+.menu__cat .name { font-weight: 500; font-size: 1.125rem; letter-spacing: -0.01em; }
 .menu__cat .meta { font: 400 0.75rem var(--font-mono); color: var(--on-teal-2); text-align: right; white-space: nowrap; }
 @media (hover: hover) and (pointer: fine) { .menu__cat:hover .name { color: var(--glow); } }
 .menu__side { grid-column: span 4; display: grid; gap: 1.5rem; align-content: start; }
-.menu__big a { display: block; font-stretch: 66%; font-weight: 800; text-transform: uppercase; font-size: clamp(2.25rem, 1.4rem + 3vw, 4rem); line-height: 0.95; text-decoration: none; padding-block: 0.15rem; }
+.menu__big a { display: block; font-weight: 250; letter-spacing: -0.04em; font-size: clamp(2.25rem, 1.4rem + 3vw, 4rem); line-height: 0.95; text-decoration: none; padding-block: 0.15rem; }
 @media (hover: hover) and (pointer: fine) { .menu__big a:hover { color: var(--sun); } }
 @media (max-width: 960px) { .menu__cats, .menu__side { grid-column: 1 / -1; } }
 
@@ -343,31 +346,91 @@ html[data-header="hidden"] .site-header:not(:focus-within) { transform: translat
   .tray { right: 6px; width: calc(100% - 12px); } /* stays flush with the dock under it */
 }
 
-/* ---------- footer ---------- */
-.site-footer { background: var(--teal-deep); color: var(--paper); padding: var(--section-gap) var(--gutter) 2rem; --line: var(--line-on-teal); --line-strong: var(--line-on-teal-strong); --ink-2: var(--on-teal-2); --text-2: var(--on-teal-2); }
+/* ---------- footer: a mini website ----------
+   The closing hero over the dusk house, the shop at a glance, the free tools, then the site map with the contact
+   card, the big wordmark and the bottom bar. Everything sits in the --max column on the night ground. */
+.site-footer { background: radial-gradient(120% 60% at 50% 0%, var(--teal), var(--teal-deep) 55%); color: var(--on-teal); padding: clamp(2rem, 1rem + 3vw, 4rem) var(--gutter) 2rem; --line: var(--line-on-teal); --line-strong: var(--line-on-teal-strong); --ink-2: var(--on-teal-2); --text-2: var(--on-teal-2); display: grid; gap: clamp(2.5rem, 1.5rem + 3vw, 5rem); }
+.site-footer > * { width: 100%; max-width: var(--max); margin-inline: auto; min-width: 0; }
 .site-footer a { text-decoration: none; }
-@media (hover: hover) and (pointer: fine) { .site-footer a:hover { color: var(--sun); } }
-/* about on its own row, then four link columns: renewable energy, efficiency and building, company, legal */
-.footer__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2.5rem var(--gutter); max-width: var(--max); margin-inline: auto; }
-.footer__about, .footer__facts { grid-column: 1 / -1; min-width: 0; }
-.footer__about .lede { max-width: 40rem; }
-.footer__facts { color: var(--on-teal-2); }
+@media (hover: hover) and (pointer: fine) { .site-footer a:not(.btn):hover { color: var(--sun); } }
+
+/* the closing hero */
+.fhero { position: relative; isolation: isolate; overflow: hidden; border-radius: 30px; min-height: clamp(22rem, 30vw, 32rem); display: grid; align-items: end; padding: clamp(1.5rem, 1rem + 3vw, 4rem); color: #fff; }
+.fhero__img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; }
+.fhero::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(24 32 30 / 0.9) 0%, rgb(24 32 30 / 0.6) 45%, rgb(24 32 30 / 0.1) 100%); }
+.fhero__body { display: grid; gap: 1rem; max-width: 40rem; }
+.fhero__eyebrow { color: var(--sun) !important; }
+.fhero__title { font-size: clamp(2.3rem, 1.2rem + 3.6vw, 5.25rem); font-weight: 250; line-height: 1.02; letter-spacing: -0.045em; }
+.fhero__text { font-size: var(--step-1); line-height: 1.4; color: rgb(255 255 255 / 0.86); max-width: 34rem; }
+.fhero__cta { gap: 0.6rem; margin-top: 0.4rem; }
+.fhero .btn--ghost { --b-fg: #fff; --b-bd: rgb(255 255 255 / 0.7); }
+.fhero__stats { position: absolute; right: clamp(1.25rem, 3vw, 3rem); top: clamp(1.25rem, 3vw, 2.5rem); margin: 0; padding: 0.55rem 0.9rem; border-radius: var(--pill); font-size: 0.75rem; color: #fff; background: rgb(255 255 255 / 0.12); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: inset 0 0 0 1px var(--glass-line); }
+
+/* section heads */
+.fsec__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1.5rem; margin-bottom: 1.5rem; }
+.fsec__title { font-size: clamp(1.8rem, 1.2rem + 1.8vw, 3rem); font-weight: 300; letter-spacing: -0.035em; line-height: 1.05; }
+.ftools .fsec__title { margin-bottom: 1.5rem; }
+
+/* the shop at a glance */
+.fshop { display: grid; gap: 1.5rem; }
+.fshop__group { display: grid; gap: 0.8rem; }
+.fshop__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(15.5rem, 100%), 1fr)); gap: 0.6rem; }
+.fcat { position: relative; display: grid; gap: 0.3rem; min-height: 5.25rem; padding: 0.95rem 2.75rem 0.95rem 1.1rem; border-radius: 16px; background: rgb(255 255 255 / 0.05); box-shadow: inset 0 0 0 1px var(--line-on-teal); transition: background-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out); }
+.fcat__name { font-weight: 500; font-size: 1.0625rem; letter-spacing: -0.01em; line-height: 1.2; }
+.fcat__meta { font-size: 0.75rem; color: var(--on-teal-2); }
+.fcat__arrow { position: absolute; right: 1rem; top: 50%; translate: 0 -50%; color: var(--sun); transition: transform 220ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .fcat:hover { background: rgb(236 228 76 / 0.1); box-shadow: inset 0 0 0 1px rgb(236 228 76 / 0.5); color: inherit !important; }
+  .fcat:hover .fcat__arrow { transform: translateX(4px); }
+}
+
+/* the three free tools: lemon, sage and white, like the hero's cards */
+.ftools__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr)); gap: 0.75rem; }
+.ftool a { position: relative; display: grid; align-content: start; gap: 0.6rem; min-height: 12.5rem; height: 100%; padding: clamp(1.25rem, 1rem + 1vw, 2rem); border-radius: 26px; overflow: hidden; transition: transform 300ms var(--ease-spring); }
+.ftool--packages a { background: var(--sun); color: var(--text) !important; }
+.ftool--guide a { background: #5b6d67; color: #fff; }
+.ftool--calc a { background: #f3f5f2; color: var(--text) !important; }
+.ftool__title { font-size: clamp(1.4rem, 1rem + 1vw, 2rem); font-weight: 400; letter-spacing: -0.03em; line-height: 1.05; }
+.ftool__text { font-size: 0.9375rem; line-height: 1.4; max-width: 30ch; opacity: 0.85; }
+.ftool__cta { position: absolute; right: 1.25rem; bottom: 1.1rem; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 50%; font-size: 1.1rem; background: rgb(0 0 0 / 0.08); transition: transform 300ms var(--ease-spring); }
+.ftool--guide .ftool__cta { background: rgb(255 255 255 / 0.14); }
+@media (hover: hover) and (pointer: fine) {
+  html[data-motion="on"] .ftool a:hover { transform: translateY(-6px); }
+  html[data-motion="on"] .ftool a:hover .ftool__cta { transform: rotate(-45deg); }
+}
+
+/* the map of the site and the contact card */
+.footer__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2.5rem var(--gutter); padding-top: clamp(2rem, 1rem + 2vw, 3rem); border-top: 1px solid var(--line-on-teal); }
+.footer__about { grid-column: 1 / -1; display: grid; gap: 0.75rem; align-content: start; }
+.footer__lede { font-size: var(--step-1); line-height: 1.4; font-weight: 300; max-width: 34rem; }
+.footer__facts { color: var(--on-teal-2); max-width: 34rem; }
 .footer__col { grid-column: span 6; min-width: 0; }
-@media (min-width: 760px) { .footer__col { grid-column: span 3; } }
-/* wide: the about text on the left, the operator and price lines on the right, on the about's last line */
-@media (min-width: 1024px) {
-  .footer__about { grid-column: 1 / span 7; }
-  .footer__facts { grid-column: 9 / -1; align-self: end; padding-top: 0.9rem; border-top: 1px solid var(--line-on-teal); }
+.fcontact { grid-column: 1 / -1; display: grid; gap: 0.6rem; align-content: start; justify-items: start; padding: 1.5rem; border-radius: 22px; background: rgb(255 255 255 / 0.05); box-shadow: inset 0 0 0 1px var(--line-on-teal); }
+.fcontact h2 { font-size: 1.35rem; font-weight: 400; letter-spacing: -0.02em; }
+.fcontact p { color: var(--on-teal-2); }
+.fcontact__line { font-weight: 500; }
+@media (min-width: 900px) {
+  .footer__about { grid-column: 1 / span 5; }
+  .footer__col { grid-column: span 2; }
+  .fcontact { grid-column: span 3; }
 }
 @media (max-width: 359.98px) { .footer__col { grid-column: 1 / -1; } }
-.footer__grid h2 { font: 500 0.75rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-teal-2); margin-bottom: 0.9rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--line-on-teal); }
+.footer__col h2 { font: 500 0.75rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-teal-2); margin-bottom: 0.9rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--line-on-teal); }
 .footer__grid ul { list-style: none; padding: 0; display: grid; gap: 0.15rem; }
 .footer__grid li a { display: inline-flex; align-items: center; min-height: 36px; line-height: 1.25; padding-block: 0.3rem; }
-.footer__more { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--line-on-teal); }
-.footer__word { max-width: var(--max); margin: clamp(3rem, 2rem + 4vw, 6rem) auto 0; font-stretch: 62%; font-weight: 800; text-transform: uppercase; line-height: 0.8; font-size: min(clamp(4.5rem, 0.5rem + 19vw, 21rem), 17.5vw); letter-spacing: -0.03em; color: var(--paper); white-space: nowrap; overflow: hidden; }
-.footer__word b { color: var(--sun); font-weight: 800; }
-.footer__bottom { max-width: var(--max); margin: 1.5rem auto 0; padding-top: 1.25rem; border-top: 1px solid var(--line-on-teal); display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; justify-content: space-between; align-items: center; font: 400 0.75rem var(--font-mono); color: var(--on-teal-2); }
-@media (max-width: 760px) { .site-footer { padding-bottom: calc(2rem + var(--stack-clear)); } } /* its last row stays clear of the dock, action bar and tray */
+.footer__word { margin-top: clamp(-2rem, -1vw, 0rem); font-weight: 200; line-height: 1; font-size: min(clamp(3.25rem, 0.5rem + 13.4vw, 17rem), 13.6vw); letter-spacing: -0.06em; color: var(--on-teal); white-space: nowrap; overflow-x: clip; padding-bottom: 0.1em; }
+.footer__word b { color: var(--sun); font-weight: 200; }
+.footer__bottom { margin-top: -1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line-on-teal); display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; justify-content: space-between; align-items: center; font: 400 0.75rem var(--font-mono); color: var(--on-teal-2); }
+@media (max-width: 760px) { .site-footer { padding-bottom: calc(2rem + var(--stack-clear)); } .fhero__stats { position: static; justify-self: start; margin-top: 1.25rem; } } /* its last row stays clear of the dock, action bar and tray */
+/* phones: the shop in two columns of small tiles and short tool cards, so the footer stays a page, not a scroll */
+@media (max-width: 560px) {
+  .fshop__grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .fcat { min-height: 0; align-content: start; padding: 0.8rem 0.85rem 0.85rem; border-radius: 14px; }
+  .fcat__name { font-size: 0.9375rem; }
+  .fcat__meta { font-size: 0.6875rem; }
+  .fcat__arrow { display: none; }
+  .ftool a { min-height: 0; padding-bottom: 4.25rem; border-radius: 22px; }
+}
 
 /* ---------- loader: a battery charging, in the logo's green ---------- */
 /* <head> marks <html data-preloader="on"> before the first paint (LOADER_SCRIPT, src/lib/csp.ts), so the cover is
@@ -448,7 +511,7 @@ html[data-motion="off"] .js-reveal, html:not(.js) .js-reveal { opacity: 1 !impor
 /* ---------- micro-interactions (2026-10-28) ----------
    Small, quick and playful, and only with motion on: the Stop-animations switch and reduced motion both set
    html[data-motion=off]. The scripted ones (the spark burst, the basket button's tick) are src/scripts/micro.ts. */
-.btn.is-done { --b-bg: var(--leaf); --b-bd: var(--leaf); --b-fg: #fff; --b-arrow: #fff; }
+.btn.is-done { --b-bg: var(--sun); --b-bd: var(--sun); --b-fg: var(--text); --b-arrow: var(--text); }
 .btn.is-done::before { content: '✓' / ''; font-weight: 800; }
 .toast { position: relative; overflow: hidden; }
 .spark-burst { position: fixed; z-index: 96; width: 0; height: 0; pointer-events: none; }
@@ -506,3 +569,13 @@ html[data-motion="off"] .js-reveal, html:not(.js) .js-reveal { opacity: 1 !impor
     html[data-motion="on"] .nav :is(.nav-shelf, .nav-tool):not([aria-current]):hover { text-decoration: none; background-size: calc(100% - 2 * var(--nav-pad, 0.7rem)) 2px; }
   }
 }
+
+/* ---------- Mist + Volt surfaces (2026-11-01) ----------
+   Panels, boxes and frames take the reference's soft corners; :where() keeps the specificity at zero, so a page
+   rule that needs a square edge still wins. */
+:where(.choice, .notice, .sheet__paper, .buybox, .fan-card, .gd-sheet__draw, .pk-plan__grid, .rn-note, .gd-index, .gd-shelf, .rn-sched-wrap,
+  .pk-city__note, .pk, .calc-form, .sumcard, .parcel, .co-final, .final, .teaser__plan, .box, .empty, .table-wrap, .offers) { border-radius: var(--radius-l); }
+:where(.gallery__thumb, .compare__fig, .stepper, .hud__label, .bline__fig, .pk-plan__link, .rn-tag, .actionbar) { border-radius: var(--radius-m); }
+:where(.input, .select, .textarea, .stage__key) { border-radius: 12px; }
+:where(.tag) { border-radius: 6px; }
+:where(.sheet__paper, .gallery__thumb, .compare__fig, .bline__fig) { overflow: hidden; }

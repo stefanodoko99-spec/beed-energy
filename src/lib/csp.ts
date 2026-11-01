@@ -15,11 +15,12 @@ export const MOTION_SCRIPT =
  * On the page with the intro (home): decides before the first paint whether it plays, so the page is never
  * seen first and covered a moment later. Once per session, never with motion off or when the address
  * points into the page. Runs after MOTION_SCRIPT; src/scripts/site.ts plays it when <html data-preloader="on">.
+ * html.preloaded stays for the whole page view, so the hero's entrance can wait for the loader without jumping.
  */
 export const LOADER_SCRIPT =
   "(function(){var d=document.documentElement,s=false;if(d.getAttribute('data-motion')==='off'||location.hash)return;" +
   "try{s=sessionStorage.getItem('beed-loader')==='1';sessionStorage.setItem('beed-loader','1')}catch(e){}" +
-  "if(!s)d.setAttribute('data-preloader','on')})();";
+  "if(!s){d.setAttribute('data-preloader','on');d.classList.add('preloaded')}})();";
 
 const sha = (s: string) => `'sha256-${createHash('sha256').update(s, 'utf8').digest('base64')}'`;
 const SCRIPT_HASHES = [sha(MOTION_SCRIPT), sha(LOADER_SCRIPT)];
