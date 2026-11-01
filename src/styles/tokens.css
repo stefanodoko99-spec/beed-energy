@@ -103,8 +103,11 @@
   --step-display: clamp(4rem, 0.5rem + 15.5vw, 18.75rem);
   --step-poster-s: clamp(3rem, 0.6rem + 10.5vw, 10rem);
 
-  --gutter: clamp(1.25rem, 0.8rem + 2vw, 2.5rem);
-  --header-h: 5.25rem; /* the floating glass bar (4.25rem) and its 12px gap above */
+  /* the page's side margin never runs under a phone's notch or rounded corners in landscape */
+  --gutter: max(clamp(1.25rem, 0.8rem + 2vw, 2.5rem), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  /* the status bar's height when the page runs under it (the installed app, viewport-fit=cover); 0 in a browser tab */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --header-h: calc(5.25rem + var(--safe-top)); /* the floating glass bar (4.25rem) and its 12px gap above */
   --section-gap: clamp(5rem, 3rem + 6vw, 8rem);
   --max: 1600px;
 
@@ -124,4 +127,12 @@
   --ease-settle: cubic-bezier(0.34, 1.32, 0.64, 1);
 
   color-scheme: light;
+}
+
+/* Phones fill more of the screen: a 16 px side margin (was 20) and about 52 px between sections (was 80). */
+@media (max-width: 600px) {
+  :root {
+    --gutter: max(1rem, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+    --section-gap: clamp(3.25rem, 2rem + 5vw, 5rem);
+  }
 }

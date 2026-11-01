@@ -1,0 +1,16 @@
+{
+  "name": "BeeD Energy",
+  "short_name": "BeeD",
+  "description": "Treg për energjinë e rinovueshme: panele diellore, bateri, invertere dhe ndërtim, me çmime nga disa shitës.",
+  "lang": "sq",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#33423e",
+  "theme_color": "#33423e",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

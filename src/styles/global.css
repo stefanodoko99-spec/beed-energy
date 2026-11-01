@@ -231,13 +231,34 @@ img.ph { object-fit: contain; background: transparent; mix-blend-mode: multiply;
   .pcard:hover { border-color: var(--teal); }
   .pcard:hover .drawing { color: var(--amber-deep); }
 }
+/* Phones: two cards to a row (.results in shop.css, .featured__grid in home.css), so each card is about 175 px wide.
+   Square photo, three lines of name at most, one spec, and the compare switch under the price instead of beside it.
+   The list view (.results--list) keeps its own one-per-row layout. */
+@media (max-width: 600px) {
+  :is(.results:not(.results--list), .featured__grid) .pcard__fig { aspect-ratio: 1; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__fig:has(img.ph) { padding: 0.6rem; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__body { gap: 0.35rem; padding: 0.65rem 0.7rem 0.25rem; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__brand { font-size: 0.625rem; letter-spacing: 0.04em; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__name { font-size: 0.875rem; line-height: 1.25; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__specs li:nth-child(n + 2) { display: none; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__energy { font-size: 0.6875rem; gap: 0.35rem; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__energy::before { width: 0.5rem; height: 0.5rem; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__foot { flex-direction: column; align-items: stretch; gap: 0; margin-top: 0.1rem; padding-top: 0.45rem; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__price .price { font-size: 1rem; white-space: normal; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__price .price .was { display: block; margin-left: 0; white-space: nowrap; } /* the old price drops under the new one */
+  :is(.results:not(.results--list), .featured__grid) .pcard__meta { font-size: 0.625rem; gap: 0.1rem 0.5rem; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__stock { display: flex; align-items: baseline; }
+  :is(.results:not(.results--list), .featured__grid) .pcard__stock .dot { flex: none; align-self: center; }
+  :is(.results:not(.results--list), .featured__grid) .pcard .cmp-toggle { min-height: 40px; font-size: 0.6875rem; }
+}
+
 .drawing { transition: color 240ms var(--ease-out); }
 .drawing__dim { font-family: var(--font-mono); }
 
 /* ---------- header ---------- */
 .site-header {
-  position: fixed; z-index: 50; height: calc(var(--header-h) - 1rem);
-  inset: 12px max(var(--gutter), calc((100vw - var(--max)) / 2)) auto;
+  position: fixed; z-index: 50; height: calc(var(--header-h) - var(--safe-top) - 1rem);
+  inset: calc(12px + var(--safe-top)) max(var(--gutter), calc((100vw - var(--max)) / 2)) auto;
   display: flex; align-items: center; gap: 1rem;
   /* floating glass with slanted ends (the reference's top bar); blur keeps the copy behind it unreadable */
   padding-inline: clamp(1.5rem, 1rem + 1.5vw, 2.25rem);
@@ -247,7 +268,10 @@ img.ph { object-fit: contain; background: transparent; mix-blend-mode: multiply;
   transition: transform 260ms var(--ease-out), background-color 200ms var(--ease-out), color 200ms var(--ease-out);
 }
 .site-header { --line: var(--line-on-teal); --line-strong: var(--line-on-teal-strong); --ink-2: var(--on-teal-2); --text-2: var(--on-teal-2); }
-html[data-header="hidden"] .site-header:not(:focus-within) { transform: translateY(calc(-100% - 16px)); }
+html[data-header="hidden"] .site-header:not(:focus-within) { transform: translateY(calc(-100% - 16px - var(--safe-top))); }
+/* the installed app on iPhone draws the page under the status bar (black-translucent): a slate strip keeps the clock
+   readable over light pages. It has no height in a browser tab, where --safe-top is 0. */
+body::before { content: ''; position: fixed; z-index: 58; inset: 0 0 auto; height: var(--safe-top); background: rgb(36 47 44 / 0.92); pointer-events: none; }
 .brand { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; min-height: 44px; font-weight: 700; font-size: 1.375rem; letter-spacing: -0.01em; word-spacing: 0.06em; white-space: nowrap; flex: none; }
 /* the logo (Logo.astro): the lemon label with dark letters on every ground; "Energy" follows the text colour */
 .logo { display: block; flex: none; overflow: visible; --logo-label: var(--leaf); --logo-on-label: var(--text); }
@@ -306,9 +330,9 @@ html[data-header="hidden"] .site-header:not(:focus-within) { transform: translat
 /* ---------- full-screen menu ----------
    Compact (2026-11-01): fits a 1440 × 900 laptop without scrolling. Four main destinations stay large; the other ten
    links sit in a two-column list; category rows are one line of name with count and price beside it. */
-.menu { position: fixed; inset: 0; z-index: 60; background: var(--teal); color: var(--paper); display: grid; grid-template-rows: auto 1fr auto; overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--gutter) 1.5rem; }
+.menu { position: fixed; inset: 0; z-index: 60; background: var(--teal); color: var(--paper); display: grid; grid-template-rows: auto 1fr auto; overflow-y: auto; overscroll-behavior: contain; padding: var(--safe-top) var(--gutter) calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
 .menu[hidden] { display: none; }
-.menu__top { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line-on-teal); }
+.menu__top { height: calc(var(--header-h) - var(--safe-top)); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line-on-teal); }
 .menu__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1.5rem var(--gutter); padding-top: 1.25rem; }
 .menu__cats { grid-column: span 8; display: grid; gap: 1.25rem; align-content: start; }
 .menu .menu__group-h { display: flex; gap: 0.4rem; align-items: baseline; padding-bottom: 0.4rem; border-bottom: 3px solid var(--sun); color: var(--paper); }
@@ -578,7 +602,7 @@ html[data-motion="off"] .js-reveal, html:not(.js) .js-reveal { opacity: 1 !impor
 
   /* a charge line along the top edge fills as the page is read (scroll-driven; scaled to 0 where unsupported) */
   @supports (animation-timeline: scroll()) {
-    html[data-motion="on"] body::after { content: ''; position: fixed; z-index: 55; top: 0; left: 0; right: 0; height: 3px; pointer-events: none; transform: scaleX(0); transform-origin: 0 50%; background: linear-gradient(90deg, var(--leaf-bright), var(--sun)); animation: charge-bar linear both; animation-timeline: scroll(root); }
+    html[data-motion="on"] body::after { content: ''; position: fixed; z-index: 55; top: var(--safe-top); left: 0; right: 0; height: 3px; pointer-events: none; transform: scaleX(0); transform-origin: 0 50%; background: linear-gradient(90deg, var(--leaf-bright), var(--sun)); animation: charge-bar linear both; animation-timeline: scroll(root); }
   }
 
   @media (hover: hover) and (pointer: fine) {

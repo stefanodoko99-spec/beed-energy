@@ -24,6 +24,7 @@ interface Props {
   alternate: string; // same page in the other language
   current?: RouteKey;
   tone?: 'paper' | 'ink'; // header colour over the first screen
+  chrome?: string; // the phone browser's bar colour (theme-color): the colour at the top of the first screen
   noindex?: boolean;
   jsonld?: Record<string, unknown>[];
   loader?: boolean;
@@ -32,7 +33,7 @@ interface Props {
   nativeScroll?: boolean; // form pages (basket, checkout): the browser's own scroll, no smooth-scroll inertia
   categorySlug?: string; // categories.slug_en of the shelf this page belongs to (category and product pages): the header marks its link
 }
-const { lang, title, description, alternate, current, tone = 'paper', noindex = false, jsonld = [], loader = false, hideTray = false, bodyClass, nativeScroll = false, categorySlug } = Astro.props;
+const { lang, title, description, alternate, current, tone = 'paper', chrome = '#e8ede9', noindex = false, jsonld = [], loader = false, hideTray = false, bodyClass, nativeScroll = false, categorySlug } = Astro.props;
 // lekë or euros on this page (lib/currency.ts): the browser's scripts format in the same currency as the server
 const display = Astro.locals.display ?? { cur: 'all' as const, rate: 0 };
 // One read of the categories for the whole shell: header links, menu and footer.
@@ -69,7 +70,14 @@ const org = {
     <link rel="alternate" hreflang="en" href={enUrl} />
     <link rel="alternate" hreflang="x-default" href={sqUrl} />
     {noindex && <meta name="robots" content="noindex, follow" />}
-    <meta name="theme-color" content="#e8ede9" />
+    <meta name="theme-color" content={chrome} />
+    <!-- Add to Home Screen opens the shop full screen, without the browser's bars; on iPhone the page runs under the
+         status bar (--safe-top in tokens.css keeps the header and menu below it) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BeeD" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="BeeD Energy" />
     <meta property="og:title" content={fullTitle} />

@@ -98,6 +98,12 @@ h1, h2, h3 { line-height: 1.1; }
 }
 .eyebrow { font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.06em; }
 :target { scroll-margin-top: var(--header-h); }
+/* Lenis (scripts/motion.ts) needs these from its own stylesheet, which was never loaded: the page's real height for
+   its measurements, a held page while stopped (menu open), and contained scrolling inside panels it lets through. */
+html.lenis, html.lenis body { height: auto; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
 a, button, input, label, select, textarea, summary, [role="button"] { touch-action: manipulation; }
 input, select, textarea { font-size: max(16px, 1em); } /* iOS Safari zooms below 16px */
 select { background-color: var(--c-surface); color: var(--c-ink); } /* native select on Windows */

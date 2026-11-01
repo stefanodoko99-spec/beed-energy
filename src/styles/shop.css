@@ -131,6 +131,8 @@
 .results { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(16.5rem, 100%), 1fr)); gap: var(--gutter); }
 .results--wide { grid-template-columns: repeat(auto-fill, minmax(min(17rem, 100%), 1fr)); }
 .results > li { display: grid; min-width: 0; }
+/* phones: two cards to a row, like the shopping apps people know; the list view stays one per row */
+@media (max-width: 600px) { .results:not(.results--list) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.625rem; } }
 .results--list { grid-template-columns: minmax(0, 1fr); gap: 0; }
 .results--list .pcard { grid-template-rows: none; grid-template-columns: minmax(7rem, 12rem) minmax(0, 1fr); border-width: 0 0 1px; }
 .results--list > li:first-child .pcard { border-top-width: 1px; }
@@ -183,9 +185,11 @@
 @media (max-width: 560px) {
   .toolbar__sort { width: 100%; }
   .toolbar__sort .select { flex: 1; min-width: 0; }
-  .catrow { grid-template-columns: 2rem 3.25rem minmax(0, 1fr) auto; column-gap: 0.75rem; }
+  /* the row number goes on phones (as in the menu), so the name gets the width */
+  .catrow { grid-template-columns: 3.25rem minmax(0, 1fr) auto; column-gap: 0.75rem; min-height: 4.75rem; padding-block: 0.6rem; }
+  .catrow__key { display: none; }
   .catrow__fig { height: 3rem; }
-  .catrow { grid-template-areas: 'key fig name arrow' 'key fig meta arrow' 'key fig price arrow'; }
+  .catrow { grid-template-areas: 'fig name arrow' 'fig meta arrow' 'fig price arrow'; }
   .catrow__price { grid-area: price; justify-self: start; text-align: left; }
 }
 

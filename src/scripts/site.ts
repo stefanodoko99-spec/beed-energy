@@ -1,6 +1,6 @@
 // Shell behaviour on every public page: energy-saving switch, menu dialog, header hide on scroll,
 // basket and compare forms without reloads, toasts, the once-per-session loader and simple reveals.
-import { gsap, motionOn, setMotion, onMotionChange, ScrollTrigger } from './motion';
+import { gsap, motionOn, setMotion, onMotionChange, ScrollTrigger, getLenis } from './motion';
 import { setCount } from './counts';
 import { confirmButton } from './micro';
 
@@ -46,6 +46,7 @@ function openMenu(from: HTMLElement) {
   menu.hidden = false;
   openers.forEach((b) => b.setAttribute('aria-expanded', 'true'));
   root.style.overflow = 'hidden';
+  getLenis()?.stop(); // the page behind holds still; the wheel scrolls the menu itself
   if (motionOn()) {
     gsap.fromTo(menu, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 0.42, ease: 'power3.out' });
     gsap.fromTo(menu.querySelectorAll('.menu__cat, .menu__big a, .menu__links a'), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.018, ease: 'power2.out', delay: 0.08 });
@@ -57,6 +58,7 @@ function closeMenu() {
   const done = () => {
     menu.hidden = true;
     root.style.overflow = '';
+    getLenis()?.start();
     openers.forEach((b) => b.setAttribute('aria-expanded', 'false'));
     lastOpener?.focus();
   };
