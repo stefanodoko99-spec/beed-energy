@@ -216,9 +216,12 @@ img.ph { object-fit: contain; background: transparent; mix-blend-mode: multiply;
 .pcard__fig { aspect-ratio: 4 / 3; display: grid; place-items: center; padding: 1.25rem; border-bottom: 1px solid var(--line); color: var(--ink); background:
   linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 24px 24px,
   linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 24px 24px; background-color: var(--paper); }
-.pcard__body { display: grid; gap: 0.5rem; padding: 0.9rem 1rem 1rem; align-content: start; }
+.pcard__body { display: grid; gap: 0.5rem; padding: 0.9rem 1rem 1rem; align-content: start; min-width: 0; }
+/* long model codes ("SUN-10K-SG04LP3-EU") wrap instead of widening the card; shop.css had this, the home page's
+   cards did not load it */
+.pcard { min-width: 0; }
 .pcard__brand { font: 500 0.6875rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
-.pcard__name { font-weight: 650; font-size: 1.0625rem; line-height: 1.2; }
+.pcard__name { font-weight: 650; font-size: 1.0625rem; line-height: 1.2; overflow-wrap: anywhere; }
 .pcard__name a { text-decoration: none; }
 .pcard__name a::after { content: ''; position: absolute; inset: 0; }
 .pcard__specs { display: flex; flex-wrap: wrap; gap: 0.3rem; }
@@ -499,33 +502,53 @@ body::before { content: ''; position: fixed; z-index: 49; inset: 0 0 auto; heigh
   .ftool a { min-height: 0; padding-bottom: 4.25rem; border-radius: 22px; }
 }
 
-/* ---------- loader: a battery charging, in the logo's green ---------- */
+/* ---------- loader: a solar farm at dusk making energy (Loader.astro) ---------- */
 /* <head> marks <html data-preloader="on"> before the first paint (LOADER_SCRIPT, src/lib/csp.ts), so the cover is
-   there from the very first frame; `hidden` alone keeps it away without scripts. */
-.loader { position: fixed; inset: 0; z-index: 90; background: var(--teal); color: var(--paper); display: grid; place-items: center; }
+   there from the very first frame; `hidden` alone keeps it away without scripts. The sun, its rays and the energy
+   on the cables run on CSS from that first frame; site.ts lights the panels and counts. */
+.loader { position: fixed; inset: 0; z-index: 90; background: radial-gradient(120% 80% at 50% 30%, #2f3f3a 0%, var(--teal-deep) 70%); color: var(--paper); display: grid; place-items: center; padding: 4rem var(--gutter) 5rem; }
 .loader[hidden] { display: none; }
 html[data-preloader="on"] .loader[hidden] { display: grid; }
-/* if the page script never arrives, the cover still steps aside after 3 s */
-html[data-preloader="on"] .loader { animation: loader-gone 0.01s 3s forwards; }
+/* if the page script never arrives, the cover still steps aside after 3.4 s */
+html[data-preloader="on"] .loader { animation: loader-gone 0.01s 3.4s forwards; }
 @keyframes loader-gone { to { visibility: hidden; } }
-.loader__stage { display: grid; justify-items: center; gap: clamp(1.25rem, 0.75rem + 2vw, 2.25rem); }
-/* the casing and its + terminal; ten cells light amber left to right as the % counts */
-.loader__batt { position: relative; width: clamp(14rem, 9rem + 30vw, 26rem); aspect-ratio: 2.5; padding: clamp(5px, 0.6vw, 8px); border: 3px solid rgb(243 248 245 / 0.85); border-radius: clamp(12px, 1.4vw, 20px); transition: border-color 0.2s, box-shadow 0.3s; }
-.loader__batt::after { content: ''; position: absolute; left: calc(100% + 6px); top: 32%; width: clamp(7px, 0.8vw, 11px); height: 36%; background: rgb(243 248 245 / 0.85); border-radius: 0 6px 6px 0; transition: background 0.2s; }
-.loader__cells { display: grid; grid-template-columns: repeat(10, 1fr); gap: clamp(3px, 0.5vw, 6px); height: 100%; }
-.loader__cells i { border-radius: clamp(3px, 0.5vw, 6px); background: rgb(243 248 245 / 0.07); }
-.loader__cells i.is-on { background: linear-gradient(180deg, var(--leaf-bright), var(--leaf)); box-shadow: 0 0 14px rgb(61 220 151 / 0.45); }
-.loader__cells i.is-next { animation: loader-cell 0.3s ease-in-out infinite alternate; }
-@keyframes loader-cell { to { background: rgb(61 220 151 / 0.35); } }
-.loader__bolt { position: absolute; inset: 0; margin: auto; height: 70%; width: auto; aspect-ratio: 32 / 48; fill: var(--paper); stroke: var(--teal); stroke-width: 2.5; stroke-linejoin: round; paint-order: stroke; filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.3)); }
-.loader.is-full .loader__batt { border-color: var(--leaf-bright); box-shadow: 0 0 0 6px rgb(61 220 151 / 0.16), 0 0 70px rgb(61 220 151 / 0.4); }
-.loader.is-full .loader__batt::after { background: var(--leaf-bright); }
-.loader__pct { margin: 0; font-stretch: 62%; font-weight: 800; font-size: clamp(3rem, 2rem + 5vw, 6.5rem); line-height: 0.9; letter-spacing: -0.02em; word-spacing: 0.08em; font-variant-numeric: tabular-nums; }
-.loader__pct b { color: var(--leaf-bright); font-weight: 800; }
+.loader__stage { display: grid; justify-items: center; gap: clamp(1rem, 0.5rem + 2vw, 2rem); width: min(100%, 50rem); }
+.loader__farm { width: 100%; height: auto; border-radius: clamp(14px, 2vw, 26px); box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.6), inset 0 0 0 1px rgb(255 255 255 / 0.06); overflow: hidden; }
+/* phones: the farm runs past both edges (its rows go on out of frame), so the panels are big enough to read */
+@media (max-width: 600px) {
+  .loader { overflow: hidden; }
+  .loader__farm { width: 165vw; max-width: none; margin-inline: calc(50% - 82.5vw); border-radius: 0; box-shadow: none; }
+}
+/* the sun climbs over the hills, its rays turn */
+.loader__sun { animation: loader-rise 1.25s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.loader__rays { transform-box: view-box; transform-origin: 560px 190px; animation: loader-spin 9s linear infinite; }
+.loader.is-full .loader__sun { animation: loader-flare 0.5s ease-out both; }
+@keyframes loader-rise { from { transform: translateY(150px); } }
+@keyframes loader-spin { to { transform: rotate(360deg); } }
+@keyframes loader-flare { 50% { transform: scale(1.06); filter: brightness(1.25); } }
+.loader__sun, .loader.is-full .loader__sun { transform-box: view-box; transform-origin: 560px 190px; }
+/* the panels: dark glass that catches the sun as it reaches them (site.ts adds .is-on, from the sun's side) */
+.loader__post { stroke: #6f817c; stroke-width: 2; }
+.loader__glass { fill: url(#farm-panel); stroke: #7f9590; stroke-width: 1.2; stroke-linejoin: round; transition: fill 260ms ease-out, stroke 260ms ease-out; }
+.loader__cells { fill: none; stroke: rgb(255 255 255 / 0.14); stroke-width: 0.8; }
+.loader__panel.is-on .loader__glass { fill: url(#farm-lit); stroke: var(--sun); }
+.loader__panel.is-on { filter: drop-shadow(0 0 6px rgb(236 228 76 / 0.55)); }
+/* the cables, and the energy running along them toward the middle and down to the counter */
+.loader__cable { stroke: rgb(255 255 255 / 0.12); stroke-width: 2; }
+.loader__flow { stroke: var(--sun); stroke-width: 2.5; stroke-dasharray: 2 12; opacity: 0; animation: loader-flow 0.7s linear infinite, loader-in 0.4s 0.45s ease-out forwards; }
+.loader__flow--trunk { stroke-width: 3.5; }
+.loader.is-full .loader__flow { stroke-dasharray: none; filter: drop-shadow(0 0 5px var(--sun)); }
+@keyframes loader-flow { to { stroke-dashoffset: -14; } }
+@keyframes loader-in { to { opacity: 1; } }
+.loader__read { display: grid; justify-items: center; gap: 0.35rem; }
+.loader__pct { margin: 0; font-stretch: 62%; font-weight: 800; font-size: clamp(3rem, 2rem + 5vw, 6rem); line-height: 0.9; letter-spacing: -0.02em; word-spacing: 0.08em; font-variant-numeric: tabular-nums; }
+.loader__pct b { color: var(--sun); font-weight: 800; }
+.loader__kwh { margin: 0; font: 500 0.8125rem var(--font-mono); letter-spacing: 0.04em; color: rgb(243 248 245 / 0.75); font-variant-numeric: tabular-nums; }
+.loader__kwh span:first-child { color: var(--sun); }
 .loader__meta { position: absolute; left: var(--gutter); right: var(--gutter); bottom: max(1.5rem, env(safe-area-inset-bottom)); display: flex; justify-content: space-between; font: 400 0.75rem var(--font-mono); letter-spacing: 0.04em; color: var(--on-teal-2); }
 .loader__meta { align-items: center; }
 .loader__meta .logo { color: var(--paper); }
-.loader__skip { position: absolute; right: var(--gutter); top: 1rem; }
+.loader__skip { position: absolute; right: var(--gutter); top: calc(1rem + var(--safe-top)); }
 
 /* ---------- compare tray ---------- */
 .tray { position: fixed; z-index: 44; right: var(--gutter); bottom: 1.25rem; width: min(30rem, calc(100% - 2 * var(--gutter))); background: var(--teal); color: var(--paper); --line: var(--line-on-teal); box-shadow: var(--shadow-2); padding: 0.85rem 1rem; display: grid; gap: 0.6rem; }

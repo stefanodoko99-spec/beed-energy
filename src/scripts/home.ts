@@ -6,6 +6,7 @@
 // close-up leave together as the camera pulls back to the whole house. The finale switches the house on. Transform
 // and opacity only, all through motion.ts (one GSAP ticker); scrubbed without lag, so it plays backwards too.
 import { gsap, ScrollTrigger, motionOn, onMotionChange, getLenis } from './motion';
+import { TALL_SHOTS } from '../lib/stage-scenes';
 
 const stage = document.querySelector<HTMLElement>('[data-stage]');
 const cine = document.querySelector<HTMLElement>('[data-cine]');
@@ -16,7 +17,7 @@ const glow = cine?.querySelector<HTMLElement>('[data-glow]') ?? null;
 const mist = cine?.querySelector<HTMLElement>('[data-mist]') ?? null;
 const dust = cine?.querySelector<HTMLElement>('[data-dust]') ?? null;
 const spots = [...(frame?.querySelectorAll<HTMLElement>('.cine__spot') ?? [])]; // the chapters carry data-spot too
-const shots = new Map([...(cine?.querySelectorAll<HTMLImageElement>('[data-shot]') ?? [])].map((el) => [Number(el.dataset.shot), el]));
+const shots = new Map([...(cine?.querySelectorAll<HTMLElement>('[data-shot]') ?? [])].map((el) => [Number(el.dataset.shot), el]));
 const tags = new Map([...(cine?.querySelectorAll<HTMLElement>('[data-tag]') ?? [])].map((el) => [Number(el.dataset.tag), el]));
 const chapters = [...document.querySelectorAll<HTMLElement>('[data-chapter]')];
 const keys = [...document.querySelectorAll<HTMLAnchorElement>('[data-key-link]')];
@@ -104,14 +105,17 @@ function buildFilm() {
   // the pinned view is 100svh: a phone's toolbar coming and going does not change it, so the film keeps its length
   const vh = g.vh;
   unit = vh;
-  // the film's length: a short establishing shot, one step per chapter, a longer step for the finale
+  // the film's length: a short establishing shot, one step per chapter, a longer step for the finale. Each step holds
+  // its close-up and card for most of its length (2026-11-01, "it changes the product very fast"): 1.6 screens of
+  // scroll on wide screens, 2.2 on phones, where one flick of the thumb travels several screens.
   const intro = 0.45 * vh;
-  const step = 1.2 * vh;
+  const step = (g.side ? 1.6 : 2.2) * vh;
   const ordered = chapters.map((c) => Number(c.dataset.chapter)).sort((a, b) => a - b);
   const total = intro + step * ordered.length + 0.3 * vh;
   cine.style.height = `${Math.round(total + vh)}px`;
   // every later tween starts from where the one before left it: none may render ahead of its turn
   const tl = gsap.timeline({ defaults: { ease: 'none', immediateRender: false } });
+  const tall = matchMedia(TALL_SHOTS).matches; // the upright close-ups are showing (Home.astro <picture>)
   steps = new Map();
 
   // the establishing shot: a slow dolly in on the whole house, every spot lit, no card yet
@@ -131,7 +135,7 @@ function buildFilm() {
     const shot = shots.get(n);
     const last = i === ordered.length - 1;
     const end = last ? total : a + step;
-    steps.set(n, { from: a, read: a + 0.5 * vh, to: end });
+    steps.set(n, { from: a, read: a + 0.55 * vh, to: end });
     // the card rises in as the camera arrives and leaves as it pulls back (the finale's stays)
     if (card) {
       tl.fromTo(card, { autoAlpha: 0, y: 48 }, { autoAlpha: 1, y: 0, duration: 0.28 * vh, ease: 'power2.out' }, a + 0.12 * vh);
@@ -146,7 +150,9 @@ function buildFilm() {
       return;
     }
     const spot = ch.dataset.spot.split(' ').map(Number);
-    const zoom = Number(ch.dataset.zoom || 2.6);
+    // phones: the house already fills an upright screen at about twice its pixels, so the flight stops short of
+    // the wide-screen zoom and lets the sharp close-up do the rest
+    const zoom = Math.min(Number(ch.dataset.zoom || 2.6), g.side ? 9 : 1.8);
     const focus = (ch.dataset.focus ?? '0.5 0.5').split(' ').map(Number);
     const near = pose(g, spot, zoom);
     const past = pose(g, spot, zoom * 1.22);
@@ -160,7 +166,9 @@ function buildFilm() {
     const out = end - 0.3 * vh;
     // the orbit turns the other way on every other chapter
     const turn = i % 2 ? -4 : 4;
-    tl.fromTo(shot, push(g, focus, 1.12, turn), { ...push(g, focus, 1.24, turn * -0.6), duration: out + 0.22 * vh - cut }, cut);
+    // upright screens: the close-up is already framed on its equipment (home.css), so it only pushes in, gently
+    if (tall) tl.fromTo(shot, { scale: 1.02, rotationY: turn / 2, transformPerspective: 1400 }, { scale: 1.1, rotationY: turn * -0.3, transformPerspective: 1400, duration: out + 0.22 * vh - cut }, cut);
+    else tl.fromTo(shot, push(g, focus, 1.12, turn), { ...push(g, focus, 1.24, turn * -0.6), duration: out + 0.22 * vh - cut }, cut);
     // close-up and card leave together, the camera pulls back to the whole house, spots on again
     tl.fromTo(shot, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.22 * vh }, out);
     tl.fromTo(cam, past, { ...wide(1.1), duration: 0.3 * vh, ease: 'power2.out' }, out);
@@ -169,6 +177,10 @@ function buildFilm() {
   });
   tl.set({}, {}, total);
   film = tl;
+  // Touch screens scroll natively (motion.ts): when a swipe comes to rest, the film settles on the nearest card,
+  // fully read, so a flick never leaves the picture between two chapters. Wheel scrolling (Lenis) stays free.
+  const reads = [0, ...[...steps.values()].map((x) => x.read / total), 1];
+  const snap = matchMedia('(hover: none) and (pointer: coarse)').matches ? { snapTo: reads, duration: { min: 0.25, max: 0.7 }, delay: 0.12, ease: 'power2.inOut' } : undefined;
   // no scrub lag: Lenis already smooths the scroll, and a second delay put the picture behind the words
   triggers.push(
     ScrollTrigger.create({
@@ -176,6 +188,7 @@ function buildFilm() {
       start: 'top top',
       end: () => `+=${total}`,
       scrub: true,
+      snap,
       animation: tl,
       // the live chapter comes from the same clock as the camera
       onUpdate: (self) => setLayer(chapterAt(self.progress * total)),

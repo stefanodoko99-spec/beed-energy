@@ -188,7 +188,7 @@ onMotionChange((on) => {
   }
 });
 
-// ---------- loader: home only, once per session, ≤ 1.6 s, hard time-out 2.2 s ----------
+// ---------- loader: home only, once per session, about 1.9 s, hard time-out 2.6 s ----------
 // Whether it plays was decided in <head> before the first paint (LOADER_SCRIPT, src/lib/csp.ts), which
 // already shows the cover; this only animates it and takes it away.
 const loader = document.querySelector<HTMLElement>('[data-loader]');
@@ -197,24 +197,27 @@ function runLoader(el: HTMLElement) {
   el.hidden = false;
   el.removeAttribute('aria-hidden');
   root.style.overflow = 'hidden';
-  const cells = [...el.querySelectorAll<HTMLElement>('[data-loader-cells] i')];
+  // the panels catch the light from the sun's side (it rises on the right) across all three rows
+  const panels = [...el.querySelectorAll<SVGGElement>('[data-loader-panels] .loader__panel')].sort((a, b) => Number(b.dataset.x) - Number(a.dataset.x));
   const pct = el.querySelector<HTMLElement>('[data-loader-pct]');
-  const bolt = el.querySelector<SVGElement>('[data-loader-bolt]');
+  const kwh = el.querySelector<HTMLElement>('[data-loader-kwh]');
+  const kwhFmt = new Intl.NumberFormat(root.lang === 'en' ? 'en-GB' : 'sq-AL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const counter = { v: 0 };
   let lit = 0;
-  const charge = () => {
+  const generate = () => {
     if (pct) pct.textContent = String(Math.round(counter.v));
-    const n = Math.min(cells.length, Math.ceil((counter.v / 100) * cells.length - 1e-6));
-    while (lit < n) cells[lit++].classList.add('is-on');
-    cells.forEach((c, i) => c.classList.toggle('is-next', i === lit));
+    // a day of a 10 kWp roof near Tirana, about 42 kWh, made while the bar fills
+    if (kwh) kwh.textContent = kwhFmt.format((counter.v / 100) * 42);
+    const n = Math.min(panels.length, Math.ceil((counter.v / 100) * panels.length - 1e-6));
+    while (lit < n) panels[lit++].classList.add('is-on');
   };
   const tl = gsap.timeline({ onComplete: finish });
-  // ≤ 1.6 s in all (DESIGN.md): a 1.0 s charge, the full battery flashes, then a 0.35 s curtain.
-  tl.to(counter, { v: 100, duration: 1.0, ease: 'power2.inOut', onUpdate: charge }, 0);
-  tl.add(() => el.classList.add('is-full'), 1.0);
-  if (bolt) tl.to(bolt, { scale: 1.2, duration: 0.11, yoyo: true, repeat: 1, ease: 'power2.out', transformOrigin: '50% 50%' }, 1.0);
-  tl.to(el, { clipPath: 'inset(0 0 100% 0)', duration: 0.35, ease: 'power3.inOut' }, 1.24);
-  const timeout = setTimeout(finish, 2200);
+  // about 1.9 s in all: the sun is up and the farm making energy for 1.3 s, the sun flares, then a 0.35 s curtain
+  // (the hero's entrance waits 1.75 s for it: home.css --pre)
+  tl.to(counter, { v: 100, duration: 1.3, ease: 'power1.inOut', onUpdate: generate }, 0.1);
+  tl.add(() => el.classList.add('is-full'), 1.4);
+  tl.to(el, { clipPath: 'inset(0 0 100% 0)', duration: 0.35, ease: 'power3.inOut' }, 1.6);
+  const timeout = setTimeout(finish, 2600);
   const skip = el.querySelector<HTMLButtonElement>('[data-loader-skip]');
   skip?.addEventListener('click', finish);
   skip?.focus(); // the first Tab must reach Skip, not the page behind the cover

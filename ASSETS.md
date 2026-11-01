@@ -7,6 +7,7 @@
 | File | Where | What it is |
 |---|---|---|
 | `hero-house-{960,1440,2048}.webp` | home hero; the stage's reference | A modern glass-gabled house at dusk in sage mist, its roof covered with solar panels, thin orange LED lines on the eaves, a lone tree. |
+| `hero-house-tall-{720,1152}.webp` | home hero on upright phones (≤ 900 px, taller than 5:4) | The same house photographed upright and close, filling the width (FLUX.2 [klein] edit of `hero-house-2048`, 2026-11-01, `tools/art/stage-hires-prompts.mjs` `hero-tall`, the 4th of 4 tries; the first two left the house small in a tall sky). |
 | `dusk-house-{960,1440,2048}.webp` | footer hero, seller band, packages card | A second dusk house in the same light. |
 | `battery-grass-{…}.webp` | hero's battery card | A white home battery cabinet with a glowing ring, standing in tall grass. |
 
@@ -26,11 +27,13 @@
 | `stage-ev-…` | Close-up: the wallbox with its glowing ring, the cable to the car. |
 | `stage-meter-…` | Close-up: the grey meter cabinet on the wall. |
 | `stage-envelope-…` | Close-up: the corner of the triple-glazed gable facade. |
+| `stage-<id>-tall-{720,1152}.webp` | The same seven close-ups recomposed upright (1152 × 2048), for upright screens, where they fill the top 62 % (home.css). Made 2026-11-01 ("the quality is very shitty on the scroll part"), `tools/art/stage-hires-prompts.mjs`, the first try of each; a label's pseudo-lettering and a small symbol on the battery shot's inverter box painted out. |
 
 - **Model:** FLUX.2 [klein] 4B on Cloudflare Workers AI (as below), every image an edit of a reference: the house of the hero photo (`hero-house-2048`), the close-ups of the chosen equipped house; the heat pump and the meter of a 640 × 360 crop of it around them (they are too small in the wide shot to come back as close-ups otherwise). 26 renders on 2026-11-01, about 9,500 of the 10,000 daily neurons. Kept: house 3, pv 1, inverter 1, battery 2, heatpump 3, ev 2, meter 3, envelope 1.
 - **Prompts:** `tools/art/stage-prompts.mjs` (runner `tools/art/flux2.mjs`).
 - **Post-processing** (sharp): marks painted out with a local blur of their surroundings; the house graded with `linear([0.80, 0.84, 0.84], [-4, -2, -2])` to the hero's levels, the close-ups with a slight cool tint; WebP q 70–74 (the meter median-filtered first, its grain cost 280 KB). The 2048 files are 41–169 KB.
-- Spots, zooms and focus points: `src/lib/stage-scenes.ts`.
+- **Re-encoded 2026-11-01** for sharpness: the 16:9 close-ups from the cleaned originals (marks already painted out) with the same cool tint, `linear([0.956, 0.996, 1.025], [-0.3, 1.5, 2.8])`, WebP q 88: the 2048 files are now 200–660 KB (they were 41–169 KB, and the grain showed as smears). The upright ones are WebP q 86, 18–150 KB. The house was left as it was: its source was graded by hand and none of the kept renders match it.
+- Spots, zooms and focus points (and each upright close-up's `tallY`): `src/lib/stage-scenes.ts`.
 
 ## Earlier house renders (`public/house/`)
 

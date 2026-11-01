@@ -28,7 +28,6 @@ const rows = await all<any>(
 const pick = Number(Astro.url.searchParams.get('instalues') ?? state?.values.seller ?? 0) || 0;
 const v: Record<string, string> = { seller: pick ? String(pick) : '', city: city?.slug ?? 'tirane', name: '', phone: '', email: '', details: '', ...(state?.values ?? {}) };
 const err = state?.errors ?? {};
-const sent = Astro.url.searchParams.get('dergua') === '1';
 const allInstallers = await all<{ id: number; name: string }>("SELECT id, name FROM sellers WHERE status = 'active' AND kind IN ('installer', 'contractor') ORDER BY name");
 const cityName = (c: { name_sq: string; name_en: string }) => (lang === 'sq' ? c.name_sq : c.name_en);
 const cParam = lang === 'sq' ? 'qyteti' : 'city';

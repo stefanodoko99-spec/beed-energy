@@ -3,16 +3,19 @@
 // ("Solar ⚡ Power"). Decorative only; the hero sets it between its words and home.ts floats it.
 interface Props { class?: string }
 const { class: cls } = Astro.props;
+// each mark needs its own gradient id: two marks sharing one made both depend on the first (a hidden first mark
+// left the others unfilled in some browsers)
+const face = `volt-face-${Math.random().toString(36).slice(2, 8)}`;
 ---
 <svg class:list={['volt', cls]} viewBox="0 0 64 64" aria-hidden="true" focusable="false">
   <defs>
-    <linearGradient id="volt-face" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id={face} x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#fff7a8" />
       <stop offset="0.55" stop-color="#ece44c" />
       <stop offset="1" stop-color="#d6c92a" />
     </linearGradient>
   </defs>
   <path d="M44 3 15 37h17l-8 25 32-36H38l9-23Z" fill="#9e9411" />
-  <path d="M41 1 12 35h17l-8 25 32-36H35l9-23Z" fill="url(#volt-face)" />
+  <path d="M41 1 12 35h17l-8 25 32-36H35l9-23Z" fill={`url(#${face})`} />
   <path d="M41 1 12 35h3L41 4h3Z" fill="#fffbd1" opacity="0.7" />
 </svg>

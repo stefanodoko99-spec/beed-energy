@@ -97,7 +97,7 @@
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr)); gap: 0.75rem; }
 .kpi { container-type: inline-size; display: grid; gap: 0.6rem; align-content: start; padding: 1.1rem 1.35rem 1.4rem; border-radius: 22px; background: #fff; box-shadow: 0 1px 2px rgb(24 34 31 / 0.06); min-width: 0; }
 .kpi__label { display: flex; justify-content: space-between; gap: 0.75rem; font: 500 0.6875rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
-.kpi__n { font: 300 clamp(2.25rem, calc(170cqi / var(--len, 6)), 7rem)/0.9 var(--font-text); letter-spacing: -0.045em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kpi__n { font: 300 clamp(2.25rem, calc(170cqi / var(--len, 6)), 7rem)/0.9 var(--font-text); letter-spacing: -0.045em; word-spacing: 0.13em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .kpi__n small { font-size: 0.26em; letter-spacing: 0.02em; margin-left: 0.35em; color: var(--ink-2); vertical-align: 0.25em; }
 .kpi--copper .kpi__n { color: var(--amber-deep); }
 .kpi--ink { background: radial-gradient(120% 120% at 100% 0%, var(--teal-2), var(--teal)); color: var(--on-teal); --ink-2: var(--on-teal-2); --text-2: var(--on-teal-2); }

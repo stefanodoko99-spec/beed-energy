@@ -337,3 +337,6 @@ html[data-motion="off"] .gd-shelf, html[data-motion="off"] .gd-shelf .arrow { tr
 @media (prefers-reduced-motion: reduce) {
   .gd-faq__mark::before, .gd-faq__mark::after, .gd-shelf, .gd-shelf .arrow { transition: none; }
 }
+
+/* the city names in the schedule tables link to their sources: a finger-sized hit area without a taller row */
+.rn-sched th a { display: inline-block; padding-block: 0.75rem; margin-block: -0.75rem; }

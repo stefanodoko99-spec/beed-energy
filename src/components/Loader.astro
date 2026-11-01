@@ -1,22 +1,109 @@
 ---
-// Brand loader: a battery charges cell by cell in the logo's green while the % counts to 100, flashes full,
-// then the curtain lifts (Belgrade Arbor's % curtain, made electric). Home page only, once per session,
-// skippable, hard time-out in site.ts. Whether it plays is decided in <head> before the first paint
-// (LOADER_SCRIPT in src/lib/csp.ts); `hidden` keeps it away without scripts.
+// Brand loader (2026-11-01, "make it like a solar panel farm with a sun and energy is being generated"): a solar
+// farm at dusk. The sun rises over the hills, the three rows of panels light up one by one as its light reaches
+// them, energy runs along the cables to the counter, which climbs to 100 %; the sun flares and the curtain lifts.
+// Home page only, once per session, skippable, hard time-out in site.ts. Whether it plays is decided in <head>
+// before the first paint (LOADER_SCRIPT in src/lib/csp.ts); `hidden` keeps it away without scripts.
 import { type Lang } from '../lib/i18n';
 import { tc } from '../i18n/common';
 import Logo from './Logo.astro';
 interface Props { lang: Lang; }
 const t = tc(Astro.props.lang);
+
+// The farm in a 800 × 460 scene: three rows in perspective, each smaller and higher the further away it stands.
+// A panel is a parallelogram tilted toward the sun, split into cells, on a short post.
+const ROWS = [
+  { y: 296, w: 40, h: 15, n: 9, gap: 10, skew: -7 },
+  { y: 336, w: 58, h: 22, n: 8, gap: 14, skew: -10 },
+  { y: 394, w: 86, h: 33, n: 6, gap: 20, skew: -15 },
+];
+const rows = ROWS.map((r) => {
+  const span = r.n * r.w + (r.n - 1) * r.gap;
+  const x0 = 400 - span / 2;
+  const panels = Array.from({ length: r.n }, (_, i) => {
+    const x = x0 + i * (r.w + r.gap);
+    const p = (dx: number, dy: number) => `${(x + dx).toFixed(1)},${(r.y + dy).toFixed(1)}`;
+    // the top edge leans back (skew): the panel faces up toward the sun
+    const outline = [p(-r.skew, 0), p(r.w - r.skew, 0), p(r.w, r.h), p(0, r.h)].join(' ');
+    const cells = [1, 2, 3].map((k) => {
+      const f = k / 4;
+      return `M${p(-r.skew + f * r.w, 0)} L${p(f * r.w, r.h)}`;
+    }).join(' ') + ` M${p(-r.skew / 2, r.h / 2)} L${p(r.w - r.skew / 2, r.h / 2)}`;
+    return { x, outline, cells, post: { x: x + r.w / 2, y1: r.y + r.h, y2: r.y + r.h + r.h * 0.45 } };
+  });
+  return { ...r, x0, span, bus: r.y + r.h + r.h * 0.45, panels };
+});
+// the cables: along under each row from both ends to the middle, then down the trunk to the counter
+const flows = rows.flatMap((r) => [
+  `M${r.x0 + r.w / 2} ${r.bus} H400`,
+  `M${r.x0 + r.span - r.w / 2} ${r.bus} H400`,
+]);
+const trunk = `M400 ${rows[0].bus} V460`;
+const rays = Array.from({ length: 12 }, (_, i) => i * 30);
 ---
 <div class="loader" data-loader hidden aria-hidden="true">
   <button class="btn btn--ghost loader__skip" type="button" data-loader-skip>{t.loader.skip}</button>
   <div class="loader__stage">
-    <div class="loader__batt">
-      <div class="loader__cells" data-loader-cells>{Array.from({ length: 10 }, () => <i></i>)}</div>
-      <svg class="loader__bolt" data-loader-bolt viewBox="0 0 32 48" aria-hidden="true" focusable="false"><path d="M20 2 4 27h10l-3 19 17-27H17z" /></svg>
+    <svg class="loader__farm" viewBox="0 0 800 460" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="farm-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#1c2623" />
+          <stop offset="1" stop-color="#46594f" />
+        </linearGradient>
+        <linearGradient id="farm-ground" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#2b3833" />
+          <stop offset="1" stop-color="#1a2320" />
+        </linearGradient>
+        <radialGradient id="farm-glow">
+          <stop offset="0" stop-color="#ece44c" stop-opacity="0.55" />
+          <stop offset="0.45" stop-color="#ece44c" stop-opacity="0.16" />
+          <stop offset="1" stop-color="#ece44c" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="farm-panel" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#2c4352" />
+          <stop offset="1" stop-color="#16232b" />
+        </linearGradient>
+        <linearGradient id="farm-lit" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f6f1a0" />
+          <stop offset="0.35" stop-color="#5d7f8c" />
+          <stop offset="1" stop-color="#1d3340" />
+        </linearGradient>
+        <clipPath id="farm-sky-clip"><rect width="800" height="286" /></clipPath>
+      </defs>
+      <rect width="800" height="286" fill="url(#farm-sky)" />
+      <!-- the sun rises from behind the hills: clipped at the horizon -->
+      <g clip-path="url(#farm-sky-clip)">
+        <g class="loader__sun" data-loader-sun>
+          <circle cx="560" cy="190" r="150" fill="url(#farm-glow)" />
+          <g class="loader__rays" stroke="#ece44c" stroke-width="3" stroke-linecap="round" opacity="0.75">
+            {rays.map((a) => <line x1="560" y1="128" x2="560" y2="112" transform={`rotate(${a} 560 190)`} />)}
+          </g>
+          <circle cx="560" cy="190" r="48" fill="#ece44c" />
+          <circle cx="560" cy="190" r="48" fill="none" stroke="#fff7b8" stroke-width="2" opacity="0.6" />
+        </g>
+      </g>
+      <path d="M0 286 C120 262 210 270 300 279 C380 287 470 258 560 268 C650 278 720 262 800 272 V300 H0 Z" fill="#26322e" />
+      <rect y="284" width="800" height="176" fill="url(#farm-ground)" />
+      <g class="loader__cables" fill="none" stroke-linecap="round">
+        {flows.map((d) => <path class="loader__cable" d={d} />)}
+        <path class="loader__cable" d={trunk} />
+        {flows.map((d) => <path class="loader__flow" d={d} />)}
+        <path class="loader__flow loader__flow--trunk" d={trunk} />
+      </g>
+      <g data-loader-panels>
+        {rows.map((r) => r.panels.map((p) => (
+          <g class="loader__panel" data-x={p.x.toFixed(0)}>
+            <line class="loader__post" x1={p.post.x} y1={p.post.y1} x2={p.post.x} y2={p.post.y2} />
+            <polygon class="loader__glass" points={p.outline} />
+            <path class="loader__cells" d={p.cells} />
+          </g>
+        )))}
+      </g>
+    </svg>
+    <div class="loader__read">
+      <p class="loader__pct"><span data-loader-pct>0</span><b>%</b></p>
+      <p class="loader__kwh"><span aria-hidden="true">⚡</span> <span data-loader-kwh>0,0</span> kWh</p>
     </div>
-    <p class="loader__pct"><span data-loader-pct>0</span><b>%</b></p>
   </div>
   <div class="loader__meta"><span>{t.loader.loading}</span><Logo height={18} /></div>
 </div>

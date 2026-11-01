@@ -6,7 +6,7 @@
 import Site from '../layouts/Site.astro';
 import '../styles/home.css';
 import { LAYERS, NUMBERS, type Fact, type Part } from '../content/story';
-import { FRAME, HOUSE_WIDTHS, SHOTS, SHOT_WIDTHS, sceneSrcset, shotOf } from '../lib/stage-scenes';
+import { FRAME, HOUSE_WIDTHS, SHOTS, SHOT_WIDTHS, TALL_SHOTS, TALL_WIDTHS, sceneSrcset, shotOf } from '../lib/stage-scenes';
 import { ts } from '../i18n/stage';
 import { categories, featuredProducts } from '../lib/catalog';
 import ProductPhoto from '../components/ProductPhoto.astro';
@@ -121,12 +121,18 @@ const jsonld = [
 ];
 ---
 <Site lang={lang} title={t.title} description={t.description} alternate={href(other, 'home')} current="home" chrome="#33423e" loader jsonld={jsonld}>
-  {/* The hero (after the glowing-house reference): the house at dusk under three words and two volt marks, two
-      leader tags on the house, a glass card and three cards along the bottom. Images: public/scenes/ (ASSETS.md). */}
+  {/* The hero (after the glowing-house reference): the house at dusk fills the whole first screen under three words
+      and two volt marks, two leader tags on the house, a glass card and the claim; three cards follow just below the
+      picture. Images: public/scenes/ (ASSETS.md). */}
   <section class="vhero" data-vhero aria-labelledby="vhero-title">
     <div class="vhero__scene" aria-hidden="true">
       <div class="vhero__frame" data-vhero-frame>
-        <img class="vhero__img" src="/scenes/hero-house-1440.webp" srcset={scene('hero-house')} sizes="max(100vw, 178svh)" width="2048" height="1152" alt="" fetchpriority="high" decoding="async" />
+        {/* phones held upright get the house photographed upright (hero-house-tall, 1152 × 2048): the 16:9 photo was
+            blown up 2.2 times to cover them. The leader tags only show on wide screens, which keep the 16:9 frame. */}
+        <picture>
+          <source media="(max-aspect-ratio: 4/5) and (max-width: 900px)" srcset="/scenes/hero-house-tall-720.webp 720w, /scenes/hero-house-tall-1152.webp 1152w" sizes="max(100vw, 56.25lvh)" width="1152" height="2048" />
+          <img class="vhero__img" src="/scenes/hero-house-1440.webp" srcset={scene('hero-house')} sizes="max(100vw, 178svh)" width="2048" height="1152" alt="" fetchpriority="high" decoding="async" />
+        </picture>
         {/* leader lines in the photo's own coordinates (1600 × 900 = the frame), from a point on the house to its tag */}
         <svg class="vhero__leads" viewBox="0 0 1600 900">
           <line x1="720" y1="360" x2="880" y2="306" pathLength="1" />
@@ -140,6 +146,7 @@ const jsonld = [
       <div class="vhero__shade"></div>
     </div>
 
+    <div class="vhero__screen">
     <div class="vhero__top">
       <p class="eyebrow vhero__eyebrow" data-vhero-in>{t.eyebrow}</p>
       <h1 class="vhero__title" id="vhero-title">
@@ -170,6 +177,7 @@ const jsonld = [
           <a class="btn btn--ghost" href={href(lang, 'shop')}>{t.shop}</a>
         </div>
       </div>
+    </div>
     </div>
 
     <ul class="vhero__cards">
@@ -236,7 +244,15 @@ const jsonld = [
             const id = shotFor.get(l.n);
             if (!id) return null;
             const [fx, fy] = SHOTS[id].focus;
-            return <img class="cine__shot" data-shot={l.n} src={`/scenes/stage-${id}-1024.webp`} srcset={sceneSrcset(`stage-${id}`, SHOT_WIDTHS)} sizes="100vw" width="2048" height="1152" style={`object-position:${fx * 100}% ${fy * 100}%`} alt="" loading="lazy" decoding="async" />;
+            const ty = SHOTS[id].tallY;
+            // upright screens get the upright close-up (stage-<id>-tall, 1152 × 2048), wide ones the 16:9; both
+            // sized for a picture that covers the screen, not for its width alone
+            return (
+              <picture class="cine__shot" data-shot={l.n} style={`--op:${fx * 100}% ${fy * 100}%;--opt:${ty * 100}%`}>
+                <source media={TALL_SHOTS} srcset={sceneSrcset(`stage-${id}-tall`, TALL_WIDTHS)} sizes="100vw" width="1152" height="2048" />
+                <img src={`/scenes/stage-${id}-1024.webp`} srcset={sceneSrcset(`stage-${id}`, SHOT_WIDTHS)} sizes="max(100vw, 178svh)" width="2048" height="1152" alt="" loading="lazy" decoding="async" />
+              </picture>
+            );
           })}
         </div>
         <div class="cine__mist" data-mist aria-hidden="true"><i></i><i></i></div>
