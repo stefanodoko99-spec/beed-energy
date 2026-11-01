@@ -1,11 +1,11 @@
 // Home choreography. The stage is a film (public/scenes/stage-*, lib/stage-scenes.ts): the hero's dusk house with
-// its equipment, pinned full screen while the chapter cards scroll over it. Scroll is the camera: for each chapter
-// it flies in (scale and pan) to that chapter's equipment on the house, cuts to the close-up, which keeps pushing
-// in and orbits a few degrees in 3D while the card is read, then dissolves back to the whole house as the camera
-// pulls out for the next one. The live chapter's tag shows its shelf and that shelf's most-offered product. The
-// finale pulls back and switches the house on. Transform and opacity only, all through motion.ts (one GSAP
-// ticker); the camera is one timeline scrubbed by the scroll, so it plays backwards just as well.
-import { gsap, ScrollTrigger, motionOn, onMotionChange } from './motion';
+// its equipment, pinned full screen, with the chapter cards pinned inside it. Scroll is the camera, and one timeline
+// drives everything, so the picture, the card, the tag and the keys can never disagree: each chapter is one fixed
+// step of scroll in which the camera flies in (scale and pan) to that chapter's equipment while its card rises,
+// cuts to the close-up, which pushes in and orbits a few degrees in 3D while the card is read, then card and
+// close-up leave together as the camera pulls back to the whole house. The finale switches the house on. Transform
+// and opacity only, all through motion.ts (one GSAP ticker); scrubbed without lag, so it plays backwards too.
+import { gsap, ScrollTrigger, motionOn, onMotionChange, getLenis } from './motion';
 
 const stage = document.querySelector<HTMLElement>('[data-stage]');
 const cine = document.querySelector<HTMLElement>('[data-cine]');
@@ -28,6 +28,10 @@ const FRAME_H = 900;
 let current = -1;
 let triggers: ScrollTrigger[] = [];
 let film: gsap.core.Timeline | null = null;
+/** Where each chapter's step begins and where its card is fully read, in px of scroll from the moment the film
+ *  pins (set by buildFilm, used by the keys, keyboard focus and #shtresa-N links). */
+let steps = new Map<number, { from: number; read: number; to: number }>();
+let unit = 1;
 
 // ---------- the camera ----------
 type Pose = { x: number; y: number; scale: number };
@@ -75,6 +79,7 @@ function setLayer(n: number) {
   current = n;
   stage?.setAttribute('data-active', String(n));
   if (n <= 0) stage?.removeAttribute('data-active');
+  // only the live card takes clicks: the others are see-through and stacked in the same place
   chapters.forEach((c) => c.classList.toggle('is-active', Number(c.dataset.chapter) === n));
   keys.forEach((k) => (Number(k.dataset.keyLink) === n ? k.setAttribute('aria-current', 'step') : k.removeAttribute('aria-current')));
   // On narrow phones the key row scrolls sideways: bring the live key into view (scrollLeft only, no page scroll).
@@ -93,34 +98,26 @@ function setLayer(n: number) {
   });
 }
 
-/** Scroll positions (px from the moment the shot pins) at which each chapter card is where it is read: the middle
- *  of the screen on wide screens, resting above the dock on phones. */
-function centres(g: Geo): Map<number, { c: number; h: number }> {
-  const top = cine!.getBoundingClientRect().top;
-  const vh = window.innerHeight;
-  return new Map(chapters.map((c) => {
-    const card = c.querySelector<HTMLElement>('.chapter__card') ?? c;
-    const r = card.getBoundingClientRect();
-    const eye = g.side ? vh / 2 : Math.max(vh * 0.55, vh - 96 - r.height / 2);
-    return [Number(c.dataset.chapter), { c: r.top - top + r.height / 2 - eye, h: r.height }];
-  }));
-}
-
 function buildFilm() {
   const g = geo();
   if (!g || !cine || !cam) return;
-  const vh = window.innerHeight;
-  const total = Math.max(1, cine.offsetHeight - vh);
-  const at = centres(g);
-  // the camera's beat: one screen
-  const u = vh;
-  // every later tween on the camera starts from where the one before left it: none may render ahead of its turn
-  const tl = gsap.timeline({ defaults: { ease: 'none', immediateRender: false } });
+  // the pinned view is 100svh: a phone's toolbar coming and going does not change it, so the film keeps its length
+  const vh = g.vh;
+  unit = vh;
+  // the film's length: a short establishing shot, one step per chapter, a longer step for the finale
+  const intro = 0.45 * vh;
+  const step = 1.2 * vh;
   const ordered = chapters.map((c) => Number(c.dataset.chapter)).sort((a, b) => a - b);
-  const flyAt = (n: number) => Math.max(0, (at.get(n)?.c ?? 0) - 0.75 * u);
+  const total = intro + step * ordered.length + 0.3 * vh;
+  cine.style.height = `${Math.round(total + vh)}px`;
+  // every later tween starts from where the one before left it: none may render ahead of its turn
+  const tl = gsap.timeline({ defaults: { ease: 'none', immediateRender: false } });
+  steps = new Map();
 
-  // the establishing shot: a slow dolly in on the whole house while it waits for the first card
-  tl.fromTo(cam, { ...wide(1.16), x: -0.03 * g.vw }, { ...wide(), duration: Math.max(1, flyAt(ordered[0])), ease: 'power1.out', immediateRender: true }, 0);
+  // the establishing shot: a slow dolly in on the whole house, every spot lit, no card yet
+  tl.fromTo(cam, { ...wide(1.16), x: -0.03 * g.vw }, { ...wide(), duration: intro, ease: 'power1.out', immediateRender: true }, 0);
+  const cards = new Map(chapters.map((c) => [Number(c.dataset.chapter), c.querySelector<HTMLElement>('.chapter__card')]));
+  gsap.set([...cards.values()].filter(Boolean), { autoAlpha: 0, y: 48 });
   if (glow) tl.set(glow, { opacity: 0 }, 0);
   // mist and dust drift against the camera at their own depths
   if (mist) tl.fromTo(mist, { xPercent: 6 }, { xPercent: -6, duration: total }, 0);
@@ -128,17 +125,23 @@ function buildFilm() {
 
   let from: Pose = wide();
   ordered.forEach((n, i) => {
-    const { c = 0, h = 0 } = at.get(n) ?? {};
-    const fly = flyAt(n);
-    const next = ordered[i + 1];
-    const nextFly = next !== undefined ? flyAt(next) : total;
+    const a = intro + i * step;
     const ch = chapters.find((x) => Number(x.dataset.chapter) === n)!;
+    const card = cards.get(n);
     const shot = shots.get(n);
+    const last = i === ordered.length - 1;
+    const end = last ? total : a + step;
+    steps.set(n, { from: a, read: a + 0.5 * vh, to: end });
+    // the card rises in as the camera arrives and leaves as it pulls back (the finale's stays)
+    if (card) {
+      tl.fromTo(card, { autoAlpha: 0, y: 48 }, { autoAlpha: 1, y: 0, duration: 0.28 * vh, ease: 'power2.out' }, a + 0.12 * vh);
+      if (!last) tl.fromTo(card, { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -40, duration: 0.22 * vh, ease: 'power1.in' }, end - 0.3 * vh);
+    }
     if (n >= FINALE || !ch.dataset.spot || !shot) {
       // the finale: back to the whole house, which switches on, every spot lit
-      tl.fromTo(cam, from, { ...wide(1.02), duration: 0.5 * u, ease: 'power2.inOut' }, fly);
-      if (glow) tl.fromTo(glow, { opacity: 0 }, { opacity: 1, duration: 0.5 * u, ease: 'power1.inOut' }, fly + 0.15 * u);
-      tl.fromTo(spots, { scale: 0.4 }, { autoAlpha: 1, scale: 1, duration: 0.2 * u, stagger: 0.04 * u, ease: 'back.out(2)' }, fly + 0.3 * u);
+      tl.fromTo(cam, from, { ...wide(1.02), duration: 0.45 * vh, ease: 'power2.inOut' }, a);
+      if (glow) tl.fromTo(glow, { opacity: 0 }, { opacity: 1, duration: 0.45 * vh, ease: 'power1.inOut' }, a + 0.1 * vh);
+      tl.fromTo(spots, { scale: 0.4 }, { autoAlpha: 1, scale: 1, duration: 0.2 * vh, stagger: 0.04 * vh, ease: 'back.out(2)' }, a + 0.25 * vh);
       from = wide(1.02);
       return;
     }
@@ -147,54 +150,81 @@ function buildFilm() {
     const focus = (ch.dataset.focus ?? '0.5 0.5').split(' ').map(Number);
     const near = pose(g, spot, zoom);
     const past = pose(g, spot, zoom * 1.22);
-    // fly in on the equipment while the card comes up (the spots fade as the camera leaves the whole house)
-    const cut = fly + 0.45 * u;
-    tl.fromTo(cam, from, { ...near, duration: cut - fly, ease: 'power2.inOut' }, fly);
-    tl.to(spots, { autoAlpha: 0, duration: 0.15 * u }, fly + 0.05 * u);
-    // keep going past it while the close-up cuts in over the top, then push in slowly on the close-up
-    tl.fromTo(cam, near, { ...past, duration: 0.2 * u, ease: 'power1.in' }, cut);
-    tl.fromTo(shot, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.14 * u }, cut);
-    // the close-up holds while the card is read (a tall card holds it longer), then dissolves into the whole
-    // house as the camera pulls back
-    const out = Math.max(cut + 0.4 * u, Math.min(c + Math.max(0.35 * u, h / 2 - 0.2 * u), nextFly - 0.24 * u));
+    // fly in on the equipment (the spots fade as the camera leaves the whole house)
+    const cut = a + 0.4 * vh;
+    tl.fromTo(cam, from, { ...near, duration: cut - a, ease: 'power2.inOut' }, a);
+    tl.to(spots, { autoAlpha: 0, duration: 0.12 * vh }, a + 0.04 * vh);
+    // keep going past it while the close-up cuts in over the top, then push in slowly while the card is read
+    tl.fromTo(cam, near, { ...past, duration: 0.16 * vh, ease: 'power1.in' }, cut);
+    tl.fromTo(shot, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12 * vh }, cut);
+    const out = end - 0.3 * vh;
     // the orbit turns the other way on every other chapter
     const turn = i % 2 ? -4 : 4;
-    tl.fromTo(shot, push(g, focus, 1.12, turn), { ...push(g, focus, 1.24, turn * -0.6), duration: out + 0.2 * u - cut }, cut);
-    tl.fromTo(shot, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.2 * u }, out);
-    tl.fromTo(cam, past, { ...wide(1.1), duration: 0.22 * u, ease: 'power2.out' }, out - 0.02 * u);
-    tl.to(spots, { autoAlpha: 1, duration: 0.1 * u }, out + 0.12 * u);
+    tl.fromTo(shot, push(g, focus, 1.12, turn), { ...push(g, focus, 1.24, turn * -0.6), duration: out + 0.22 * vh - cut }, cut);
+    // close-up and card leave together, the camera pulls back to the whole house, spots on again
+    tl.fromTo(shot, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.22 * vh }, out);
+    tl.fromTo(cam, past, { ...wide(1.1), duration: 0.3 * vh, ease: 'power2.out' }, out);
+    tl.to(spots, { autoAlpha: 1, duration: 0.08 * vh }, out + 0.2 * vh);
     from = wide(1.1);
   });
   tl.set({}, {}, total);
   film = tl;
-  triggers.push(ScrollTrigger.create({ trigger: cine, start: 'top top', end: 'bottom bottom', scrub: 0.7, animation: tl }));
-
-  // the live chapter: the card in the middle of the screen
-  let first: ScrollTrigger | null = null;
-  for (const c of chapters) {
-    const n = Number(c.dataset.chapter);
-    const st = ScrollTrigger.create({
-      trigger: c,
-      start: 'top 55%',
-      end: 'bottom 45%',
-      onToggle: (self) => {
-        if (self.isActive) setLayer(n);
-        // back above the first chapter (also after a jump straight to the top): the whole house again
-        else if (self.direction < 0 && first && self.scroll() < first.start) setLayer(0);
-      },
-    });
-    first ??= st;
-    triggers.push(st);
-  }
+  // no scrub lag: Lenis already smooths the scroll, and a second delay put the picture behind the words
+  triggers.push(
+    ScrollTrigger.create({
+      trigger: cine,
+      start: 'top top',
+      end: () => `+=${total}`,
+      scrub: true,
+      animation: tl,
+      // the live chapter comes from the same clock as the camera
+      onUpdate: (self) => setLayer(chapterAt(self.progress * total)),
+      onLeaveBack: () => setLayer(0),
+    }),
+  );
 }
+
+/** The chapter whose step holds this point of the film (0 before the first card has risen). */
+function chapterAt(t: number): number {
+  let live = 0;
+  for (const [n, s] of steps) if (t >= s.from + 0.1 * unit) live = n;
+  return live;
+}
+
+/** Scroll the page to where a chapter's card is read (keys, keyboard focus, #shtresa-N links). */
+function goTo(n: number, smooth = true) {
+  const s = steps.get(n);
+  if (!s || !cine) return;
+  const top = cine.getBoundingClientRect().top + window.scrollY + s.read;
+  const lenis = getLenis();
+  if (lenis) lenis.scrollTo(top, { immediate: !smooth, duration: 1.4 });
+  else window.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
+}
+keys.forEach((k) =>
+  k.addEventListener('click', (e) => {
+    if (!film) return;
+    e.preventDefault();
+    goTo(Number(k.dataset.keyLink));
+  }),
+);
+// a keyboard user tabbing into a card that is not on screen yet: bring its chapter up
+chapters.forEach((c) =>
+  c.addEventListener('focusin', () => {
+    const n = Number(c.dataset.chapter);
+    if (film && n !== current) goTo(n, false);
+  }),
+);
 
 /** Motion off: hand the film back to CSS (the still and the cards). */
 function clearStage() {
   film?.kill();
   film = null;
-  const els = [cam, glow, mist, dust, ...spots, ...shots.values(), ...tags.values()].filter((e): e is HTMLElement => !!e);
+  const cards = chapters.map((c) => c.querySelector<HTMLElement>('.chapter__card'));
+  const els = [cam, glow, mist, dust, ...spots, ...shots.values(), ...tags.values(), ...cards].filter((e): e is HTMLElement => !!e);
   gsap.killTweensOf(els);
   gsap.set(els, { clearProps: 'transform,opacity,visibility' });
+  cine?.style.removeProperty('height');
+  steps = new Map();
   stage?.removeAttribute('data-active');
   chapters.forEach((c) => c.classList.remove('is-active'));
   keys.forEach((k) => k.removeAttribute('aria-current'));
@@ -275,7 +305,7 @@ if (view && 'ResizeObserver' in window) {
   let last = '';
   let timer = 0;
   new ResizeObserver(() => {
-    const size = `${view.clientWidth}x${window.innerHeight}`;
+    const size = `${view.clientWidth}x${view.clientHeight}`;
     const first = !last;
     if (size === last) return;
     last = size;
@@ -292,3 +322,6 @@ if (view && 'ResizeObserver' in window) {
 document.addEventListener('beed:loaded', () => ScrollTrigger.refresh());
 build();
 onMotionChange(() => build());
+// arriving on #shtresa-N: the chapters are stacked inside the pinned film, so go to where that card is read
+const hashN = /^#shtresa-(\d+)$/.exec(location.hash);
+if (hashN && film) requestAnimationFrame(() => goTo(Number(hashN[1]), false));

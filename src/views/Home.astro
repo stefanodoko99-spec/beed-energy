@@ -219,7 +219,7 @@ const jsonld = [
       <figure class="cine__view" data-view>
         <div class="cine__cam" data-cam>
           <div class="cine__frame" data-frame>
-            <img class="cine__house" src="/scenes/stage-house-1440.webp" srcset={sceneSrcset('stage-house', HOUSE_WIDTHS)} sizes="max(100vw, 178svh)" width="2048" height="1152" alt={t.drawingAlt} loading="lazy" decoding="async" />
+            <img class="cine__house" src="/scenes/stage-house-1440.webp" srcset={sceneSrcset('stage-house', HOUSE_WIDTHS)} sizes="max(100vw, 178svh)" width="2048" height="1152" alt={t.drawingAlt} fetchpriority="low" decoding="async" />
             <div class="cine__glow" data-glow aria-hidden="true"></div>
             <ol class="cine__spots" aria-hidden="true">
               {LAYERS.map((l) => {
@@ -291,7 +291,7 @@ const jsonld = [
             >
               <div class="chapter__card">
                 {id && <img class="chapter__shot" src={`/scenes/stage-${id}-1024.webp`} srcset={sceneSrcset(`stage-${id}`, SHOT_WIDTHS)} sizes="(max-width: 900px) 100vw, 40vw" width="2048" height="1152" alt="" loading="lazy" decoding="async" />}
-                <p class="chapter__key mono"><span class="tag tag--copper">{pad(l.n)} / {total}</span> {l.short[lang]}</p>
+                <p class="chapter__key mono"><span class="tag tag--copper">{pad(l.n)} / {total}</span> <span class="chapter__short">{l.short[lang]}</span></p>
                 <h2 class="title chapter__title">{l.name[lang]}</h2>
                 {fact && <p class="chapter__fact"><strong class="chapter__value figure">{fact.value}</strong> {fact.text}</p>}
                 <ul class="chapter__cats" aria-label={t.inShop}>
