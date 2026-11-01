@@ -1,194 +1,148 @@
-/* Home: poster + the house that opens (sticky drawing beside scrolling chapters), then the story sections. */
+/* Home: the glowing-house hero, the house film (the stage), then the story sections. */
 
-.stage {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: var(--gutter);
-  padding-inline: var(--gutter);
-  max-width: 1600px;
-  margin-inline: auto;
-}
+/* ---------- the stage intro: on paper, the title left, the lede and links right ---------- */
 .stage__intro {
-  grid-column: 1 / span 6;
-  grid-row: 1;
-  display: flex; flex-direction: column; justify-content: center; gap: 1.4rem;
-  padding-block: var(--section-gap) 3rem;
-  position: relative; z-index: 2;
+  display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: end; gap: 1.5rem var(--gutter);
+  max-width: var(--max); margin-inline: auto; padding: var(--section-gap) var(--gutter) clamp(2rem, 4vw, 3.5rem);
 }
 .stage__title { max-width: 14ch; }
-/* every poster line stays on one line (sized for "SWITCH ON.", wider than today's widest, "PRODUCE.", in half the stage), and on a desktop the hero
-   buttons and the quote link stay above the fold: capped by the viewport's height and width */
-.stage__poster { display: grid; font-size: min(clamp(4.5rem, 0.6rem + 11.2vw, 15.5rem), 19svh, 20vw); padding-top: 0.08em; }
-@media (min-width: 901px) {
-  .stage__poster { font-size: min(clamp(4.5rem, 0.6rem + 11.2vw, 15.5rem), 17.5svh, 10vw, 10.5rem); }
-}
-/* short desktop screens (1280 × 720, 1366 × 768): tighter rhythm, so the buttons and the quote link stay in view */
-@media (min-width: 901px) and (max-height: 820px) {
-  .stage__intro { gap: 0.9rem; padding-top: calc(var(--header-h) + 0.875rem); }
-}
-.stage__line { display: block; }
-.stage__line:last-child { color: var(--teal); }
-.stage__cta { margin-top: 0.4rem; }
-.stage__quote { align-self: flex-start; }
+.stage__aside { display: grid; gap: 1rem; justify-items: start; }
 .stage__stats { color: var(--ink-2); }
-.stage__hint { color: var(--ink-2); margin-top: auto; }
-.stage__drawing {
-  grid-column: 7 / -1;
-  grid-row: 1 / span 2;
-  position: sticky; top: var(--header-h); align-self: start;
-  height: calc(100svh - var(--header-h));
-  margin: 0;
-  display: grid; grid-template-rows: 1fr auto auto; gap: 0.5rem;
-  padding-block: 1.25rem 1rem;
-}
-/* The sheet: the realistic house (AI illustration, public/house/, ASSETS.md) on the drafting grid. */
-.stage__sheet { --pad: clamp(0.5rem, 2vw, 2rem); --gap: clamp(0.5rem, 1.2vw, 1rem); position: relative; min-height: 0; border: 1px solid var(--line); border-radius: var(--radius-l); background:
-  linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 32px 32px,
-  linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 32px 32px; background-color: var(--sheet); overflow: hidden; }
-.stage__stamp { position: absolute; right: 8px; bottom: 6px; z-index: 2; margin: 0; font-size: 10px; line-height: 1.2; letter-spacing: 0.02em; color: var(--ink-2); transition: color 400ms var(--ease-out); }
+@media (max-width: 900px) { .stage__intro { grid-template-columns: minmax(0, 1fr); padding-bottom: 1.5rem; } }
 
-/* Static exploded diagram — the default (no scripts, reduced motion, energy saving): the house in the middle of
-   the sheet, every part laid out around it with its chapter key and a short amber leader toward the house. */
-.stage__sheet {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: minmax(0, 0.85fr) minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 0.85fr);
-  grid-template-areas:
-    "pv       pv    swh   meter"
-    "house    house house inverter"
-    "house    house house battery"
-    "envelope ev    ev    heatpump";
-  gap: var(--gap);
-  padding: var(--pad) var(--pad) calc(var(--pad) + 0.9rem);
-}
-.rp-list { display: contents; list-style: none; }
-.rh { grid-area: house; position: relative; min-width: 0; min-height: 0; }
-.rh__img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: contain; }
-.rh__dusk, .stage__night, .hud { display: none; }
-.rp { position: relative; min-width: 0; min-height: 0; list-style: none; }
-.rp img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: contain; }
-.rp__key { position: absolute; left: 0; top: 0; z-index: 1; font: 600 11px/1 var(--font-mono); font-variant-numeric: tabular-nums; padding: 3px 4px; background: var(--sun); color: var(--text); }
-/* leader stubs: down from the top row, left from the right column, up from the bottom row, diagonal from the corners */
-.rp::after { content: ''; position: absolute; left: 50%; top: 100%; width: 1px; height: calc(var(--gap) + 4px); background: var(--amber-deep); transform-origin: 50% 0; }
-.rp:is([data-part="inverter"], [data-part="battery"])::after { left: auto; right: 100%; top: 50%; width: calc(var(--gap) + 4px); height: 1px; }
-.rp:is([data-part="envelope"], [data-part="ev"])::after { top: auto; bottom: 100%; }
-.rp[data-part="meter"]::after { left: 0; transform: rotate(45deg); }
-.rp[data-part="heatpump"]::after { left: 0; top: 0; transform: rotate(135deg); }
-/* each picture sits on the side of its cell that faces the house, so the stub meets it */
-.rp:is([data-part="pv"], [data-part="swh"]) img { object-position: 50% 100%; }
-.rp[data-part="meter"] img { object-position: 0% 100%; }
-.rp:is([data-part="inverter"], [data-part="battery"]) img { object-position: 0% 50%; }
-.rp:is([data-part="envelope"], [data-part="ev"]) img { object-position: 50% 0%; }
-/* the charger sits centred in its double cell: its key goes to the picture's top-left corner, not the cell's
-   (which is next to the window). 40.2cqh = half the picture's width when the cell's height sets its size (643 × 800). */
-.rp[data-part="ev"] { container-type: size; }
-.rp[data-part="ev"] .rp__key { left: max(0px, 50cqw - 40.2cqh - 1.5rem); }
-.rp[data-part="heatpump"] img { object-position: 0% 0%; }
+/* ---------- the film (public/scenes/stage-*, ASSETS.md) ----------
+   Without motion (no scripts, reduced motion, energy saving) it is a still: the wide shot of the house with its
+   numbered spots, then the chapters as cards, each with its own close-up. With motion the wide shot is pinned full
+   screen, the chapter cards scroll over its left side and home.ts moves the camera (transform + opacity only). */
+.cine { position: relative; background: var(--teal-deep); }
+.cine__view { position: relative; margin: 0; width: 100%; aspect-ratio: 16 / 9; max-height: 100svh; overflow: hidden; isolation: isolate; container-type: size; background: #5d7576; color: #fff; }
+.cine__cam { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.cine__frame { position: absolute; left: 50%; top: 50%; width: max(100cqw, 100cqh * 16 / 9); aspect-ratio: 16 / 9; translate: -50% -50%; }
+.cine__house { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* the finale: warm light from the windows and the eaves when the house switches on */
+/* plain translucent light, no blend mode: a blended layer inside the zoomed camera blanked the whole page in Chromium */
+.cine__glow { position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  background: radial-gradient(20% 28% at 27% 50%, rgb(255 196 120 / 0.3), transparent 70%), radial-gradient(40% 9% at 52% 47%, rgb(255 154 60 / 0.28), transparent 70%), radial-gradient(60% 50% at 50% 55%, rgb(255 214 150 / 0.1), transparent 70%); }
+.cine__spots { list-style: none; margin: 0; padding: 0; }
+.cine__spot { position: absolute; left: var(--x); top: var(--y); width: 0; height: 0; }
+.cine__spot::before, .cine__spot::after { content: ''; position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 3px rgb(24 34 31 / 0.35), 0 0 18px var(--sun); }
+.cine__spot::after { background: none; border: 1.5px solid var(--sun); box-shadow: none; opacity: 0; }
+.cine__spot span { position: absolute; left: 12px; bottom: 8px; padding: 0.2rem 0.4rem; border-radius: 4px; background: #fff; color: var(--text); font: 600 0.6875rem/1 var(--font-mono); white-space: nowrap; box-shadow: 0 6px 16px rgb(0 0 0 / 0.25); }
+.cine__shots, .cine__mist, .cine__dust, .cine__tags { display: none; }
+.cine__shade { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(20 28 26 / 0.55) 100%), linear-gradient(180deg, rgb(20 28 26 / 0.35) 0%, transparent 18%, transparent 72%, rgb(20 28 26 / 0.7) 100%); }
+.cine__caption { position: absolute; left: max(var(--gutter), calc((100vw - var(--max)) / 2)); bottom: 1.1rem; z-index: 3; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; max-width: 60%; font-size: 0.6875rem; color: rgb(255 255 255 / 0.82); text-shadow: 0 1px 8px rgb(0 0 0 / 0.5); }
+.cine__caption [data-caption-layer] { color: var(--sun); }
+.cine__stamp { color: rgb(255 255 255 / 0.6); }
+.stage__keys { position: absolute; right: max(var(--gutter), calc((100vw - var(--max)) / 2)); bottom: 0.9rem; z-index: 3; display: flex; gap: 0.3rem; }
+.stage__key { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; border-radius: 10px; text-decoration: none; font: 500 0.75rem var(--font-mono); color: #fff; background: rgb(36 47 44 / 0.45); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: inset 0 0 0 1px var(--glass-line); transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out), transform 300ms var(--ease-spring); }
+.stage__key[aria-current="step"] { background: var(--sun); color: var(--text); font-weight: 650; box-shadow: none; }
+@media (hover: hover) and (pointer: fine) { .stage__key:hover { background: rgb(236 228 76 / 0.25); } }
 
-/* Motion on: the house sits centred on the sheet and home.ts moves it, the parts and the HUD (transform + opacity). */
-html.js[data-motion="on"] .stage__sheet { display: block; padding: 0; container-type: size; }
-html.js[data-motion="on"] .rh {
-  --hw: min(100cqw - 2 * var(--pad), (100cqh - 2 * var(--pad)) * 1.1494);
-  position: absolute; z-index: 1;
-  width: var(--hw); height: calc(var(--hw) / 1.1494);
-  left: calc(50cqw - var(--hw) / 2); top: calc(50cqh - var(--hw) / 2.2988);
-  transform-origin: 0 0;
-}
-html.js[data-motion="on"] .rh__dusk { display: block; opacity: 0; }
-/* the finale's night: deep teal ground with a paper grid and a lifted-teal halo behind the house (no amber wash: amber
-   over teal turns olive); the warm light is the dusk render's lit windows. Faded in under the dusk render. */
-html.js[data-motion="on"] .stage__night { display: block; position: absolute; inset: 0; opacity: 0; background:
-  radial-gradient(ellipse 60% 52% at 52% 56%, rgb(22 94 105 / 0.85), rgb(22 94 105 / 0.3) 55%, transparent 85%),
-  linear-gradient(rgb(243 248 245 / 0.11) 1px, transparent 1px) 0 0 / 32px 32px,
-  linear-gradient(90deg, rgb(243 248 245 / 0.11) 1px, transparent 1px) 0 0 / 32px 32px; background-color: var(--teal-deep); }
-html.js[data-motion="on"] .stage__sheet[data-dusk] .stage__stamp { color: var(--on-teal-2); }
-html.js[data-motion="on"] .rp { position: absolute; left: 0; top: 0; z-index: 3; opacity: 0; pointer-events: none; container-type: normal; }
-html.js[data-motion="on"] .rp img { position: static; display: block; width: 100%; height: auto; }
-html.js[data-motion="on"] .rp::after, html.js[data-motion="on"] .rp__key { display: none; }
-
-/* HUD (Igloo): a sun-amber ring on the equipment, a leader to the part, and the label beside it. home.ts places them. */
-html.js[data-motion="on"] .hud { display: block; position: absolute; inset: 0; pointer-events: none; }
-.hud__ring { --ring: 30px; position: absolute; left: 0; top: 0; z-index: 2; width: var(--ring); height: var(--ring); margin: calc(var(--ring) / -2) 0 0 calc(var(--ring) / -2); border: 2.5px solid var(--sun); border-radius: 50%; background: rgb(245 165 36 / 0.22); box-shadow: 0 0 0 2px rgb(243 248 245 / 0.8), 0 0 0 3px rgb(146 87 0 / 0.35); opacity: 0; visibility: hidden; }
-.hud__ring::after { content: ''; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--amber-deep); }
-.hud__leader { position: absolute; left: 0; top: 0; z-index: 2; height: 2px; margin-top: -1px; background: var(--sun); box-shadow: 0 0 0 0.5px rgb(146 87 0 / 0.45); transform-origin: 0 50%; opacity: 0; visibility: hidden; }
-.hud__label { position: absolute; left: 0; top: 0; z-index: 4; display: grid; gap: 0.2rem; width: max-content; max-width: min(17rem, 48cqw); padding: 0.55rem 0.7rem 0.6rem; background: var(--paper); border: 1px solid var(--teal); box-shadow: inset 0 3px 0 var(--sun); color: var(--text); text-decoration: none; opacity: 0; visibility: hidden; pointer-events: auto; }
-.hud__label--measure { visibility: hidden; pointer-events: none; }
-.hud__head { display: flex; gap: 0.5rem; align-items: baseline; }
-.hud__n { flex: none; font: 600 11px/1 var(--font-mono); font-variant-numeric: tabular-nums; padding: 3px 4px; background: var(--sun); color: var(--text); }
-.hud__name { font-stretch: 75%; font-weight: 750; font-size: 1.0625rem; line-height: 1.05; text-transform: uppercase; letter-spacing: 0.01em; }
-.hud__cat { font-weight: 600; font-size: 0.8125rem; line-height: 1.25; }
-.hud__meta { font: 500 11px/1.35 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--amber-deep); }
-.hud__meta .arrow { display: inline-block; transition: transform 200ms var(--ease-out); }
-.hud__end { white-space: nowrap; }
-@media (hover: hover) and (pointer: fine) { .hud__label:hover .arrow { transform: translateX(3px); } .hud__label:hover .hud__cat { text-decoration: underline; } }
-.stage__caption { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.75rem; color: var(--ink-2); border-top: 3px solid var(--teal); padding-top: 0.5rem; }
-.stage__keys { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-.stage__key { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; border: 1px solid var(--line-strong); text-decoration: none; font: 500 0.75rem var(--font-mono); transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out), border-color 200ms var(--ease-out); }
-.stage__key[aria-current="step"] { background: var(--sun); color: var(--text); border-color: var(--amber-deep); font-weight: 600; }
-@media (hover: hover) and (pointer: fine) { .stage__key:hover { border-color: var(--teal); } }
-
-.chapters { grid-column: 1 / span 6; grid-row: 2; list-style: none; padding: 0; margin: 0; }
-.chapter {
-  min-height: 92svh;
-  display: flex; flex-direction: column; justify-content: center; gap: 1rem;
-  padding-block: 3rem;
-  border-top: 1px solid var(--line);
-  scroll-margin-top: var(--header-h);
-}
-.chapter__key { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; font-size: 0.75rem; color: var(--ink-2); }
-.chapter__title { font-size: clamp(2.5rem, 1.3rem + 3.6vw, 5.25rem); }
+/* the chapters as cards: two columns of slate glass, each with its close-up on top */
+.chapters { list-style: none; margin: 0 auto; max-width: var(--max); padding: clamp(1.5rem, 3vw, 3rem) var(--gutter) var(--section-gap); display: grid; grid-template-columns: repeat(auto-fill, minmax(min(32rem, 100%), 1fr)); gap: var(--gutter); }
+.chapter { scroll-margin-top: var(--header-h); }
+.chapter__card { display: flex; flex-direction: column; gap: 1rem; height: 100%; padding: clamp(1.25rem, 1rem + 1.2vw, 2.25rem); border-radius: 26px; background: rgb(255 255 255 / 0.05); box-shadow: inset 0 0 0 1px var(--line-on-teal); }
+.chapter__shot { display: block; width: calc(100% + 2 * clamp(1.25rem, 1rem + 1.2vw, 2.25rem)); max-width: none; height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin: calc(-1 * clamp(1.25rem, 1rem + 1.2vw, 2.25rem)) calc(-1 * clamp(1.25rem, 1rem + 1.2vw, 2.25rem)) 0.25rem; border-radius: 26px 26px 0 0; }
+.chapter__key { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; font-size: 0.75rem; color: var(--on-teal-2); }
+.chapter__title { font-size: clamp(2.25rem, 1.2rem + 3vw, 4.5rem); color: #fff; }
 .chapter__fact { font-size: var(--step-1); line-height: 1.35; max-width: 34ch; }
-.chapter__value { display: block; font-size: clamp(2.5rem, 1.3rem + 3.6vw, 5.25rem); line-height: 0.95; color: var(--teal); margin-bottom: 0.4rem; }
+.chapter__value { display: block; font-size: clamp(2.5rem, 1.3rem + 3.6vw, 5rem); line-height: 0.95; color: var(--sun); margin-bottom: 0.4rem; }
 .chapter__src a, .chapter__extra a { color: inherit; }
-.chapter__extra { max-width: 40ch; color: var(--ink-2); }
-.chapter__extra-value { font-size: 1.5em; line-height: 1; color: var(--ink); margin-right: 0.1em; }
-.chapter__cats { list-style: none; padding: 0; margin-top: 0.75rem; border-top: 1px solid var(--line-strong); }
-.chapter__cats a { display: grid; grid-template-columns: 1fr auto 1.25rem; gap: 0.25rem 1rem; align-items: baseline; padding: 0.85rem 0; border-bottom: 1px solid var(--line); text-decoration: none; min-height: 44px; }
-.chapter__cat { font-weight: 650; font-size: 1.0625rem; }
+.chapter__extra { max-width: 40ch; color: var(--on-teal-2); }
+.chapter__extra-value { font-size: 1.5em; line-height: 1; color: #fff; margin-right: 0.1em; }
+.chapter__cats { list-style: none; padding: 0; margin-top: 0.5rem; border-top: 1px solid var(--line-strong); }
+.chapter__cats a { display: grid; grid-template-columns: 1fr auto 1.25rem; gap: 0.25rem 1rem; align-items: baseline; padding: 0.8rem 0; border-bottom: 1px solid var(--line); text-decoration: none; min-height: 44px; color: inherit; }
+.chapter__cat { font-weight: 600; font-size: 1.0625rem; }
+.chapter__meta { color: var(--on-teal-2); }
+.chapter__cats .arrow { color: var(--sun); transition: transform 200ms var(--ease-out); }
 @media (hover: hover) and (pointer: fine) {
-  .chapter__cats a:hover .chapter__cat { color: var(--teal); }
+  .chapter__cats a:hover .chapter__cat { color: var(--sun); }
   .chapter__cats a:hover .arrow { transform: translateX(4px); }
 }
-.chapter__cats .arrow { transition: transform 200ms var(--ease-out); }
-.chapter--final .title { color: var(--ink); }
-.final { display: grid; gap: 0.5rem; max-width: 28rem; padding: 1.25rem; border: 1px solid var(--teal); background: var(--teal-tint); box-shadow: inset 0 4px 0 var(--sun); }
+.chapter--final { grid-column: 1 / -1; }
+.chapter--final .chapter__card { background: radial-gradient(90% 120% at 100% 0%, rgb(236 228 76 / 0.12), transparent 60%), rgb(255 255 255 / 0.05); }
+.final { display: grid; gap: 0.5rem; max-width: 28rem; padding: 1.25rem; border-radius: 18px; background: rgb(0 0 0 / 0.16); box-shadow: inset 0 0 0 1px var(--line-on-teal); }
 .final__select { max-width: 18rem; }
 .final__out { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
-.final__num { font-size: clamp(3.25rem, 1.8rem + 4.4vw, 6.5rem); line-height: 0.95; color: var(--teal); }
-
-/* Scripted states: inactive chapters recede (only when motion is on; static pages show everything) */
-html.js[data-motion="on"] .chapter :is(.chapter__title, .chapter__fact, .chapter__value, .chapter__extra, .chapter__extra-value, .chapter__cats a) { transition: color 300ms var(--ease-out); }
-html.js[data-motion="on"] .stage[data-active] .chapter:not(.is-active) :is(.chapter__title, .chapter__fact, .chapter__value, .chapter__extra, .chapter__extra-value, .chapter__cats a) { color: var(--ink-2); }
+.final__num { font-size: clamp(3.25rem, 1.8rem + 4.4vw, 6.5rem); line-height: 0.95; color: var(--sun); }
 
 @media (max-width: 900px) {
-  .stage { display: block; }
-  .stage__intro { min-height: auto; padding-top: calc(var(--header-h) + 2rem); padding-bottom: 1.5rem; }
-  .stage__hint { display: none; }
-  .stage__drawing { position: sticky; top: 0; z-index: 3; height: auto; background: var(--paper); padding-block: 0.5rem; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); border-bottom: 1px solid var(--line); }
-  /* the header comes back on the way up: the stuck sheet moves down under it, so the HUD's top line stays in view */
-  html.js:not([data-motion="off"]):not([data-header="hidden"]) .stage__drawing { top: var(--header-h); }
-  .stage__sheet { height: max(32svh, 15rem); --pad: 0.4rem; --gap: 0.4rem; }
-  /* static diagram on a phone: a plain figure above the chapter list, not a sticky band */
-  html:not(.js) .stage__drawing, html[data-motion="off"] .stage__drawing { position: relative; }
-  html:not(.js) .stage__sheet, html[data-motion="off"] .stage__sheet { height: auto; aspect-ratio: 1 / 1.08; }
-  .rp__key { font-size: 10px; padding: 2px 3px; }
-  /* a compact tag on the small sheet: key, layer, count and price (the chapter below carries the rest) */
-  .hud__ring { --ring: 22px; }
-  .hud__label { max-width: min(13rem, 58cqw); padding: 0.3rem 0.45rem 0.35rem; gap: 0.1rem; }
-  /* two parts (heat pump + solar water heater): both shelves named, on a wider tag that runs along the top */
-  .hud__label[data-multi] { max-width: min(19rem, 92cqw); }
-  .hud__head { gap: 0.35rem; }
-  .hud__name { font-size: 0.8125rem; }
-  .hud__cat { display: none; }
-  .stage__stamp { font-size: 9px; right: 6px; bottom: 4px; }
-  .stage__caption { display: none; }
-  .stage__keys { flex-wrap: nowrap; overflow-x: auto; }
-  .stage__key { min-width: 44px; flex: none; }
-  .chapter { min-height: 70svh; padding-block: 2.5rem; }
+  .cine__caption { max-width: none; right: var(--gutter); bottom: auto; top: 0.9rem; }
+  .cine__stamp { display: none; }
+  .stage__keys { left: var(--gutter); right: var(--gutter); bottom: 0.6rem; overflow-x: auto; scrollbar-width: none; }
+  .stage__key { flex: none; min-width: 40px; min-height: 40px; }
+  .cine__spot span { display: none; }
 }
-/* the 280–335 px sheets (phones up to 379 px): a wider tag stays two lines (key + layer, count + price) */
-@media (max-width: 379.98px) {
-  .hud__label { max-width: min(13rem, 66cqw); }
+
+/* ---------- the film with motion: pinned, the camera is home.ts ---------- */
+html.js[data-motion="on"] .cine { display: grid; }
+html.js[data-motion="on"] .cine__view { grid-area: 1 / 1; position: sticky; top: 0; z-index: 1; height: 100svh; aspect-ratio: auto; max-height: none; }
+html.js[data-motion="on"] .cine__cam { will-change: transform; }
+html.js[data-motion="on"] .cine__shots { display: block; position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+html.js[data-motion="on"] .cine__shot { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; opacity: 0; visibility: hidden; }
+/* mist drifts across in two layers at two depths, dust floats nearer still: the depth of the shot */
+html.js[data-motion="on"] .cine__mist { display: block; position: absolute; inset: -10% -20%; z-index: 2; pointer-events: none; }
+html.js[data-motion="on"] .cine__mist i { position: absolute; inset: 0; background: radial-gradient(40% 22% at 30% 72%, rgb(214 230 228 / 0.28), transparent 70%), radial-gradient(35% 18% at 78% 64%, rgb(214 230 228 / 0.22), transparent 70%); background-size: 200% 100%; animation: cine-drift 46s linear infinite; }
+html.js[data-motion="on"] .cine__mist i + i { background: radial-gradient(30% 14% at 60% 86%, rgb(230 240 238 / 0.3), transparent 70%), radial-gradient(28% 12% at 12% 90%, rgb(230 240 238 / 0.22), transparent 70%); background-size: 200% 100%; animation-duration: 28s; animation-direction: reverse; }
+html.js[data-motion="on"] .cine__dust { display: block; position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0.55;
+  background-image: radial-gradient(1.5px 1.5px at 12% 22%, #fff8d0, transparent), radial-gradient(1px 1px at 34% 68%, #fff, transparent), radial-gradient(2px 2px at 56% 38%, #fff3b0, transparent), radial-gradient(1px 1px at 72% 82%, #fff, transparent), radial-gradient(1.5px 1.5px at 88% 30%, #fff8d0, transparent), radial-gradient(1px 1px at 46% 12%, #fff, transparent);
+  background-size: 640px 520px; animation: cine-dust 30s linear infinite; }
+html.js[data-motion="on"] .cine__shade { z-index: 2; }
+html.js[data-motion="on"] .cine__caption, html.js[data-motion="on"] .stage__keys { z-index: 4; }
+/* the live chapter's tag: its shelf and that shelf's most-offered product, white and slanted like the hero's tags */
+html.js[data-motion="on"] .cine__tags { display: block; position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.cine__tag { position: absolute; right: max(var(--gutter), calc((100vw - var(--max)) / 2)); bottom: 5.5rem; display: grid; gap: 0.6rem; width: min(21rem, 34vw); padding: 0.9rem 1.6rem 0.9rem 1rem; background: #fff; color: var(--text); text-decoration: none; border-radius: 14px 4px 4px 14px; clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%); box-shadow: 0 18px 40px rgb(0 0 0 / 0.3); opacity: 0; visibility: hidden; pointer-events: auto; }
+.cine__tag-head { display: flex; align-items: baseline; gap: 0.6rem; }
+.cine__tag-n { flex: none; padding: 0.2rem 0.35rem; border-radius: 4px; background: var(--sun); font-size: 0.6875rem; font-weight: 600; }
+.cine__tag-cat { font-weight: 750; font-size: 0.8125rem; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.2; }
+.cine__tag-pick { display: grid; grid-template-columns: 4rem minmax(0, 1fr); gap: 0.75rem; align-items: center; }
+.cine__tag-fig { display: grid; place-items: center; aspect-ratio: 1; border-radius: 10px; background: #f3f5f2; overflow: hidden; }
+.cine__tag-fig .ph { width: 100%; height: 100%; object-fit: contain; padding: 0.3rem; }
+.cine__tag-fig .ph--none { font-size: 0.6rem; }
+.cine__tag-name { font-size: 0.875rem; line-height: 1.3; }
+.cine__tag-meta { font-size: 0.75rem; color: var(--amber-deep); }
+.cine__tag .arrow { display: inline-block; transition: transform 200ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .cine__tag:hover .arrow { transform: translateX(4px); } .cine__tag:hover .cine__tag-name { text-decoration: underline; } }
+@keyframes cine-drift { to { background-position: -200% 0; } }
+@keyframes cine-dust { to { background-position: 40px -520px; } }
+@keyframes cine-ping { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(3); } }
+html.js[data-motion="on"] .cine__spot::after { animation: cine-ping 2.2s var(--ease-out) infinite; }
+
+@media (min-width: 900.02px) {
+  /* the chapter cards scroll over the left of the pinned shot, a screen and a third apart (the camera flies in,
+     holds the close-up while the card is read, pulls back); the first comes in after a moment on the house */
+  html.js[data-motion="on"] .chapters { grid-area: 1 / 1; z-index: 2; display: block; max-width: none; margin: 0; padding: 90svh 0 0 max(var(--gutter), calc((100vw - var(--max)) / 2)); pointer-events: none; }
+  html.js[data-motion="on"] .chapter { min-height: 135svh; display: flex; align-items: center; padding-block: 8svh; }
+  html.js[data-motion="on"] .chapter__card { width: min(34rem, 36vw); height: auto; pointer-events: auto; gap: 0.8rem;
+    background: rgb(36 47 44 / 0.62); -webkit-backdrop-filter: blur(16px) saturate(130%); backdrop-filter: blur(16px) saturate(130%); box-shadow: inset 0 1px 0 var(--glass-line), 0 30px 60px rgb(0 0 0 / 0.25); }
+  html.js[data-motion="on"] .chapter__shot { display: none; }
+  html.js[data-motion="on"] .chapter__title { font-size: clamp(2rem, 1rem + 2.6vw, 3.75rem); }
+  html.js[data-motion="on"] .chapter__value { font-size: clamp(2.25rem, 1rem + 3vw, 4.25rem); }
+  html.js[data-motion="on"] .chapter--final { min-height: 100svh; }
+}
+/* short laptop screens (1366 × 768, 1280 × 720): tighter cards, so most of a chapter is read in one screen */
+@media (min-width: 900.02px) and (max-height: 860px) {
+  html.js[data-motion="on"] .chapter__card { gap: 0.5rem; padding: 1.1rem 1.4rem; }
+  html.js[data-motion="on"] .chapter__title { font-size: clamp(1.75rem, 0.9rem + 2vw, 2.75rem); }
+  html.js[data-motion="on"] .chapter__value { font-size: clamp(2rem, 0.9rem + 2.4vw, 3.25rem); }
+  html.js[data-motion="on"] .chapter__fact { font-size: 1rem; }
+  html.js[data-motion="on"] .chapter__extra { font-size: 0.875rem; }
+  html.js[data-motion="on"] .chapter__cats { margin-top: 0.25rem; }
+  html.js[data-motion="on"] .chapter__cats a { padding-block: 0.45rem; }
+}
+@media (max-width: 900px) {
+  /* phones: the shot is a band pinned under the header, the chapters scroll below it */
+  html.js[data-motion="on"] .cine { display: block; }
+  html.js[data-motion="on"] .cine__view { height: 52svh; top: 0; }
+  html.js[data-motion="on"]:not([data-header="hidden"]) .cine__view { top: var(--header-h); }
+  html.js[data-motion="on"] .chapters { display: block; padding-top: 1rem; }
+  html.js[data-motion="on"] .chapter { min-height: 72svh; display: flex; align-items: center; padding-block: 1.5rem; }
+  html.js[data-motion="on"] .chapter__card { background: none; box-shadow: none; padding-inline: 0; }
+  html.js[data-motion="on"] .chapter__shot { display: none; }
+  .cine__tag { right: auto; left: var(--gutter); bottom: 3.6rem; width: min(17rem, calc(100vw - 2 * var(--gutter))); padding: 0.6rem 1.3rem 0.6rem 0.7rem; gap: 0.4rem; }
+  .cine__tag-pick { grid-template-columns: minmax(0, 1fr); }
+  .cine__tag-fig { display: none; } /* the band is small: the product's name is enough */
+  .cine__tag-name { font-size: 0.8125rem; }
 }
 
 /* ---------- teasers: solar packages + guide (src/components/HomeTeasers.astro), static in every mode ---------- */

@@ -13,7 +13,7 @@ export type DynamicFact = 'insulation' | 'windows' | 'heat';
 export type LayerFact = Fact | DynamicFact;
 
 export type LayerId = 'pv' | 'inverter' | 'battery' | 'heat' | 'ev' | 'grid' | 'envelope';
-/** Equipment in the house illustration: the `part-*.webp` files and hotspots in public/house/manifest.json (see ASSETS.md). */
+/** Equipment on the stage's house: each part has a spot on the wide shot and a close-up (lib/stage-scenes.ts, ASSETS.md). */
 export type Part = 'pv' | 'inverter' | 'battery' | 'heatpump' | 'swh' | 'ev' | 'meter' | 'envelope';
 
 export type Layer = {

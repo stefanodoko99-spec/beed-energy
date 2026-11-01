@@ -1,11 +1,12 @@
 ---
-// Home: the poster, then "Shtëpia ndizet" — the realistic house on a drafting sheet; each chapter lifts its
-// equipment out of the house as an exploded part (DESIGN.md signature), then the manifesto, how it works,
-// featured products, Albania in numbers, the calculator and the seller band.
+// Home: the glowing-house hero, then "Shtëpia ndizet" — the same house at dusk with its equipment, pinned full
+// screen while the chapters scroll over it; the camera flies to each chapter's equipment and cuts to its close-up
+// (DESIGN.md signature, scripts/home.ts), then the manifesto, how it works, featured products, Albania in
+// numbers, the calculator and the seller band.
 import Site from '../layouts/Site.astro';
 import '../styles/home.css';
-import { LAYERS, NUMBERS, type Fact } from '../content/story';
-import { BASE, PARTS, partsOf, srcset, type PartId } from '../lib/house-render';
+import { LAYERS, NUMBERS, type Fact, type Part } from '../content/story';
+import { FRAME, HOUSE_WIDTHS, SHOTS, SHOT_WIDTHS, sceneSrcset, shotOf } from '../lib/stage-scenes';
 import { ts } from '../i18n/stage';
 import { categories, featuredProducts } from '../lib/catalog';
 import ProductPhoto from '../components/ProductPhoto.astro';
@@ -71,24 +72,30 @@ function factFor(f: AnyFact): Shown {
 type LayerLike = { fact?: AnyFact; extra?: Fact; facts?: readonly AnyFact[] };
 const factsOf = (l: LayerLike): AnyFact[] => [...(l.facts ?? [l.fact, l.extra])].filter((f): f is AnyFact => !!f);
 
-// The stage: which parts each chapter lifts out of the house (story.ts `parts`, or the default map), the key of
-// each part in the static exploded diagram, and the chapter count for the "01 / 07" keys.
+// The stage: each chapter's close-up and its spot on the wide shot (lib/stage-scenes.ts), and the chapter count
+// for the "01 / 07" keys.
 const pad = (n: number) => String(n).padStart(2, '0');
-const chapterParts = new Map(LAYERS.map((l) => [l.n, partsOf(l as { n: number; id?: string; parts?: string[] })]));
-const partKey = new Map<PartId, number>();
-for (const l of LAYERS) for (const p of chapterParts.get(l.n) ?? []) if (!partKey.has(p)) partKey.set(p, l.n);
-const shownParts = (Object.keys(PARTS) as PartId[]).filter((p) => partKey.has(p));
 const total = pad(LAYERS.length);
 const finaleN = Math.max(0, ...LAYERS.map((l) => l.n)) + 1;
-// The HUD label names the shelf of the part that lifts out; a chapter with two parts (heat pump + solar water
-// heater) names both shelves, with their products counted together and the lowest price of the two.
-const PART_SHELF: Partial<Record<PartId, string>> = { pv: 'solar-panels', inverter: 'inverters', battery: 'batteries', heatpump: 'heat-pumps', swh: 'solar-water-heaters', ev: 'ev-chargers' };
+const shotFor = new Map(LAYERS.map((l) => [l.n, shotOf(l.parts)]));
+// The tag names the shelf of what the camera looks at; a chapter with two parts (heat pump + solar water heater)
+// names both shelves, with their products counted together and the lowest price of the two.
+const PART_SHELF: Partial<Record<Part, string>> = { pv: 'solar-panels', inverter: 'inverters', battery: 'batteries', heatpump: 'heat-pumps', swh: 'solar-water-heaters', ev: 'ev-chargers' };
 type Cat = (typeof cats)[number];
 const hudShelves = (l: (typeof LAYERS)[number]): Cat[] => {
-  const own = (chapterParts.get(l.n) ?? []).map((p) => PART_SHELF[p]).filter((s): s is string => !!s && l.categories.includes(s));
+  const own = l.parts.map((p) => PART_SHELF[p]).filter((s): s is string => !!s && l.categories.includes(s));
   const list = (own.length > 1 ? own : l.categories.slice(0, 1)).map((s) => bySlug.get(s)).filter((c): c is Cat => !!c);
   return list;
 };
+// The tag's product per shelf: the most-offered published product, one with a photo first.
+const faceRows = await all<{ category_id: number; slug: string; brand: string; model: string; image: string | null; min_price: number }>(
+  `SELECT p.category_id, p.slug, p.brand, p.model, MIN(o.price_all) AS min_price, COUNT(o.id) AS n,
+          (SELECT path FROM product_images i WHERE i.product_id = p.id ORDER BY sort LIMIT 1) AS image
+     FROM products p JOIN offers o ON o.product_id = p.id AND o.active = 1 AND o.seller_id IN (SELECT id FROM sellers WHERE status = 'active')
+    WHERE p.status = 'published' GROUP BY p.id ORDER BY (image IS NULL), n DESC, p.id`,
+);
+const faces = new Map<number, (typeof faceRows)[number]>();
+for (const r of faceRows) if (!faces.has(r.category_id)) faces.set(r.category_id, r);
 const cities = await all<{ slug: string; name_sq: string; name_en: string; pv_yield: number }>('SELECT slug, name_sq, name_en, pv_yield FROM cities WHERE pv_yield IS NOT NULL ORDER BY pv_yield DESC');
 const tirana = cities.find((c) => c.slug === 'tirane') ?? cities[0];
 const featured = await featuredProducts(8);
@@ -194,124 +201,148 @@ const jsonld = [
 
   <section class="stage" data-stage aria-labelledby="stage-title">
     <div class="stage__intro" data-intro>
-      <p class="eyebrow">{t.hero.stageEyebrow}</p>
-      <h2 class="title title--xl stage__title" id="stage-title">{t.hero.stageTitle}</h2>
-      <p class="lede">{t.lede}</p>
-      <a class="link-arrow stage__quote" href={href(lang, 'quote')}><span>{t.quote}</span><span class="arrow" aria-hidden="true">→</span></a>
-      <p class="mono small stage__stats">{t.stats(cats.length, counts.products, counts.offers)}</p>
-      <p class="mono small stage__hint" aria-hidden="true">↓ {t.scrollHint}</p>
+      <div class="stage__head">
+        <p class="eyebrow">{t.hero.stageEyebrow}</p>
+        <h2 class="title title--xl stage__title" id="stage-title">{t.hero.stageTitle}</h2>
+      </div>
+      <div class="stage__aside">
+        <p class="lede">{t.lede}</p>
+        <a class="link-arrow stage__quote" href={href(lang, 'quote')}><span>{t.quote}</span><span class="arrow" aria-hidden="true">→</span></a>
+        <p class="mono small stage__stats">{t.stats(cats.length, counts.products, counts.offers)}</p>
+      </div>
     </div>
 
-    <figure class="stage__drawing" data-drawing>
-      {/* The sheet: the realistic house (AI illustration, public/house/) and its parts. With motion on, home.ts lifts
-          each chapter's parts out of the house; without it (no JS, reduced motion, energy saving) CSS lays every
-          part around the house as a static exploded diagram with numbered keys. */}
-      <div class="stage__sheet" data-sheet data-finale={finaleN}>
-        <div class="stage__night" data-night aria-hidden="true"></div>
-        <div class="rh" data-rh>
-          <img class="rh__img rh__day" data-rh-day src={`/house/${BASE.day[1].file}`} srcset={srcset(BASE.day)} sizes="(max-width: 900px) 70vw, 46vw" width={BASE.w} height={BASE.h} alt={t.drawingAlt} fetchpriority="high" decoding="async" />
-          <img class="rh__img rh__dusk" data-rh-dusk src={`/house/${BASE.dusk[1].file}`} srcset={srcset(BASE.dusk)} sizes="(max-width: 900px) 70vw, 46vw" width={BASE.w} height={BASE.h} alt="" loading="lazy" decoding="async" />
+    {/* The film: the wide shot pinned full screen while the chapters scroll over it. With motion on, home.ts is the
+        camera (fly to the chapter's spot, cut to its close-up, pull back); without it this is a still of the house
+        with its numbered spots, and each chapter shows its own close-up. Images: public/scenes/ (ASSETS.md). */}
+    <div class="cine on-ink" data-cine data-finale={finaleN}>
+      <figure class="cine__view" data-view>
+        <div class="cine__cam" data-cam>
+          <div class="cine__frame" data-frame>
+            <img class="cine__house" src="/scenes/stage-house-1440.webp" srcset={sceneSrcset('stage-house', HOUSE_WIDTHS)} sizes="max(100vw, 178svh)" width="2048" height="1152" alt={t.drawingAlt} loading="lazy" decoding="async" />
+            <div class="cine__glow" data-glow aria-hidden="true"></div>
+            <ol class="cine__spots" aria-hidden="true">
+              {LAYERS.map((l) => {
+                const id = shotFor.get(l.n);
+                if (!id) return null;
+                const [x, y] = SHOTS[id].spot;
+                return <li class="cine__spot" data-spot={l.n} style={`--x:${((x / FRAME.w) * 100).toFixed(2)}%;--y:${((y / FRAME.h) * 100).toFixed(2)}%`}><span>{pad(l.n)}</span></li>;
+              })}
+            </ol>
+          </div>
         </div>
-        <ol class="rp-list" aria-hidden="true">
-          {shownParts.map((p) => {
-            const f = PARTS[p].files;
+        <div class="cine__shots" aria-hidden="true">
+          {LAYERS.map((l) => {
+            const id = shotFor.get(l.n);
+            if (!id) return null;
+            const [fx, fy] = SHOTS[id].focus;
+            return <img class="cine__shot" data-shot={l.n} src={`/scenes/stage-${id}-1024.webp`} srcset={sceneSrcset(`stage-${id}`, SHOT_WIDTHS)} sizes="100vw" width="2048" height="1152" style={`object-position:${fx * 100}% ${fy * 100}%`} alt="" loading="lazy" decoding="async" />;
+          })}
+        </div>
+        <div class="cine__mist" data-mist aria-hidden="true"><i></i><i></i></div>
+        <div class="cine__dust" data-dust aria-hidden="true"></div>
+        <div class="cine__shade" aria-hidden="true"></div>
+        <div class="cine__tags" aria-hidden="true">
+          {LAYERS.map((l) => {
+            const shelves = hudShelves(l);
+            const first = shelves[0];
+            if (!first) return null;
+            const lows = shelves.map((c) => c.min_price).filter((v): v is number => !!v);
+            const count = shelves.reduce((n, c) => n + (c.product_count ?? 0), 0);
+            const face = faces.get(first.id);
             return (
-              <li class="rp" data-part={p} style={`grid-area:${p}`}>
-                <img src={`/house/${f[0].file}`} srcset={srcset(f)} sizes="(max-width: 900px) 30vw, 18vw" width={f[1].w} height={f[1].h} alt="" loading="lazy" decoding="async" />
-                <span class="rp__key">{pad(partKey.get(p)!)}</span>
-              </li>
+              <a class="cine__tag" data-tag={l.n} tabindex="-1" href={face ? href(lang, 'product', { slug: face.slug }) : catHref(first)}>
+                <span class="cine__tag-head"><span class="cine__tag-n mono">{pad(l.n)} / {total}</span><span class="cine__tag-cat">{shelves.map((c) => (lang === 'sq' ? c.name_sq : c.name_en)).join(' + ')}</span></span>
+                {face && (
+                  <span class="cine__tag-pick">
+                    <span class="cine__tag-fig"><ProductPhoto src={face.image} brand={face.brand} model={face.model} /></span>
+                    <span class="cine__tag-name"><b>{face.brand}</b> {face.model.split(' (')[0]}</span>
+                  </span>
+                )}
+                <span class="cine__tag-meta mono">{t.products(count)} · {lows.length ? <>{t.from} {lek(Math.min(...lows), lang)}</> : t.noOffers} <span class="arrow">→</span></span>
+              </a>
             );
           })}
-        </ol>
-        <div class="hud" data-hud aria-hidden="true">
-          <div class="hud__marks" data-hud-marks></div>
-          <a class="hud__label" data-hud-label tabindex="-1" href={href(lang, 'shop')}>
-            <span class="hud__head"><span class="hud__n" data-hud-n></span><span class="hud__name" data-hud-name></span></span>
-            <span class="hud__cat" data-hud-cat></span>
-            <span class="hud__meta"><span data-hud-meta></span><span class="hud__end"><span data-hud-end></span>&nbsp;<span class="arrow">→</span></span></span>
-          </a>
         </div>
-        <p class="stage__stamp mono" data-stamp>{s.stamp}</p>
-      </div>
-      <figcaption class="stage__caption mono">
-        <span>{t.drawingTitle}</span>
-        <span data-caption-layer aria-live="polite"></span>
-      </figcaption>
-      <nav class="stage__keys" aria-label={t.layers}>
-        {LAYERS.map((l) => <a href={`#shtresa-${l.n}`} class="stage__key" data-key-link={l.n} title={l.name[lang]}><span>{pad(l.n)}</span></a>)}
-      </nav>
-    </figure>
+        <figcaption class="cine__caption mono">
+          <span>{t.drawingTitle}</span>
+          <span data-caption-layer aria-live="polite"></span>
+          <span class="cine__stamp">{s.stamp}</span>
+        </figcaption>
+        <nav class="stage__keys" aria-label={t.layers}>
+          {LAYERS.map((l) => <a href={`#shtresa-${l.n}`} class="stage__key" data-key-link={l.n} title={l.name[lang]}><span>{pad(l.n)}</span></a>)}
+        </nav>
+      </figure>
 
-    <ol class="chapters" aria-label={t.layers}>
-      {LAYERS.map((l) => {
-        const [fact, ...more] = factsOf(l).map(factFor);
-        const catMeta = (c: Cat) => `${t.products(c.product_count ?? 0)} · ${c.min_price ? `${t.from} ${lek(c.min_price, lang)}` : t.noOffers}`; // no-break space: "nga" stays with the price on phones
-        // the HUD label: the shelf (or both shelves) of what this chapter lifts out of the house
-        const shelves = hudShelves(l);
-        const first = shelves[0];
-        const lows = shelves.map((c) => c.min_price).filter((v): v is number => !!v);
-        const hudMeta = shelves.length > 1
-          ? `${t.products(shelves.reduce((n, c) => n + (c.product_count ?? 0), 0))} · ${lows.length ? `${t.from} ${lek(Math.min(...lows), lang)}` : t.noOffers}`
-          : first && catMeta(first);
-        return (
-          <li
-            class="chapter"
-            id={`shtresa-${l.n}`}
-            data-chapter={l.n}
-            data-parts={(chapterParts.get(l.n) ?? []).join(' ')}
-            data-hud-cat={first ? shelves.map((c) => (lang === 'sq' ? c.name_sq : c.name_en)).join(' + ') : undefined}
-            data-hud-meta={hudMeta || undefined}
-            data-hud-multi={shelves.length > 1 ? '' : undefined}
-            data-hud-href={first ? href(lang, 'category', { slug: lang === 'sq' ? first.slug_sq : first.slug_en }) : undefined}
-          >
-            <p class="chapter__key mono"><span class="tag tag--copper">{pad(l.n)} / {total}</span> {l.short[lang]}</p>
-            <h2 class="title chapter__title">{l.name[lang]}</h2>
-            {fact && <p class="chapter__fact"><strong class="chapter__value figure">{fact.value}</strong> {fact.text}</p>}
-            {fact?.source && <p class="small muted mono chapter__src">{t.source}: <a href={fact.source.url} rel="noopener" target="_blank">{fact.source.label}</a>{fact.also && <>; <a href={fact.also.url} rel="noopener" target="_blank">{fact.also.label}</a></>}</p>}
-            {fact?.product && <p class="small muted mono chapter__src">{t.datasheet}: <a href={href(lang, 'product', { slug: fact.product.slug })}>{fact.product.name}</a></p>}
-            {more.map((x) => (
-              <p class="chapter__extra">
-                <span class="chapter__extra-value figure">{x.value}</span>{/^[:;,.]/.test(x.text) ? '' : ' '}{x.text}
-                {x.source && <> <a class="small mono muted" href={x.source.url} rel="noopener" target="_blank">↗ {x.source.label}</a></>}
-                {x.also && <> <a class="small mono muted" href={x.also.url} rel="noopener" target="_blank">↗ {x.also.label}</a></>}
-                {x.product && <> <a class="small mono muted" href={href(lang, 'product', { slug: x.product.slug })}>{t.datasheet}: {x.product.name}</a></>}
-              </p>
-            ))}
-            <ul class="chapter__cats" aria-label={t.inShop}>
-              {l.categories.map((s) => {
-                const c = bySlug.get(s);
-                if (!c) return null;
-                return (
-                  <li>
-                    <a href={href(lang, 'category', { slug: lang === 'sq' ? c.slug_sq : c.slug_en })}>
-                      <span class="chapter__cat">{lang === 'sq' ? c.name_sq : c.name_en}</span>
-                      <span class="mono small chapter__meta">{catMeta(c)}</span>
-                      <span class="arrow" aria-hidden="true">→</span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </li>
-        );
-      })}
-      <li class="chapter chapter--final" id="ndize" data-chapter={finaleN}>
-        <p class="chapter__key mono"><span class="tag tag--sun">{t.final.key}</span></p>
-        <h2 class="title title--xl chapter__title">{t.final.title}</h2>
-        <p>{t.final.text}</p>
-        {tirana && (
-          <div class="final" data-final data-cities={JSON.stringify(cities.map((c) => ({ s: c.slug, y: Math.round(c.pv_yield * 5) })))}>
-            <label class="eyebrow" for="final-city">{t.final.city}</label>
-            <select class="select final__select" id="final-city" data-final-city>
-              {cities.map((c) => <option value={c.slug} selected={c.slug === tirana.slug}>{lang === 'sq' ? c.name_sq : c.name_en}</option>)}
-            </select>
-            <p class="final__out"><span class="final__num figure" data-final-num>{num(Math.round(tirana.pv_yield * 5), 0, lang).replace(/ /g, ' ')}</span> <span class="mono">{t.final.perYear}</span></p>
-            <p class="small muted mono">{t.final.note}</p>
+      <ol class="chapters" aria-label={t.layers}>
+        {LAYERS.map((l) => {
+          const [fact, ...more] = factsOf(l).map(factFor);
+          const catMeta = (c: Cat) => `${t.products(c.product_count ?? 0)} · ${c.min_price ? `${t.from} ${lek(c.min_price, lang)}` : t.noOffers}`; // no-break space: "nga" stays with the price on phones
+          const id = shotFor.get(l.n);
+          const shot = id ? SHOTS[id] : null;
+          return (
+            <li
+              class="chapter"
+              id={`shtresa-${l.n}`}
+              data-chapter={l.n}
+              data-spot={shot ? `${shot.spot[0]} ${shot.spot[1]}` : undefined}
+              data-zoom={shot?.zoom}
+              data-focus={shot ? `${shot.focus[0]} ${shot.focus[1]}` : undefined}
+            >
+              <div class="chapter__card">
+                {id && <img class="chapter__shot" src={`/scenes/stage-${id}-1024.webp`} srcset={sceneSrcset(`stage-${id}`, SHOT_WIDTHS)} sizes="(max-width: 900px) 100vw, 40vw" width="2048" height="1152" alt="" loading="lazy" decoding="async" />}
+                <p class="chapter__key mono"><span class="tag tag--copper">{pad(l.n)} / {total}</span> {l.short[lang]}</p>
+                <h2 class="title chapter__title">{l.name[lang]}</h2>
+                {fact && <p class="chapter__fact"><strong class="chapter__value figure">{fact.value}</strong> {fact.text}</p>}
+                {fact?.source && <p class="small muted mono chapter__src">{t.source}: <a href={fact.source.url} rel="noopener" target="_blank">{fact.source.label}</a>{fact.also && <>; <a href={fact.also.url} rel="noopener" target="_blank">{fact.also.label}</a></>}</p>}
+                {fact?.product && <p class="small muted mono chapter__src">{t.datasheet}: <a href={href(lang, 'product', { slug: fact.product.slug })}>{fact.product.name}</a></p>}
+                {more.map((x) => (
+                  <p class="chapter__extra">
+                    <span class="chapter__extra-value figure">{x.value}</span>{/^[:;,.]/.test(x.text) ? '' : ' '}{x.text}
+                    {x.source && <> <a class="small mono muted" href={x.source.url} rel="noopener" target="_blank">↗ {x.source.label}</a></>}
+                    {x.also && <> <a class="small mono muted" href={x.also.url} rel="noopener" target="_blank">↗ {x.also.label}</a></>}
+                    {x.product && <> <a class="small mono muted" href={href(lang, 'product', { slug: x.product.slug })}>{t.datasheet}: {x.product.name}</a></>}
+                  </p>
+                ))}
+                <ul class="chapter__cats" aria-label={t.inShop}>
+                  {l.categories.map((s) => {
+                    const c = bySlug.get(s);
+                    if (!c) return null;
+                    return (
+                      <li>
+                        <a href={href(lang, 'category', { slug: lang === 'sq' ? c.slug_sq : c.slug_en })}>
+                          <span class="chapter__cat">{lang === 'sq' ? c.name_sq : c.name_en}</span>
+                          <span class="mono small chapter__meta">{catMeta(c)}</span>
+                          <span class="arrow" aria-hidden="true">→</span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </li>
+          );
+        })}
+        <li class="chapter chapter--final" id="ndize" data-chapter={finaleN}>
+          <div class="chapter__card">
+            <p class="chapter__key mono"><span class="tag tag--sun">{t.final.key}</span></p>
+            <h2 class="title title--xl chapter__title">{t.final.title}</h2>
+            <p>{t.final.text}</p>
+            {tirana && (
+              <div class="final" data-final data-cities={JSON.stringify(cities.map((c) => ({ s: c.slug, y: Math.round(c.pv_yield * 5) })))}>
+                <label class="eyebrow" for="final-city">{t.final.city}</label>
+                <select class="select final__select" id="final-city" data-final-city>
+                  {cities.map((c) => <option value={c.slug} selected={c.slug === tirana.slug}>{lang === 'sq' ? c.name_sq : c.name_en}</option>)}
+                </select>
+                <p class="final__out"><span class="final__num figure" data-final-num>{num(Math.round(tirana.pv_yield * 5), 0, lang).replace(/ /g, ' ')}</span> <span class="mono">{t.final.perYear}</span></p>
+                <p class="small muted mono">{t.final.note}</p>
+              </div>
+            )}
+            <a class="btn" href={href(lang, 'calculator')}>{t.final.calc} <span class="arrow" aria-hidden="true">→</span></a>
           </div>
-        )}
-        <a class="btn" href={href(lang, 'calculator')}>{t.final.calc} <span class="arrow" aria-hidden="true">→</span></a>
-      </li>
-    </ol>
+        </li>
+      </ol>
+    </div>
   </section>
 
   <HomeTeasers lang={lang} />

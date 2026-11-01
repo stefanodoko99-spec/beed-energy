@@ -1,36 +1,40 @@
 # BeeD Energy — image assets
 
-## Realistic house renders (`public/house/`)
+## Hero scenes (`public/scenes/hero-house-*`, `dusk-house-*`, `battery-grass-*`)
 
-**These are AI-generated illustrations, not photos of a real building, installation or product.** No brand, model or seller is shown; any resemblance of an appliance to a real product is accidental. Do not caption them as a real home or as a specific product from the catalogue.
+**AI-generated illustrations, not photos.** Made on 2026-11-01 for the Mist + Volt redesign, after the client's glowing-house reference.
+
+| File | Where | What it is |
+|---|---|---|
+| `hero-house-{960,1440,2048}.webp` | home hero; the stage's reference | A modern glass-gabled house at dusk in sage mist, its roof covered with solar panels, thin orange LED lines on the eaves, a lone tree. |
+| `dusk-house-{960,1440,2048}.webp` | footer hero, seller band, packages card | A second dusk house in the same light. |
+| `battery-grass-{…}.webp` | hero's battery card | A white home battery cabinet with a glowing ring, standing in tall grass. |
+
+- **Model:** FLUX.1 [schnell] (Black Forest Labs, Apache 2.0 weights) through its public Hugging Face Space (black-forest-labs/FLUX.1-schnell), anonymous; its free GPU quota stopped the batch after three images. Prompts and raw files stayed in the session scratchpad.
+
+## Stage scenes (`public/scenes/stage-*.webp`)
+
+**AI-generated illustrations, not photos of a real building, installation or product.** No brand or model is meant to be shown; marks the model drew (a car badge, pseudo-lettering on the inverter, the battery and the heat pump) were painted out. Do not caption them as a real home or as a specific product from the catalogue.
 
 | File | What it is |
 |---|---|
-| `base-1600.webp`, `base-900.webp` | The house: a two-storey Albanian family house in daylight, isometric ¾ view from the front-right, white render walls, terracotta tile roof with an 8-panel PV array and a tilted solar thermal collector, garage with driveway and wall EV charger, heat pump, inverter/battery unit and meter box on the right wall. Transparent background with a soft ink contact shadow. |
-| `base-dusk-1600.webp`, `base-dusk-900.webp` | The same house at blue hour with lit windows (for the finale, "Ndize"). Same canvas and crop as the day file, so the two can be cross-faded. |
-| `part-pv-{800,400}.webp` | Six PV panels on aluminium rails. |
-| `part-inverter-{800,400}.webp` | Wall-mounted solar inverter. |
-| `part-battery-{800,400}.webp` | Stacked home battery (LFP modules). |
-| `part-heatpump-{800,400}.webp` | Air-to-water heat pump outdoor unit. |
-| `part-swh-{800,400}.webp` | Flat-plate solar water heater (collector + tank). |
-| `part-ev-{800,400}.webp` | Wall EV charger with coiled cable. |
-| `part-meter-{800,400}.webp` | Meter cabinet with digital meter and breakers. |
-| `part-envelope-{800,400}.webp` | Building envelope: stone wool / EPS board stack in front of a PVC window (two renders composited). |
-| `manifest.json` | Pixel sizes, byte sizes, each object's bounding box, and for the house the centre of every piece of equipment (pv, swh, heatpump, inverter, battery, ev, meter, windows) in the 1600-wide image, for the stage's hotspots. Multiply by 0.5625 for the 900 files. |
+| `stage-house-{960,1440,2048}.webp` | The wide shot: the hero's dusk house (glass gable, solar roof, orange edge lines) with its equipment added: inverter, battery cabinet and meter on the side wall, an EV charging from a wallbox, an air-to-water heat pump on the grass. Graded down to the hero's levels. |
+| `stage-pv-{1024,2048}.webp` | Close-up: wet black panels along the roof slope, the orange edge line. |
+| `stage-inverter-…` | Close-up: the white wall inverter with its display and cables. |
+| `stage-battery-…` | Close-up: the tall white battery cabinet with its glowing status strip, the wallbox beside it. |
+| `stage-heatpump-…` | Close-up: the heat pump on the grass, vapour rising, the car out of focus. |
+| `stage-ev-…` | Close-up: the wallbox with its glowing ring, the cable to the car. |
+| `stage-meter-…` | Close-up: the grey meter cabinet on the wall. |
+| `stage-envelope-…` | Close-up: the corner of the triple-glazed gable facade. |
 
-Part sizes (800 / 400) are the long side. All files are WebP with alpha; the 1600 house files are ≤ 185 KB, the parts ≤ 72 KB.
+- **Model:** FLUX.2 [klein] 4B on Cloudflare Workers AI (as below), every image an edit of a reference: the house of the hero photo (`hero-house-2048`), the close-ups of the chosen equipped house; the heat pump and the meter of a 640 × 360 crop of it around them (they are too small in the wide shot to come back as close-ups otherwise). 26 renders on 2026-11-01, about 9,500 of the 10,000 daily neurons. Kept: house 3, pv 1, inverter 1, battery 2, heatpump 3, ev 2, meter 3, envelope 1.
+- **Prompts:** `tools/art/stage-prompts.mjs` (runner `tools/art/flux2.mjs`).
+- **Post-processing** (sharp): marks painted out with a local blur of their surroundings; the house graded with `linear([0.80, 0.84, 0.84], [-4, -2, -2])` to the hero's levels, the close-ups with a slight cool tint; WebP q 70–74 (the meter median-filtered first, its grain cost 280 KB). The 2048 files are 41–169 KB.
+- Spots, zooms and focus points: `src/lib/stage-scenes.ts`.
 
-- **Model:** FLUX.2 [klein] 4B, `@cf/black-forest-labs/flux-2-klein-4b`, run on Cloudflare Workers AI inside the account's free daily allowance (32 renders, about 6,700 of the 10,000 daily neurons). The dusk image is a FLUX.2 edit with the day render as reference image.
-- **Prompts:** `tools/art/house-prompts.mjs` (rerunnable: `node tools/art/house-prompts.mjs <raw dir> --only base,part-pv --n 2`; the header lists which candidate of each prompt was kept).
-- **Date:** 2026-10-27.
+## Earlier house renders (`public/house/`)
+
+The isometric house of 2026-10-27 (FLUX.2 [klein] 4B on Workers AI, prompts in `tools/art/house-prompts.mjs`) left the home page on 2026-11-01. Only `part-pv-{400,800}.webp` (six PV panels on rails, transparent background) remains: the renewables guide's sheet uses it. **AI-generated illustration, not a photo.** Licence and model notes below apply to it.
+
+- **Model:** FLUX.2 [klein] 4B, `@cf/black-forest-labs/flux-2-klein-4b`, run on Cloudflare Workers AI inside the account's free daily allowance.
 - **Licence:** the FLUX.2 [klein] 4B weights are released by Black Forest Labs under Apache 2.0 (open weights, commercial use allowed). Workers AI lists Black Forest Labs' terms of service for this model (<https://bfl.ai/legal/terms-of-service>); read them once before launch. The 9B variant of the same model is non-commercial and was not used.
-- **Post-processing** (sharp, scripts kept outside the repo): flat background removed by an edge flood fill guided by gradients, with hand-traced polygons where a white wall matched the grey background; soft contact shadow kept as semi-transparent ink; 1 px feathered edge; trimmed to content. Small pseudo-lettering the model drew on the EV charger, the heat pump and the meter face was painted out. The dusk render was scaled 0.954 and shifted (+10, +6) px to line up with the day render.
-
-### Known weaknesses
-- The house has 8 PV panels, not 12, and its solar water heater is a collector on a tilt frame with no tank on the roof (a forced-circulation system, tank indoors). The `part-swh` image does show a tank.
-- No separate battery cabinet on the house: the white wall unit stands for a hybrid inverter + battery (the `battery` hotspot sits on its lower half). The meter is the small grey box above it.
-- The parts were generated on their own, so their styling does not match the equipment drawn on the house exactly (e.g. the house's heat pump has its fan on the side, `part-heatpump` on the front).
-- Dusk vs day: a few pixels of mismatch remain around the tilted collector and the roof's right tip, and the right-wall patio door became a lit front door at dusk.
-- The meter face keeps some faint smudges.
-
-Raw renders, contact sheets and the cut-out scripts are not in the repository (they lived in the session scratchpad).
