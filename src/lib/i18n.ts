@@ -26,6 +26,12 @@ export const ROUTES = {
   contact: { sq: '/kontakt', en: '/en/contact' },
   terms: { sq: '/kushtet', en: '/en/terms' },
   privacy: { sq: '/privatesia', en: '/en/privacy' },
+  track: { sq: '/gjurmo-porosine', en: '/en/track-order' },
+  quiz: { sq: '/cili-sistem', en: '/en/which-system' },
+  builder: { sq: '/nderto-sistemin', en: '/en/build-your-system' },
+  installers: { sq: '/instaluesit', en: '/en/installers' },
+  solarCity: { sq: '/energji-diellore/:slug', en: '/en/solar-energy/:slug' },
+  projects: { sq: '/projekte', en: '/en/projects' },
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

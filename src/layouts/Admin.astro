@@ -37,7 +37,7 @@ const helpKey = help === false || bare || !user ? null : help ?? (isHelpKey(sect
 const idx = section ? NAV.findIndex((n) => n.key === section) : -1;
 const sheetNo = idx >= 0 ? `A-${String(idx + 1).padStart(2, '0')}` : 'A-00';
 const counts = user ? await navCounts(user) : null;
-const countFor = (k: NavKey) => (counts ? (k === 'orders' ? counts.orders : k === 'quotes' ? counts.quotes : k === 'applications' ? counts.applications : k === 'messages' ? counts.messages : 0) : 0);
+const countFor = (k: NavKey) => (counts && k in counts ? counts[k as keyof typeof counts] : 0);
 const items = user ? NAV.filter((n) => !n.adminOnly || user.role === 'admin') : [];
 const seller = user ? await sellerName(user) : null;
 const other: Lang = lang === 'sq' ? 'en' : 'sq';

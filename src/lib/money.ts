@@ -18,13 +18,44 @@ export function groupDigits(n: number, sep = THIN): string {
   return (neg ? '−' : '') + out;
 }
 
-/** 124 900 L — the short form Albanian price tags use. */
+// The display currency. Amounts are always lekë; a visitor may choose to see euros (lib/currency.ts, cookie
+// beed_cur). On the server the request's choice comes through currency.ts; in the browser from <html data-cur
+// data-eur-rate> (Site.astro), so the basket and calculator scripts show the same currency as the page.
+type Display = { cur: 'all' | 'eur'; rate: number };
+let serverDisplay: (() => Display | undefined) | null = null;
+export function setDisplaySource(fn: () => Display | undefined) {
+  serverDisplay = fn;
+}
+/** The page's display currency (undefined = lekë), for formatters outside this file. */
+export function displayCurrency(): Display | undefined {
+  return display();
+}
+function display(): Display | undefined {
+  if (typeof document !== 'undefined') {
+    const d = document.documentElement.dataset;
+    const rate = Number(d.eurRate);
+    return d.cur === 'eur' && rate > 0 ? { cur: 'eur', rate } : undefined;
+  }
+  return serverDisplay?.();
+}
+/** € 1 249 — whole euros, cents under €100. */
+function inEuro(all: number, rate: number, lang: Lang): string {
+  const v = all / rate;
+  if (v < 100) return `€${NBSP}${v.toFixed(2).replace('.', lang === 'sq' ? ',' : '.')}`;
+  return `€${NBSP}${groupDigits(v, lang === 'sq' ? THIN : ',')}`;
+}
+
+/** 124 900 L — the short form Albanian price tags use (or euros, when the visitor chose them). */
 export function lek(n: number, lang: Lang = 'sq'): string {
+  const d = display();
+  if (d?.cur === 'eur') return inEuro(n, d.rate, lang);
   return `${groupDigits(n, lang === 'sq' ? THIN : ',')}${NBSP}${lang === 'sq' ? 'L' : 'ALL'}`;
 }
 
-/** 124 900 lekë — the long form for sentences and totals. */
+/** 124 900 lekë — the long form for sentences and totals (or euros, when the visitor chose them). */
 export function lekLong(n: number, lang: Lang = 'sq'): string {
+  const d = display();
+  if (d?.cur === 'eur') return inEuro(n, d.rate, lang);
   return `${groupDigits(n, lang === 'sq' ? THIN : ',')}${NBSP}${lang === 'sq' ? 'lekë' : 'ALL'}`;
 }
 

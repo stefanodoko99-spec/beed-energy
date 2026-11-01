@@ -1,0 +1,100 @@
+---
+// A city's solar page: PVGIS yield, what a 3/5/10 kWp system produces there, the calculator's own result for a
+// typical household (the same maths as /kalkulatori-diellor), the monthly curve and the sellers based in the city.
+import Site from '../layouts/Site.astro';
+import ChatButtons from '../components/ChatButtons.astro';
+import '../styles/pages.css';
+import { all } from '../lib/db';
+import { href, other, type Lang } from '../lib/i18n';
+import { lekLong, num } from '../lib/money';
+import { runCalc, readCalcInput } from '../lib/pages-solar';
+import { solarAssumptions } from '../lib/solar';
+import { tx } from '../i18n/extras';
+import { tp } from '../i18n/pages';
+
+interface Props { lang: Lang; city: { id: number; slug: string; name_sq: string; name_en: string; pv_yield: number; pv_monthly_json: string | null; zone: number } }
+const { lang, city } = Astro.props;
+const t = tx(lang).city;
+const w = tp(lang);
+const name = lang === 'sq' ? city.name_sq : city.name_en;
+const y = num(Math.round(city.pv_yield), 0, lang);
+const a = await solarAssumptions();
+const sizes = [3, 5, 10].map((k) => ({ k, kwh: Math.round(k * city.pv_yield), panels: Math.ceil((k * 1000) / a.panelWp) }));
+const monthly: number[] = city.pv_monthly_json ? JSON.parse(city.pv_monthly_json) : [];
+const peak = Math.max(1, ...monthly);
+// a household using 400 kWh a month, through the calculator itself
+const calc = await runCalc(readCalcInput(new URLSearchParams({ qyteti: city.slug, mode: 'kwh', kwh: '400' })));
+const sellers = await all<any>("SELECT slug, name, kind, phone, verified FROM sellers WHERE status = 'active' AND city_id = ? ORDER BY verified DESC, name", city.id);
+const others = await all<{ slug: string; name_sq: string; name_en: string }>('SELECT slug, name_sq, name_en FROM cities WHERE pv_yield IS NOT NULL AND id != ? ORDER BY sort, name_sq', city.id);
+const kindWord: Record<string, Record<Lang, string>> = { supplier: { sq: 'Furnitor', en: 'Supplier' }, installer: { sq: 'Instalues', en: 'Installer' }, manufacturer: { sq: 'Prodhues', en: 'Manufacturer' }, contractor: { sq: 'Kompani ndërtimi', en: 'Building company' } };
+const cParam = lang === 'sq' ? 'qyteti' : 'city';
+const example = lang === 'sq'
+  ? `Një shtëpi që harxhon 400 kWh në muaj në ${name} ka nevojë për rreth ${num(calc.kwp, 1, lang)} kWp (${calc.panels} panele).`
+  : `A home using 400 kWh a month in ${name} needs about ${num(calc.kwp, 1, lang)} kWp (${calc.panels} panels).`;
+const jsonld = { '@context': 'https://schema.org', '@type': 'WebPage', name: t.h1(name), inLanguage: lang, about: { '@type': 'City', name } };
+---
+<Site lang={lang} title={t.title(name)} description={t.description(name, y)} alternate={href(other(lang), 'solarCity', { slug: city.slug })} jsonld={[jsonld]}>
+  <header class="wrap sheet-head pg-head">
+    <nav aria-label={lang === 'sq' ? 'Gjurma' : 'Breadcrumb'}>
+      <ol class="crumbs"><li><a href={href(lang, 'home')}>{w.crumbsHome}</a></li><li><a href={href(lang, 'calculator')}>{lang === 'sq' ? 'Kalkulatori' : 'Calculator'}</a></li><li aria-current="page">{name}</li></ol>
+    </nav>
+    <p class="eyebrow">{t.eyebrow} · {t.zone(city.zone)}</p>
+    <h1 class="poster poster--s pg-poster">{t.h1(name)}</h1>
+    <div class="pg-head__row rule-double">
+      <p class="lede">{t.lede(name, y)}</p>
+      <p class="row"><a class="btn" href={href(lang, 'quiz', {}, { [cParam]: city.slug })}>{t.quiz} <span class="arrow" aria-hidden="true">→</span></a><a class="btn btn--ghost" href={href(lang, 'calculator', {}, { qyteti: city.slug })}>{t.cta}</a></p>
+    </div>
+  </header>
+
+  <div class="wrap scity">
+    <section aria-labelledby="sc-sizes">
+      <h2 class="title" id="sc-sizes">{t.sizes}</h2>
+      <ul class="scity__sizes">
+        {sizes.map((s) => (
+          <li><span class="scity__k">{t.size(s.k)}</span><span class="scity__kwh figure">{num(s.kwh, 0, lang)}</span><span class="mono small muted">{t.perYear} · {t.panelsApprox(s.panels)}</span></li>
+        ))}
+      </ul>
+      {calc.ok && (
+        <p class="scity__example">
+          {example}{' '}
+          {calc.annualSaving !== null && (lang === 'sq' ? `Kursen rreth ${lekLong(Math.round(calc.annualSaving), lang)} në vit` : `It saves about ${lekLong(Math.round(calc.annualSaving), lang)} a year`)}
+          {calc.paybackYears !== null && (lang === 'sq' ? `, dhe pajisjet shlyhen në rreth ${num(calc.paybackYears, 1, lang)} vjet.` : `, and the equipment pays back in about ${num(calc.paybackYears, 1, lang)} years.`)}
+          {' '}<a href={href(lang, 'calculator', {}, { qyteti: city.slug, mode: 'kwh', kwh: 400 })}>{t.cta} →</a>
+        </p>
+      )}
+    </section>
+
+    {monthly.length === 12 && (
+      <section aria-labelledby="sc-month">
+        <h2 class="title" id="sc-month">{t.monthly}</h2>
+        <ol class="scity__months">
+          {monthly.map((v, i) => (
+            <li style={`--v:${(v / peak).toFixed(3)}`}><span class="scity__bar" aria-hidden="true"></span><span class="mono small">{num(Math.round(v), 0, lang)}</span><span class="mono small muted">{t.months[i]}</span></li>
+          ))}
+        </ol>
+        <p class="small muted">{t.source}</p>
+      </section>
+    )}
+
+    <section aria-labelledby="sc-sellers">
+      <h2 class="title" id="sc-sellers">{t.sellers(name)}</h2>
+      {sellers.length === 0 ? <p class="muted">{t.noSellers}</p> : (
+        <ul class="ins__list">
+          {sellers.map((s) => (
+            <li class="ins__card">
+              <p class="ins__name"><a href={href(lang, 'seller', { slug: s.slug })}>{s.name}</a></p>
+              <p class="mono small muted">{kindWord[s.kind]?.[lang] ?? s.kind}</p>
+              <ChatButtons lang={lang} phone={s.phone} seller={s.name} compact />
+            </li>
+          ))}
+        </ul>
+      )}
+      <p><a class="link-arrow" href={href(lang, 'installers', {}, { [cParam]: city.slug })}><span>{tx(lang).installers.h1}</span><span class="arrow" aria-hidden="true">→</span></a></p>
+    </section>
+
+    <nav aria-labelledby="sc-others">
+      <h2 class="eyebrow" id="sc-others">{t.others}</h2>
+      <ul class="scity__others">{others.map((c) => <li><a href={href(lang, 'solarCity', { slug: c.slug })}>{lang === 'sq' ? c.name_sq : c.name_en}</a></li>)}</ul>
+    </nav>
+  </div>
+</Site>

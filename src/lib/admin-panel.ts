@@ -12,8 +12,8 @@ import { ta, type AdminWords } from '../i18n/admin';
 
 export const ADMIN_LANG_COOKIE = 'beed_admin_lang';
 
-export type NavKey = 'dashboard' | 'orders' | 'products' | 'categories' | 'sellers' | 'offers' | 'monitor' | 'quotes' | 'applications' | 'messages' | 'settings';
-/** The rail, in sheet order (A-01 … A-11). Admin-only sections are hidden from sellers and refused by their pages. */
+export type NavKey = 'dashboard' | 'orders' | 'products' | 'categories' | 'sellers' | 'offers' | 'monitor' | 'quotes' | 'applications' | 'messages' | 'reviews' | 'alerts' | 'projects' | 'settings';
+/** The rail, in sheet order (A-01 … A-14). Admin-only sections are hidden from sellers and refused by their pages. */
 export const NAV: { key: NavKey; href: string; adminOnly: boolean }[] = [
   { key: 'dashboard', href: '/admin', adminOnly: false },
   { key: 'orders', href: '/admin/orders', adminOnly: false },
@@ -25,6 +25,9 @@ export const NAV: { key: NavKey; href: string; adminOnly: boolean }[] = [
   { key: 'quotes', href: '/admin/quotes', adminOnly: false },
   { key: 'applications', href: '/admin/applications', adminOnly: true },
   { key: 'messages', href: '/admin/messages', adminOnly: true },
+  { key: 'reviews', href: '/admin/reviews', adminOnly: true },
+  { key: 'alerts', href: '/admin/alerts', adminOnly: true },
+  { key: 'projects', href: '/admin/projects', adminOnly: true },
   { key: 'settings', href: '/admin/settings', adminOnly: true },
 ];
 export const PAGE_SIZE = 50;
@@ -106,6 +109,14 @@ export async function navCounts(u: User) {
     quotes: (await get<{ n: number }>("SELECT COUNT(*) AS n FROM quote_requests WHERE status = 'open'"))!.n,
     applications: isAdmin(u) ? (await get<{ n: number }>("SELECT COUNT(*) AS n FROM seller_applications WHERE status = 'new'"))!.n : 0,
     messages: isAdmin(u) ? (await get<{ n: number }>('SELECT COUNT(*) AS n FROM contact_messages WHERE handled = 0'))!.n : 0,
+    reviews: isAdmin(u) ? (await get<{ n: number }>("SELECT COUNT(*) AS n FROM reviews WHERE status = 'pending'"))!.n : 0,
+    // alerts whose target the lowest live price has reached, not yet marked as sent
+    alerts: isAdmin(u)
+      ? (await get<{ n: number }>(
+          `SELECT COUNT(*) AS n FROM price_alerts a WHERE a.notified_at IS NULL AND a.target_all >= (
+             SELECT MIN(o.price_all) FROM offers o JOIN sellers s ON s.id = o.seller_id WHERE o.product_id = a.product_id AND o.active = 1 AND s.status = 'active')`,
+        ))!.n
+      : 0,
   };
 }
 

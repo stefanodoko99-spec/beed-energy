@@ -65,13 +65,22 @@ async function sha256Hex(data: ArrayBuffer): Promise<string> {
 
 /** Stores one product photo and returns what product_images needs. Throws MediaError on a bad file. */
 export async function putProductImage(productId: number, file: File): Promise<{ path: string; width: number | null; height: number | null }> {
+  return putImage(`p/${productId}`, file);
+}
+
+/** A project photo for the installation gallery (admin/projects): j/<project id>/<hash>. */
+export async function putProjectImage(projectId: number, file: File): Promise<{ path: string; width: number | null; height: number | null }> {
+  return putImage(`j/${projectId}`, file);
+}
+
+async function putImage(folder: string, file: File): Promise<{ path: string; width: number | null; height: number | null }> {
   if (!file.size) throw new MediaError('empty');
   if (file.size > MAX_BYTES) throw new MediaError('size');
   const data = await file.arrayBuffer();
   const bytes = new Uint8Array(data);
   const type = sniff(bytes);
   if (!type) throw new MediaError('type');
-  const key = `p/${productId}/${(await sha256Hex(data)).slice(0, 20)}.${TYPES[type]}`;
+  const key = `${folder}/${(await sha256Hex(data)).slice(0, 20)}.${TYPES[type]}`;
   await env.MEDIA.put(key, data, { metadata: { type } });
   const size = imageSize(bytes, type);
   return { path: MEDIA_PREFIX + key, width: size?.width ?? null, height: size?.height ?? null };

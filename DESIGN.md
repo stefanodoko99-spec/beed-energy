@@ -99,6 +99,21 @@ Home, after the hero. Rebuilt 2026-11-01 at the client's request ("the house peo
 | 13 | Word-by-word manifesto (Caeli) | Home manifesto under the poster |
 | 14 | Mask/slit page transition (KPR, Fluid Glass) | Cross-document view transition: the new page slides in like a drawing sheet |
 
+## Buyer tools and trust (2026-11-01)
+Each in both languages, styled with the site's cards and pills; words in `src/i18n/extras.ts`.
+| Feature | Where | How |
+|---|---|---|
+| "Which system do I need?" | `/cili-sistem`, `views/Quiz.astro`, `scripts/quiz.ts` | Five questions; a plain GET to the calculator without scripts; with scripts one question at a time, then `/api/solar` (the calculator's own sizing) shows the kit, total, saving and payback. |
+| Build your own system | `/nderto-sistemin`, `views/Builder.astro`, `scripts/builder.ts` | Real products with their cheapest live offer; checks: inverter PV limit, panel/inverter ratio 0.75–1.4, phases against the house supply, inverter–battery pairs the makers list (`content/battery-compat.ts`); adds all lines to the basket in one request. |
+| Installer finder | `/instaluesit`, `views/Installers.astro` | Installers and building companies by city; a visit request is a quote request addressed to one installer (`quote_requests.seller_id`), answered in the usual quote thread. |
+| City solar pages | `/energji-diellore/<city>`, `views/SolarCity.astro` | PVGIS yield, 3/5/10 kWp production, the calculator's result for a 400 kWh/month home, monthly curve, sellers in the city. Linked from the footer and the sitemap. |
+| Order tracking | `/gjurmo-porosine`, `lib/track.ts` | Order code + the last 6 digits of the phone open the order's own page; one answer for every miss; rate-limited. |
+| Verified reviews | `lib/reviews.ts`, `/api/review`, order page, product page, `admin/reviews` | Only from a delivered order's page, once per product; shown after approval; `aggregateRating` only from real approved reviews. |
+| WhatsApp · Viber · call | `components/ChatButtons.astro`, `lib/chat.ts` | On offers, installer and city cards, when the seller has a phone; Albanian numbers normalised to +355. |
+| Price alerts | product page form (existing), `admin/alerts` | "Due" when the cheapest live offer reaches the target; sent by hand from a pre-written e-mail until an e-mail service is connected. |
+| Lekë / euro | `lib/currency.ts`, `components/CurrencySwitch.astro`, `/api/currency` | Display only, at the admin's rate (`settings.currency.eurAll`); every `lek()` call follows the visitor's choice (AsyncLocalStorage on the server, `<html data-cur>` in the browser); checkout, order pages and the admin stay in lekë. |
+| Completed projects | `/projekte`, `admin/projects` | Real installations by sellers, shown only when published with the owner's consent; an honest empty page until then. |
+
 ## Motion rules
 - UI 150–250 ms ease-out; choreography (loader, house, offers fan-out, page transition) only, skippable.
 - Micro-interactions (2026-10-28, global.css "micro-interactions" + src/scripts/micro.ts), all off with `html[data-motion=off]`: buttons lift on hover with a light sweep on filled ones and press down to 95 %; a pressed filled button throws a small burst of leaf-green and amber sparks; the basket button turns `--leaf` with a ✓ once the item is in; product cards rise 4 px, the photo zooms 4.5 % and the energy key turns into a diamond; category thumbnails tilt; the logo's label tips over on hover; menu links draw a green underline; dock icons squash when pressed and the current one hops on arrival; toasts pop in with a green line counting down their 4.2 s; a leaf-to-sun charge line along the top edge fills with scroll (scroll-driven, hidden where unsupported).

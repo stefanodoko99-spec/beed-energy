@@ -1,0 +1,9 @@
+---
+import SolarCity from '../../views/SolarCity.astro';
+import NotFound from '../../views/NotFound.astro';
+import { get } from '../../lib/db';
+
+const city = await get<any>('SELECT id, slug, name_sq, name_en, pv_yield, pv_monthly_json, zone FROM cities WHERE slug = ? AND pv_yield IS NOT NULL', Astro.params.slug ?? '');
+if (!city) Astro.response.status = 404;
+---
+{city ? <SolarCity lang="sq" city={city} /> : <NotFound lang="sq" />}

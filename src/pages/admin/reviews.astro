@@ -1,0 +1,90 @@
+---
+// A-12 Verified reviews (lib/reviews.ts): written from delivered orders, shown on the product page once approved.
+import Admin from '../../layouts/Admin.astro';
+import St from './_parts/St.astro';
+import { adminCtx, fstr, withQuery, forbiddenPage } from '../../lib/admin-panel';
+import { isAdmin } from '../../lib/admin';
+import { csrfOk } from '../../lib/auth';
+import { all, audit, run } from '../../lib/db';
+import { date, href } from '../../lib/i18n';
+
+const c = adminCtx(Astro);
+if ('redirect' in c) return Astro.redirect(c.redirect, 303);
+const { lang, t, user, url, flash } = c;
+if (!isAdmin(user)) return forbiddenPage(Astro);
+const sq = lang === 'sq';
+const w = {
+  title: sq ? 'Vlerësimet' : 'Reviews',
+  pending: sq ? 'Në pritje' : 'Waiting',
+  published: sq ? 'Publikuar' : 'Published',
+  rejected: sq ? 'Refuzuar' : 'Rejected',
+  approve: sq ? 'Publiko' : 'Publish',
+  reject: sq ? 'Refuzo' : 'Reject',
+  empty: sq ? 'Asnjë vlerësim këtu.' : 'No reviews here.',
+  product: sq ? 'Produkti' : 'Product',
+  review: sq ? 'Vlerësimi' : 'Review',
+  order: sq ? 'Porosia' : 'Order',
+};
+const stateQ = url.searchParams.get('state') ?? 'pending';
+const state = ['pending', 'published', 'rejected'].includes(stateQ) ? stateQ : 'pending';
+let formError = '';
+if (Astro.request.method === 'POST') {
+  const f = await Astro.request.formData();
+  if (!csrfOk(user, f)) {
+    formError = t.err.csrf;
+    Astro.response.status = 403;
+  } else {
+    const op = fstr(f, 'op', 10);
+    const id = Number(f.get('id'));
+    if (['published', 'rejected', 'pending'].includes(op) && id > 0) {
+      await run('UPDATE reviews SET status = ? WHERE id = ?', op, id);
+      await audit(user.id, `review.${op}`, 'review', id);
+    }
+    return Astro.redirect(withQuery('/admin/reviews', { state }), 303);
+  }
+}
+const rows = await all<any>(
+  `SELECT r.*, p.slug, p.brand, p.model, o.code FROM reviews r JOIN products p ON p.id = r.product_id JOIN orders o ON o.id = r.order_id
+    WHERE r.status = ? ORDER BY r.created_at DESC LIMIT 200`,
+  state,
+);
+const counts = Object.fromEntries((await all<{ status: string; n: number }>('SELECT status, COUNT(*) AS n FROM reviews GROUP BY status')).map((r) => [r.status, r.n]));
+---
+<Admin lang={lang} t={t} user={user} url={url} title={w.title} section="reviews" flash={flash} help={false} sheet={[[w.pending, counts.pending ?? 0], [w.published, counts.published ?? 0]]}>
+  {formError && <div class="form-errors" role="alert"><p><strong>{formError}</strong></p></div>}
+  <nav class="chips" aria-label={w.title}>
+    {(['pending', 'published', 'rejected'] as const).map((s) => <a href={`/admin/reviews?state=${s}`} aria-current={state === s ? 'true' : undefined}>{w[s]}<span class="n">{counts[s] ?? 0}</span></a>)}
+  </nav>
+  {rows.length === 0 ? <p class="adm-empty">{w.empty}</p> : (
+    <div class="table-scroll">
+      <table class="table adm-table">
+        <thead><tr><th scope="col">{w.product}</th><th scope="col">{w.review}</th><th scope="col">{w.order}</th><th scope="col"><span class="visually-hidden">{t.common.actions}</span></th></tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr>
+              <th scope="row"><a class="rowlink" href={href('sq', 'product', { slug: r.slug })} target="_blank" rel="noopener">{r.brand} {r.model}</a></th>
+              <td style="max-width: 32rem">
+                <span class="strong" aria-label={`${r.rating}/5`}>{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span> · {r.name}
+                {r.body && <p class="msg__body small">{r.body}</p>}
+                <span class="sub">{date(r.created_at, lang, true)} · {String(r.lang).toUpperCase()}</span>
+              </td>
+              <td class="mono">{r.code}</td>
+              <td>
+                <div class="row">
+                  {(state === 'published' ? ['rejected'] : state === 'rejected' ? ['published'] : ['published', 'rejected']).map((op) => (
+                    <form method="post" action={withQuery('/admin/reviews', { state })}>
+                      <input type="hidden" name="_csrf" value={user.csrf} />
+                      <input type="hidden" name="id" value={r.id} />
+                      <input type="hidden" name="op" value={op} />
+                      <button class:list={['btn', 'btn--s', { 'btn--ghost': op === 'rejected' }]} type="submit">{op === 'published' ? w.approve : w.reject}</button>
+                    </form>
+                  ))}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</Admin>

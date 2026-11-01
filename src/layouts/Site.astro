@@ -33,6 +33,8 @@ interface Props {
   categorySlug?: string; // categories.slug_en of the shelf this page belongs to (category and product pages): the header marks its link
 }
 const { lang, title, description, alternate, current, tone = 'paper', noindex = false, jsonld = [], loader = false, hideTray = false, bodyClass, nativeScroll = false, categorySlug } = Astro.props;
+// lekë or euros on this page (lib/currency.ts): the browser's scripts format in the same currency as the server
+const display = Astro.locals.display ?? { cur: 'all' as const, rate: 0 };
 // One read of the categories for the whole shell: header links, menu and footer.
 const cats = await categories();
 const t = tc(lang);
@@ -56,7 +58,7 @@ const org = {
 };
 ---
 <!doctype html>
-<html lang={lang} data-motion="on" id="top" data-native-scroll={nativeScroll ? '' : undefined}>
+<html lang={lang} data-motion="on" id="top" data-native-scroll={nativeScroll ? '' : undefined} data-cur={display.cur === 'eur' ? 'eur' : undefined} data-eur-rate={display.cur === 'eur' ? display.rate : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

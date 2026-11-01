@@ -167,6 +167,8 @@ export async function createQuote(q: {
   budget_all: number | null;
   items: { productId: number; qty: number }[];
   lang: Lang;
+  /** A visit request from the installer finder: the one installer it is addressed to. */
+  seller_id?: number | null;
 }): Promise<{ code: string; token: string }> {
   const token = randomToken(18);
   const tmp = `TMP-${randomToken(9)}`;
@@ -177,9 +179,9 @@ export async function createQuote(q: {
   // it in the same batch rather than a second round trip, so no row is ever visible with the TMP code.
   const results = await batch([
     stmt(
-      `INSERT INTO quote_requests (code, token, project_type, city_id, name, phone, email, company, nipt, details, budget_all, items_json, lang)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      tmp, token, q.project_type, q.city_id, q.name, q.phone, q.email, q.company, q.nipt, q.details, q.budget_all, JSON.stringify(q.items), q.lang,
+      `INSERT INTO quote_requests (code, token, project_type, city_id, name, phone, email, company, nipt, details, budget_all, items_json, lang, seller_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      tmp, token, q.project_type, q.city_id, q.name, q.phone, q.email, q.company, q.nipt, q.details, q.budget_all, JSON.stringify(q.items), q.lang, q.seller_id ?? null,
     ),
     stmt(`UPDATE quote_requests SET code = 'RFQ-' || ? || '-' || printf('%05d', id) WHERE id = last_insert_rowid()`, yymm),
   ]);

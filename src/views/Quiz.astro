@@ -1,0 +1,94 @@
+---
+// "Which system do I need?": five questions in front of the calculator. The form is a plain GET to the calculator
+// (works without scripts); scripts/quiz.ts shows one question at a time and, at the end, the sized system from
+// /api/solar (the calculator's own maths), with the way on to the full kit or to the builder.
+import Site from '../layouts/Site.astro';
+import '../styles/pages.css';
+import { all } from '../lib/db';
+import { href, other, type Lang } from '../lib/i18n';
+import { tx } from '../i18n/extras';
+import { tp } from '../i18n/pages';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = tx(lang).quiz;
+const w = tp(lang);
+const cities = await all<{ slug: string; name_sq: string; name_en: string }>('SELECT slug, name_sq, name_en FROM cities WHERE pv_yield IS NOT NULL ORDER BY sort, name_sq');
+const pre = Astro.url.searchParams.get(lang === 'sq' ? 'qyteti' : 'city') ?? 'tirane';
+const N = 5;
+const words = { step: [1, 2, 3, 4, 5].map((i) => t.step(i, N)), loading: t.loading, line: t.resultLine('{kwp}', 0).replace('0', '{panels}'), saving: t.resultSaving('{s}'), payback: t.resultPayback('{y}') };
+---
+<Site lang={lang} title={t.title} description={t.description} alternate={href(other(lang), 'quiz')}>
+  <header class="wrap sheet-head pg-head">
+    <nav aria-label={lang === 'sq' ? 'Gjurma' : 'Breadcrumb'}>
+      <ol class="crumbs"><li><a href={href(lang, 'home')}>{w.crumbsHome}</a></li><li aria-current="page">{t.h1}</li></ol>
+    </nav>
+    <p class="eyebrow">{t.eyebrow}</p>
+    <h1 class="poster poster--s pg-poster">{t.h1}</h1>
+    <div class="pg-head__row rule-double"><p class="lede">{t.lede}</p></div>
+  </header>
+
+  <div class="wrap qz" data-quiz data-words={JSON.stringify(words)} data-lang={lang} data-builder={href(lang, 'builder')}>
+    <p class="qz__progress mono small" aria-live="polite" data-quiz-progress hidden></p>
+    <noscript><p class="small muted">{t.noJs}</p></noscript>
+    <form class="qz__form" method="get" action={href(lang, 'calculator')} data-quiz-form>
+      <input type="hidden" name="mode" value="bill" />
+      <fieldset class="qz__step" data-step="1">
+        <legend class="title">{t.q1}</legend>
+        <select class="select qz__select" name="qyteti" aria-label={t.q1}>
+          {cities.map((c) => <option value={c.slug} selected={c.slug === pre}>{lang === 'sq' ? c.name_sq : c.name_en}</option>)}
+        </select>
+      </fieldset>
+      <fieldset class="qz__step" data-step="2">
+        <legend class="title">{t.q2}</legend>
+        <p class="small muted">{t.q2hint}</p>
+        <div class="qz__choices">{t.bills.map(([v, l], i) => <label class="qz__choice"><input type="radio" name="fatura" value={v} checked={i === 1} /><span>{l}</span></label>)}</div>
+      </fieldset>
+      <fieldset class="qz__step" data-step="3">
+        <legend class="title">{t.q3}</legend>
+        <div class="qz__choices">
+          <label class="qz__choice"><input type="radio" name="lidhja" value="household" checked /><span>{t.household}</span></label>
+          <label class="qz__choice"><input type="radio" name="lidhja" value="business" /><span>{t.business}</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="qz__step" data-step="4">
+        <legend class="title">{t.q4}</legend>
+        <p class="small muted">{t.batteryHint}</p>
+        <div class="qz__choices">
+          <label class="qz__choice"><input type="radio" name="bateri" value="1" /><span>{t.yesBattery}</span></label>
+          <label class="qz__choice"><input type="radio" name="bateri" value="0" checked /><span>{t.noBattery}</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="qz__step" data-step="5">
+        <legend class="title">{t.q5}</legend>
+        <p class="small muted">{t.phaseHint}</p>
+        <div class="qz__choices">
+          <label class="qz__choice"><input type="radio" name="faza" value="1" checked /><span>{t.single}</span></label>
+          <label class="qz__choice"><input type="radio" name="faza" value="3" /><span>{t.three}</span></label>
+          <label class="qz__choice"><input type="radio" name="faza" value="1" data-unsure /><span>{t.unsure}</span></label>
+        </div>
+      </fieldset>
+      <div class="qz__nav">
+        <button class="btn btn--ghost" type="button" data-quiz-back hidden>{t.back}</button>
+        <button class="btn" type="button" data-quiz-next hidden>{t.next} <span class="arrow" aria-hidden="true">→</span></button>
+        <button class="btn" type="submit" data-quiz-submit>{t.see} <span class="arrow" aria-hidden="true">→</span></button>
+      </div>
+    </form>
+    <section class="qz__result" data-quiz-result hidden aria-live="polite" aria-labelledby="qz-res-h">
+      <h2 class="title" id="qz-res-h">{t.resultH2}</h2>
+      <p class="qz__big figure" data-r-line></p>
+      <p data-r-saving></p>
+      <p data-r-payback></p>
+      <p class="mono small muted">{t.resultTotal}: <b data-r-total></b></p>
+      <ul class="qz__kit" data-r-kit></ul>
+      <p class="row">
+        <a class="btn" href={href(lang, 'calculator')} data-r-details>{t.details} <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href={href(lang, 'builder')}>{t.build}</a>
+        <button class="btn btn--ghost" type="button" data-quiz-again>{t.back}</button>
+      </p>
+    </section>
+  </div>
+  <script>
+    import '../scripts/quiz';
+  </script>
+</Site>

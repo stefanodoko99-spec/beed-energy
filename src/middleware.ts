@@ -6,6 +6,7 @@ import { isHttps } from './lib/origin';
 import { maybeSweepUnpaidCardOrders } from './lib/orders';
 import { paymentMode } from './lib/payments';
 import { rememberQueryCity } from './lib/city-pref';
+import { displayFor, withDisplay } from './lib/currency';
 
 const PUBLIC_ADMIN = new Set(['/admin/login', '/admin/logout']);
 const CITY_PAGES = /^(?:\/produkt\/[^/]+|\/en\/product\/[^/]+|\/shporta|\/en\/cart|\/kalkulatori-diellor|\/en\/solar-calculator|\/paketa-diellore|\/en\/solar-packages)\/?$/;
@@ -35,7 +36,10 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   // basket and the checkout (src/lib/city-pref.ts).
   if (ctx.request.method === 'GET' && CITY_PAGES.test(pathname)) await rememberQueryCity(ctx.url, ctx.cookies);
 
-  const res = await next();
+  // lekë or euros on this page (lib/currency.ts): every price formatted while it renders follows the visitor's choice
+  const display = await displayFor(ctx.cookies, pathname);
+  ctx.locals.display = display;
+  const res = await withDisplay(display, () => next());
   const h = res.headers;
   h.set('X-Content-Type-Options', 'nosniff');
   // strict-origin-when-cross-origin keeps the Origin header on same-site form posts; no-referrer would send Origin: null.

@@ -1,0 +1,18 @@
+---
+// WhatsApp · Viber · call for a seller, when the seller has a phone number (lib/chat.ts). The WhatsApp message
+// is pre-filled with the seller's name and, on a product, the product.
+import { chatLinks } from '../lib/chat';
+import { tx } from '../i18n/extras';
+import type { Lang } from '../lib/i18n';
+interface Props { lang: Lang; phone: string | null | undefined; seller: string; what?: string; compact?: boolean }
+const { lang, phone, seller, what, compact = false } = Astro.props;
+const c = tx(lang).chat;
+const links = chatLinks(phone, c.hello(seller, what));
+---
+{links && (
+  <p class:list={['chat', { 'chat--compact': compact }]}>
+    <a class="chat__a chat__a--wa" href={links.wa} rel="noopener" target="_blank"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Zm0 1.6a7.4 7.4 0 1 1-3.8 13.8l-.3-.2-2.7.7.7-2.6-.2-.3A7.4 7.4 0 0 1 12 4.6Zm-3 3.6c-.2 0-.5 0-.7.3-.2.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4l-.5-.3-1.8-.9c-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1-.3-.1-1.1-.4-2.1-1.3-.8-.7-1.3-1.5-1.4-1.8-.2-.3 0-.4.1-.5l.4-.5.3-.4v-.4l-.8-2c-.2-.5-.4-.5-.6-.5H9Z" fill="currentColor"/></svg><span>{c.whatsapp}</span></a>
+    <a class="chat__a chat__a--viber" href={links.viber}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.2 2.5c-2.6 0-5.4.4-7 2-1.3 1.3-1.8 3.3-1.8 5.8-.1 2.5-.1 7.1 4.3 8.4v2.1s0 .8.5 1c.6.2 1-.4 1.7-1.1l1.2-1.4c3.1.3 5.4-.3 5.7-.4.6-.2 4.1-.7 4.7-5.5.6-5-.3-8.1-1.9-9.5-.5-.4-2.6-1.4-7.4-1.4Zm.1 1.5c4.1 0 5.9.8 6.3 1.1 1.3 1.1 2 3.8 1.5 8-.5 3.9-3.3 4.1-3.8 4.3-.2.1-2.2.6-4.8.4l-2.4 2.6v-2.5c-3.6-1-3.4-4.8-3.4-6.8 0-2 .4-3.7 1.4-4.7 1.3-1.2 3.6-2.4 5.2-2.4Zm-.1 2.2a.3.3 0 0 0 0 .6c1.3 0 2.4.4 3.2 1.2.8.8 1.3 2 1.3 3.5a.3.3 0 0 0 .6 0c0-1.6-.5-3-1.5-3.9-1-1-2.2-1.4-3.6-1.4Zm-3 .9c-.2 0-.4 0-.6.2l-.7.7c-.3.3-.4.8-.2 1.3.6 1.5 1.5 2.8 2.7 4 1.2 1.1 2.5 2 4 2.7.5.2 1 .1 1.3-.2l.7-.7c.3-.3.3-.8 0-1.1l-1.3-1c-.3-.3-.8-.2-1 .1l-.4.5c-.2.2-.5.2-.7.1-.8-.4-1.5-1-2.1-1.6-.6-.6-1.1-1.3-1.5-2.1-.1-.2 0-.5.1-.7l.5-.4c.3-.3.4-.7.1-1l-1-1.4a.7.7 0 0 0-.5-.3Zm3.2.6a.3.3 0 0 0 0 .6c.8.1 1.4.4 1.8.9.5.5.7 1.1.7 1.9a.3.3 0 1 0 .6 0c0-.9-.3-1.7-.9-2.3-.6-.6-1.3-1-2.2-1.1Zm.2 1.4a.3.3 0 0 0 0 .6c.6 0 .9.4.9 1a.3.3 0 0 0 .6 0c0-1-.6-1.6-1.5-1.6Z" fill="currentColor"/></svg><span>{c.viber}</span></a>
+    {!compact && <a class="chat__a" href={links.tel}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2Z" fill="currentColor"/></svg><span>{c.call}</span></a>}
+  </p>
+)}

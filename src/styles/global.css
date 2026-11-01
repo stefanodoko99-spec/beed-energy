@@ -397,6 +397,14 @@ html[data-header="hidden"] .site-header:not(:focus-within) { transform: translat
 .ftool--packages a { background: var(--sun); color: var(--text) !important; }
 .ftool--guide a { background: #5b6d67; color: #fff; }
 .ftool--calc a { background: #f3f5f2; color: var(--text) !important; }
+.ftool--quiz a { background: #f3f5f2; color: var(--text) !important; }
+.ftool--builder a { background: var(--teal-2); color: #fff; box-shadow: inset 0 0 0 1px var(--line-on-teal); }
+.ftool--builder .ftool__cta { background: rgb(255 255 255 / 0.14); }
+/* the city solar pages, as a row of chips under the tools */
+.fcities { margin-top: 1.5rem; }
+.fcities ul { list-style: none; margin: 0.6rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.fcities a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 0.9rem; border-radius: var(--pill); box-shadow: inset 0 0 0 1px var(--line-on-teal-strong); text-decoration: none; font-size: 0.875rem; }
+@media (hover: hover) and (pointer: fine) { .fcities a:hover { background: rgb(236 228 76 / 0.14); box-shadow: inset 0 0 0 1px var(--sun); } }
 .ftool__title { font-size: clamp(1.4rem, 1rem + 1vw, 2rem); font-weight: 400; letter-spacing: -0.03em; word-spacing: 0.1em; line-height: 1.05; }
 .ftool__text { font-size: 0.9375rem; line-height: 1.4; max-width: 30ch; opacity: 0.85; }
 .ftool__cta { position: absolute; right: 1.25rem; bottom: 1.1rem; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 50%; font-size: 1.1rem; background: rgb(0 0 0 / 0.08); transition: transform 300ms var(--ease-spring); }
@@ -586,3 +594,18 @@ html[data-motion="off"] .js-reveal, html:not(.js) .js-reveal { opacity: 1 !impor
 :where(.input, .select, .textarea, .stage__key) { border-radius: 12px; }
 :where(.tag) { border-radius: 6px; }
 :where(.sheet__paper, .gallery__thumb, .compare__fig, .bline__fig) { overflow: hidden; }
+
+/* ---------- chat buttons (components/ChatButtons.astro): WhatsApp · Viber · call ---------- */
+.chat { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; }
+.chat__a { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 40px; padding: 0 0.85rem; border-radius: var(--pill); border: 1px solid var(--line-strong); font-size: 0.8125rem; font-weight: 600; text-decoration: none; color: inherit; transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out); }
+.chat__a svg { width: 1.05rem; height: 1.05rem; flex: none; }
+.chat__a--wa svg { color: #1f9d55; }
+.chat__a--viber svg { color: #7360f2; }
+.chat--compact .chat__a { min-height: 36px; padding: 0 0.7rem; font-size: 0.75rem; }
+@media (hover: hover) and (pointer: fine) { .chat__a:hover { background: var(--teal-tint); border-color: var(--teal); } }
+
+/* ---------- currency switch (components/CurrencySwitch.astro) ---------- */
+.cur { display: inline-flex; padding: 3px; border-radius: var(--pill); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.cur button { min-width: 44px; min-height: 38px; padding: 0 0.75rem; border: 0; border-radius: var(--pill); background: none; color: inherit; font: 600 0.875rem var(--font-mono); cursor: pointer; }
+.cur button[aria-pressed="true"] { background: var(--sun); color: var(--text); }
+.cur-note { font-size: 0.8125rem; color: var(--text-2); }

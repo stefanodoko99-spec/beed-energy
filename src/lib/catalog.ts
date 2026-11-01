@@ -362,6 +362,7 @@ export type Offer = {
   seller_verified: number;
   seller_rating: number | null;
   seller_rating_count: number;
+  seller_phone: string | null;
   seller_city_sq: string | null;
   seller_city_en: string | null;
   seller_zones: string;
@@ -388,7 +389,7 @@ export async function productImages(productId: number) {
 export async function offersFor(productId: number): Promise<Offer[]> {
   const offers = await all<Offer>(
     `SELECT o.*, s.slug AS seller_slug, s.name AS seller_name, s.kind AS seller_kind, s.verified AS seller_verified,
-            s.rating AS seller_rating, s.rating_count AS seller_rating_count, s.delivery_zones AS seller_zones,
+            s.rating AS seller_rating, s.rating_count AS seller_rating_count, s.delivery_zones AS seller_zones, s.phone AS seller_phone,
             c.name_sq AS seller_city_sq, c.name_en AS seller_city_en
        FROM offers o JOIN sellers s ON s.id = o.seller_id LEFT JOIN cities c ON c.id = s.city_id
       WHERE o.product_id = ? AND o.active = 1 AND s.status = 'active'

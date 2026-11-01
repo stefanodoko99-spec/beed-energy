@@ -1,0 +1,98 @@
+---
+// A-13 Price alerts (lib/shop-alerts.ts): what visitors asked to be told about. "Due" means the lowest live offer
+// has reached the visitor's target. Sending is by hand for now (the mail link is pre-written); automatic e-mail
+// needs an e-mail provider connected to the Worker.
+import Admin from '../../layouts/Admin.astro';
+import St from './_parts/St.astro';
+import { adminCtx, withQuery, forbiddenPage } from '../../lib/admin-panel';
+import { isAdmin } from '../../lib/admin';
+import { csrfOk } from '../../lib/auth';
+import { all, audit, run } from '../../lib/db';
+import { date, href } from '../../lib/i18n';
+import { lek } from '../../lib/money';
+
+const c = adminCtx(Astro);
+if ('redirect' in c) return Astro.redirect(c.redirect, 303);
+const { lang, t, user, url, flash } = c;
+if (!isAdmin(user)) return forbiddenPage(Astro);
+const sq = lang === 'sq';
+const w = {
+  title: sq ? 'Njoftimet e çmimit' : 'Price alerts',
+  lede: sq
+    ? 'Vizitorët që duan të dinë kur bie çmimi i një produkti. “Gati” do të thotë që oferta më e lirë ka arritur çmimin që kërkuan. Dërgimi bëhet me dorë nga lidhja e postës; dërgimi automatik kërkon një shërbim e-maili të lidhur me faqen.'
+    : 'Visitors who want to know when a product gets cheaper. “Due” means the cheapest offer has reached the price they asked for. Sending is by hand from the mail link; automatic sending needs an e-mail service connected to the site.',
+  due: sq ? 'Gati për njoftim' : 'Due',
+  waiting: sq ? 'Në pritje' : 'Waiting',
+  sent: sq ? 'Njoftuar' : 'Sent',
+  target: sq ? 'Çmimi i kërkuar' : 'Target',
+  now: sq ? 'Tani' : 'Now',
+  mark: sq ? 'Shëno si të njoftuar' : 'Mark as sent',
+  mail: sq ? 'Shkruaj e-mail' : 'Write e-mail',
+  empty: sq ? 'Asnjë njoftim këtu.' : 'No alerts here.',
+  subject: (p: string) => (sq ? `Çmimi ra: ${p}` : `Price drop: ${p}`),
+  body: (p: string, price: string, link: string) =>
+    sq ? `Përshëndetje,\n\n${p} tani kushton ${price} në BeeD Energy:\n${link}\n\nFaleminderit,\nBeeD Energy` : `Hello,\n\n${p} now costs ${price} on BeeD Energy:\n${link}\n\nThank you,\nBeeD Energy`,
+};
+const stateQ = url.searchParams.get('state') ?? 'due';
+const state = ['due', 'waiting', 'sent'].includes(stateQ) ? stateQ : 'due';
+if (Astro.request.method === 'POST') {
+  const f = await Astro.request.formData();
+  if (csrfOk(user, f)) {
+    const id = Number(f.get('id'));
+    if (id > 0) {
+      await run("UPDATE price_alerts SET notified_at = datetime('now') WHERE id = ?", id);
+      await audit(user.id, 'alert.sent', 'price_alert', id);
+    }
+  }
+  return Astro.redirect(withQuery('/admin/alerts', { state }), 303);
+}
+const rows = await all<any>(
+  `SELECT a.*, p.slug, p.brand, p.model,
+          (SELECT MIN(o.price_all) FROM offers o JOIN sellers s ON s.id = o.seller_id WHERE o.product_id = a.product_id AND o.active = 1 AND s.status = 'active') AS now_all
+     FROM price_alerts a JOIN products p ON p.id = a.product_id ORDER BY a.created_at DESC LIMIT 500`,
+);
+const kind = (r: any) => (r.notified_at ? 'sent' : r.now_all !== null && r.now_all <= r.target_all ? 'due' : 'waiting');
+const counts = { due: 0, waiting: 0, sent: 0 } as Record<string, number>;
+for (const r of rows) counts[kind(r)]++;
+const shown = rows.filter((r) => kind(r) === state);
+---
+<Admin lang={lang} t={t} user={user} url={url} title={w.title} section="alerts" flash={flash} help={false} sheet={[[w.due, counts.due], [w.waiting, counts.waiting]]}>
+  <p class="adm-lede">{w.lede}</p>
+  <nav class="chips" aria-label={w.title}>
+    {(['due', 'waiting', 'sent'] as const).map((s) => <a href={`/admin/alerts?state=${s}`} aria-current={state === s ? 'true' : undefined}>{w[s]}<span class="n">{counts[s]}</span></a>)}
+  </nav>
+  {shown.length === 0 ? <p class="adm-empty">{w.empty}</p> : (
+    <div class="table-scroll">
+      <table class="table adm-table">
+        <thead><tr><th scope="col">E-mail</th><th scope="col">{sq ? 'Produkti' : 'Product'}</th><th scope="col" class="num">{w.target}</th><th scope="col" class="num">{w.now}</th><th scope="col"><span class="visually-hidden">{t.common.actions}</span></th></tr></thead>
+        <tbody>
+          {shown.map((r) => {
+            const name = `${r.brand} ${r.model}`;
+            const link = `${url.origin}${href(r.lang === 'en' ? 'en' : 'sq', 'product', { slug: r.slug })}`;
+            const mail = `mailto:${r.email}?subject=${encodeURIComponent(w.subject(name))}&body=${encodeURIComponent(w.body(name, lek(r.now_all ?? r.target_all, r.lang === 'en' ? 'en' : 'sq'), link))}`;
+            return (
+              <tr>
+                <th scope="row"><span class="strong">{r.email}</span><span class="sub">{date(r.created_at, lang, true)} · {String(r.lang).toUpperCase()}</span></th>
+                <td><a class="rowlink" href={link} target="_blank" rel="noopener">{name}</a></td>
+                <td class="num mono">{lek(r.target_all, lang)}</td>
+                <td class="num mono">{r.now_all !== null ? lek(r.now_all, lang) : '—'}</td>
+                <td>
+                  {state === 'sent' ? <St s="handled" label={w.sent} /> : (
+                    <div class="row">
+                      {state === 'due' && <a class="btn btn--s" href={mail}>{w.mail}</a>}
+                      <form method="post" action={withQuery('/admin/alerts', { state })}>
+                        <input type="hidden" name="_csrf" value={user.csrf} />
+                        <input type="hidden" name="id" value={r.id} />
+                        <button class="btn btn--s btn--ghost" type="submit">{w.mark}</button>
+                      </form>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  )}
+</Admin>

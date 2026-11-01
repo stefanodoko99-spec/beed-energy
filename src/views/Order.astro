@@ -10,6 +10,8 @@ import { lek, lekLong } from '../lib/money';
 import { tco } from '../i18n/checkout';
 import { bankDetails, orderParcels, orderPhoto, phoneDisplay } from '../lib/checkout-view';
 import type { OrderState } from '../lib/checkout-flow';
+import { orderReviews } from '../lib/reviews';
+import { tx } from '../i18n/extras';
 
 interface Props { lang: Lang; state: OrderState }
 const { lang, state } = Astro.props;
@@ -43,6 +45,13 @@ const notFoundTitle = lang === 'sq' ? 'Porosia nuk u gjet' : 'Order not found';
   const events = (o.events as any[]).filter((e) => t.event[e.status]);
   const alternate = href(other(lang), 'order', { code: o.code }, { k });
   const fee = (n: number) => (n === 0 ? t.sum.free : lekLong(n, lang));
+  // Verified reviews: only a delivered order offers them, one form per product (lib/reviews.ts).
+  const rv = tx(lang).reviews;
+  const delivered = o.status === 'delivered';
+  const reviewed = delivered ? await orderReviews(o.id) : new Map<number, string>();
+  const reviewItems = delivered ? [...new Map((o.items as any[]).filter((it) => it.product_id).map((it) => [it.product_id, it])).values()] : [];
+  const vleresim = Astro.url.searchParams.get('vleresim');
+  const firstName = String(o.name ?? '').trim().split(/\s+/)[0] ?? '';
   return (
     <Site lang={lang} title={t.order.title(o.code)} description={t.order.description} alternate={alternate} noindex hideTray>
       <div class="wrap sheet-head co-head">
@@ -151,6 +160,43 @@ const notFoundTitle = lang === 'sq' ? 'Porosia nuk u gjet' : 'Order not found';
               <p class="small">{t.order.rights} <a href={`${href(lang, 'terms')}#kthimet`}>{t.order.rightsLink}</a></p>
               <p class="small">{t.order.contact(o.code)} <a href={href(lang, 'contact')}>{t.order.contactLink}</a></p>
             </section>
+
+            {delivered && reviewItems.length > 0 && (
+              <section class="co-sec" id="vleresime" aria-labelledby="o-rev">
+                <h2 class="co-sec__h" id="o-rev"><span class="key">04</span> {rv.orderH2}</h2>
+                <p class="small muted">{rv.orderLede}</p>
+                {vleresim === 'ok' && <p class="notice notice--ok" role="status">{rv.sent}</p>}
+                {vleresim === 'gabim' && <p class="form-errors" role="alert">{rv.error}</p>}
+                <div class="rv-forms">
+                  {reviewItems.map((it: any) => {
+                    const st = reviewed.get(it.product_id);
+                    return st ? (
+                      <p class="rv-done"><b>{it.product_name}</b> <span class="small muted">{st === 'published' ? rv.published : rv.sent}</span></p>
+                    ) : (
+                      <form class="rv-form" method="post" action="/api/review">
+                        <input type="hidden" name="lang" value={lang} />
+                        <input type="hidden" name="code" value={o.code} />
+                        <input type="hidden" name="k" value={k} />
+                        <input type="hidden" name="productId" value={it.product_id} />
+                        <p class="rv-form__name"><b>{it.product_name}</b></p>
+                        <fieldset class="rv-stars">
+                          <legend>{rv.rating}</legend>
+                          <span class="rv-stars__row">
+                            {[5, 4, 3, 2, 1].map((n) => (
+                              <label><input type="radio" name="rating" value={n} required /><span aria-hidden="true">★</span><span class="visually-hidden">{rv.stars(n)}</span></label>
+                            ))}
+                          </span>
+                        </fieldset>
+                        <label class="field"><span>{rv.body}</span><textarea class="textarea" name="body" rows="3" maxlength="1200"></textarea></label>
+                        <label class="field"><span>{rv.name}</span><input class="input" name="name" required maxlength="60" value={firstName} autocomplete="given-name" /></label>
+                        <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off" /></div>
+                        <button class="btn btn--s" type="submit">{rv.send}</button>
+                      </form>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
           </div>
 
           <aside class="co-side" aria-label={t.sum.title}>

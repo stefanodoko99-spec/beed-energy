@@ -1,0 +1,13 @@
+---
+import Track from '../views/Track.astro';
+import { handleTrack, type TrackState } from '../lib/track';
+
+let state: TrackState | null = null;
+if (Astro.request.method === 'POST') {
+  const r = await handleTrack(Astro, 'sq');
+  if (r instanceof Response) return r;
+  state = r;
+  Astro.response.status = r.error === 'tooMany' ? 429 : 422;
+}
+---
+<Track lang="sq" state={state} />

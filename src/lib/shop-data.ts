@@ -4,7 +4,7 @@
 import { all, setting } from './db';
 import { DEFAULT_DELIVERY, type DeliverySettings } from './cart';
 import { unitPriceFor, type Offer } from './catalog';
-import { lek, lekLong, num } from './money';
+import { lek, lekLong, num, displayCurrency } from './money';
 import type { Lang } from './i18n';
 
 const NBSP = ' ';
@@ -21,6 +21,12 @@ export function priceLong(n: number, lang: Lang): string {
 
 /** Price per unit basis, e.g. "11,9 lekë/Wp". Small values keep decimals. */
 export function unitPrice(v: number, label: string, lang: Lang): string {
+  // in euros when the visitor chose them (lib/currency.ts): "0,13 €/Wp"
+  const cur = displayCurrency();
+  if (cur?.cur === 'eur') {
+    const e = v / cur.rate;
+    return `${num(e, e < 10 ? 2 : e < 100 ? 1 : 0, lang)}${NBSP}${label.replace(/^(lekë|ALL)/, '€')}`;
+  }
   const d = v < 10 ? 2 : v < 100 ? 1 : 0;
   return `${num(v, d, lang)}${NBSP}${label}`;
 }

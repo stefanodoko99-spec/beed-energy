@@ -1,0 +1,136 @@
+---
+// A-14 Installation gallery (public /projekte): real projects by the platform's sellers. A project shows only when it
+// is published and the owner's consent is ticked. One page: the list, and the form for a new or chosen project.
+import Admin from '../../layouts/Admin.astro';
+import St from './_parts/St.astro';
+import { adminCtx, fstr, withQuery, forbiddenPage } from '../../lib/admin-panel';
+import { isAdmin } from '../../lib/admin';
+import { csrfOk } from '../../lib/auth';
+import { all, audit, get, run } from '../../lib/db';
+import { MediaError, putProjectImage } from '../../lib/media';
+
+const c = adminCtx(Astro);
+if ('redirect' in c) return Astro.redirect(c.redirect, 303);
+const { lang, t, user, url, flash } = c;
+if (!isAdmin(user)) return forbiddenPage(Astro);
+const sq = lang === 'sq';
+const w = {
+  title: sq ? 'Projektet' : 'Projects',
+  lede: sq
+    ? 'Impiante të vërteta të shitësve, për faqen “Projekte të realizuara”. Shfaqen vetëm kur janë të publikuara dhe pronari ka dhënë lejen për foton dhe shifrat.'
+    : 'Real installations by the sellers, for the “Completed projects” page. They show only when published and the owner has agreed to the photo and the figures.',
+  add: sq ? 'Projekt i ri' : 'New project',
+  edit: sq ? 'Ndrysho projektin' : 'Edit project',
+  titleSq: sq ? 'Titulli (shqip)' : 'Title (Albanian)',
+  titleEn: sq ? 'Titulli (anglisht)' : 'Title (English)',
+  storySq: sq ? 'Përshkrimi (shqip)' : 'Story (Albanian)',
+  storyEn: sq ? 'Përshkrimi (anglisht)' : 'Story (English)',
+  seller: sq ? 'Shitësi' : 'Seller',
+  city: sq ? 'Qyteti' : 'City',
+  kind: sq ? 'Lloji' : 'Kind',
+  kwp: 'kWp',
+  battery: sq ? 'Bateria (kWh)' : 'Battery (kWh)',
+  year: sq ? 'Viti' : 'Year',
+  saving: sq ? 'Kursimi vjetor (lekë)' : 'Yearly saving (ALL)',
+  photo: sq ? 'Fotoja (JPG, PNG ose WebP)' : 'Photo (JPG, PNG or WebP)',
+  consent: sq ? 'Pronari ka dhënë lejen për foton dhe shifrat' : 'The owner agreed to the photo and the figures being shown',
+  publish: sq ? 'Publikuar' : 'Published',
+  save: t.common.save,
+  empty: sq ? 'Ende pa projekte.' : 'No projects yet.',
+  draft: sq ? 'Draft' : 'Draft',
+  noConsent: sq ? 'Pa leje' : 'No consent',
+  need: sq ? 'Shkruani titullin shqip.' : 'Type the Albanian title.',
+  photoErr: sq ? 'Fotoja nuk u ngarkua (madhësia ose formati).' : 'The photo did not upload (size or format).',
+};
+const kinds = { home: sq ? 'Shtëpi' : 'Home', business: sq ? 'Biznes' : 'Business', farm: sq ? 'Fermë' : 'Farm', public: sq ? 'Ndërtesë publike' : 'Public building' } as Record<string, string>;
+const editId = Number(url.searchParams.get('id')) || 0;
+let error = '';
+if (Astro.request.method === 'POST') {
+  const f = await Astro.request.formData();
+  if (!csrfOk(user, f)) {
+    error = t.err.csrf;
+    Astro.response.status = 403;
+  } else {
+    const n = (k: string) => { const v = Number(fstr(f, k, 20).replace(',', '.')); return Number.isFinite(v) && v > 0 ? v : null; };
+    const v = {
+      title_sq: fstr(f, 'title_sq', 140), title_en: fstr(f, 'title_en', 140), story_sq: fstr(f, 'story_sq', 2000), story_en: fstr(f, 'story_en', 2000),
+      seller_id: n('seller_id'), city_id: n('city_id'), kind: Object.keys(kinds).includes(fstr(f, 'kind', 12)) ? fstr(f, 'kind', 12) : 'home',
+      kwp: n('kwp'), battery_kwh: n('battery_kwh'), year: n('year'), saving_all: n('saving_all'),
+      consent: f.get('consent') ? 1 : 0, status: f.get('published') ? 'published' : 'draft',
+    };
+    if (!v.title_sq) {
+      error = w.need;
+      Astro.response.status = 422;
+    } else {
+      const id = Number(f.get('id')) || 0;
+      const cols = Object.keys(v);
+      let pid = id;
+      if (id) await run(`UPDATE projects SET ${cols.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`, ...Object.values(v), id);
+      else pid = (await run(`INSERT INTO projects (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`, ...Object.values(v))).id;
+      const file = f.get('photo');
+      if (file instanceof File && file.size) {
+        try {
+          const img = await putProjectImage(pid, file);
+          await run('UPDATE projects SET image = ? WHERE id = ?', img.path, pid);
+        } catch (e) {
+          if (!(e instanceof MediaError)) throw e;
+          error = w.photoErr;
+        }
+      }
+      await audit(user.id, id ? 'project.update' : 'project.create', 'project', pid);
+      if (!error) return Astro.redirect(withQuery('/admin/projects', { ok: 'saved' }), 303);
+    }
+  }
+}
+const rows = await all<any>('SELECT j.*, s.name AS seller, c.name_sq AS city FROM projects j LEFT JOIN sellers s ON s.id = j.seller_id LEFT JOIN cities c ON c.id = j.city_id ORDER BY j.created_at DESC');
+const p = editId ? await get<any>('SELECT * FROM projects WHERE id = ?', editId) : null;
+const sellers = await all<{ id: number; name: string }>("SELECT id, name FROM sellers WHERE status = 'active' ORDER BY name");
+const cities = await all<{ id: number; name_sq: string }>('SELECT id, name_sq FROM cities ORDER BY sort, name_sq');
+---
+<Admin lang={lang} t={t} user={user} url={url} title={w.title} section="projects" flash={flash} help={false} sheet={[[t.sheet.records, rows.length]]}>
+  <p class="adm-lede">{w.lede}</p>
+  <div class="adm-split">
+    <section aria-labelledby="pj-list">
+      <h2 class="adm-h2" id="pj-list">{w.title}</h2>
+      {rows.length === 0 ? <p class="adm-empty">{w.empty}</p> : (
+        <div class="table-scroll">
+          <table class="table adm-table">
+            <tbody>
+              {rows.map((r) => (
+                <tr>
+                  <th scope="row"><a class="rowlink" href={`/admin/projects?id=${r.id}#pj-form`}>{r.title_sq}</a><span class="sub">{[r.seller, r.city, r.kwp && `${r.kwp} kWp`].filter(Boolean).join(' · ')}</span></th>
+                  <td>{r.status === 'published' && r.consent ? <St s="published" label={w.publish} /> : <St s="draft" label={r.consent ? w.draft : w.noConsent} />}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+    <section id="pj-form" aria-labelledby="pj-form-h">
+      <h2 class="adm-h2" id="pj-form-h">{p ? w.edit : w.add}</h2>
+      {error && <div class="form-errors" role="alert"><p><strong>{error}</strong></p></div>}
+      <form class="adm-form" method="post" action="/admin/projects" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value={user.csrf} />
+        {p && <input type="hidden" name="id" value={p.id} />}
+        <fieldset class="adm-fs">
+          <div class="field span-all"><label for="pj-tsq">{w.titleSq}</label><input class="input" id="pj-tsq" name="title_sq" required maxlength="140" value={p?.title_sq ?? ''} /></div>
+          <div class="field span-all"><label for="pj-ten">{w.titleEn}</label><input class="input" id="pj-ten" name="title_en" maxlength="140" value={p?.title_en ?? ''} /></div>
+          <div class="field"><label for="pj-seller">{w.seller}</label><select class="select" id="pj-seller" name="seller_id"><option value="">—</option>{sellers.map((s) => <option value={s.id} selected={p?.seller_id === s.id}>{s.name}</option>)}</select></div>
+          <div class="field"><label for="pj-city">{w.city}</label><select class="select" id="pj-city" name="city_id"><option value="">—</option>{cities.map((ci) => <option value={ci.id} selected={p?.city_id === ci.id}>{ci.name_sq}</option>)}</select></div>
+          <div class="field"><label for="pj-kind">{w.kind}</label><select class="select" id="pj-kind" name="kind">{Object.entries(kinds).map(([k, l]) => <option value={k} selected={(p?.kind ?? 'home') === k}>{l}</option>)}</select></div>
+          <div class="field"><label for="pj-kwp">{w.kwp}</label><input class="input input--num" id="pj-kwp" name="kwp" inputmode="decimal" value={p?.kwp ?? ''} /></div>
+          <div class="field"><label for="pj-bat">{w.battery}</label><input class="input input--num" id="pj-bat" name="battery_kwh" inputmode="decimal" value={p?.battery_kwh ?? ''} /></div>
+          <div class="field"><label for="pj-year">{w.year}</label><input class="input input--num" id="pj-year" name="year" inputmode="numeric" value={p?.year ?? ''} /></div>
+          <div class="field"><label for="pj-sav">{w.saving}</label><input class="input input--num" id="pj-sav" name="saving_all" inputmode="numeric" value={p?.saving_all ?? ''} /></div>
+          <div class="field span-all"><label for="pj-ssq">{w.storySq}</label><textarea class="textarea" id="pj-ssq" name="story_sq" maxlength="2000">{p?.story_sq ?? ''}</textarea></div>
+          <div class="field span-all"><label for="pj-sen">{w.storyEn}</label><textarea class="textarea" id="pj-sen" name="story_en" maxlength="2000">{p?.story_en ?? ''}</textarea></div>
+          <div class="field span-all"><label for="pj-photo">{w.photo}</label>{p?.image && <img src={p.image} alt="" style="max-width: 14rem; border-radius: 12px; margin-bottom: .5rem" />}<input class="input" id="pj-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" /></div>
+          <label class="check check--box span-all"><input type="checkbox" name="consent" checked={!!p?.consent} /> <span>{w.consent}</span></label>
+          <label class="check check--box span-all"><input type="checkbox" name="published" checked={p?.status === 'published'} /> <span>{w.publish}</span></label>
+        </fieldset>
+        <p><button class="btn" type="submit">{w.save}</button></p>
+      </form>
+    </section>
+  </div>
+</Admin>

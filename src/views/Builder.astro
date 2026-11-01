@@ -1,0 +1,132 @@
+---
+// Build-your-own system: real products with their cheapest live offer, checked as they are picked against the makers'
+// data (inverter PV limit, panel/inverter ratio, phases against the house supply, and the inverter–battery pairs the
+// makers list, content/battery-compat.ts). scripts/builder.ts adds it up and fills the basket form (cart add-many).
+import Site from '../layouts/Site.astro';
+import ProductPhoto from '../components/ProductPhoto.astro';
+import '../styles/pages.css';
+import { all } from '../lib/db';
+import { href, other, type Lang } from '../lib/i18n';
+import { lek, num } from '../lib/money';
+import { COMPAT_PAIRS } from '../content/battery-compat';
+import { tx } from '../i18n/extras';
+import { tp } from '../i18n/pages';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = tx(lang).builder;
+const w = tp(lang);
+const rows = await all<any>(
+  `SELECT p.id, p.slug, p.brand, p.model, c.slug_en AS cat,
+          (SELECT o.id FROM offers o JOIN sellers s ON s.id = o.seller_id WHERE o.product_id = p.id AND o.active = 1 AND s.status = 'active' ORDER BY o.price_all LIMIT 1) AS offer_id,
+          (SELECT MIN(o.price_all) FROM offers o JOIN sellers s ON s.id = o.seller_id WHERE o.product_id = p.id AND o.active = 1 AND s.status = 'active') AS price,
+          (SELECT path FROM product_images i WHERE i.product_id = p.id ORDER BY sort LIMIT 1) AS image
+     FROM products p JOIN categories c ON c.id = p.category_id
+    WHERE p.status = 'published' AND c.slug_en IN ('solar-panels', 'inverters', 'batteries', 'mounting-systems')
+    ORDER BY c.sort, price`,
+);
+const items = rows.filter((r) => r.offer_id);
+const specRows = items.length
+  ? await all<{ product_id: number; key: string; value_num: number | null; value_text: string | null }>(
+      `SELECT ps.product_id, sa.key, ps.value_num, ps.value_text FROM product_specs ps JOIN spec_attributes sa ON sa.id = ps.attribute_id
+        WHERE ps.product_id IN (${items.map(() => '?').join(',')}) AND sa.key IN ('power_wp', 'rated_ac_power_kw', 'max_pv_power_kwp', 'phases', 'hybrid', 'battery_ready', 'usable_capacity_kwh', 'nominal_voltage_v')`,
+      ...items.map((i) => i.id),
+    )
+  : [];
+const specs = new Map<number, Record<string, number | string | null>>();
+for (const s of specRows) specs.set(s.product_id, { ...(specs.get(s.product_id) ?? {}), [s.key]: s.value_num ?? s.value_text });
+const byCat = (cat: string) => items.filter((i) => i.cat === cat).map((i) => ({ ...i, specs: specs.get(i.id) ?? {} }));
+const panels = byCat('solar-panels');
+const inverters = byCat('inverters');
+const batteries = byCat('batteries');
+const mounts = byCat('mounting-systems');
+const data = {
+  lang,
+  products: Object.fromEntries([...panels, ...inverters, ...batteries, ...mounts].map((p) => [p.id, { slug: p.slug, offer: p.offer_id, price: p.price, cat: p.cat, s: p.specs }])),
+  pairs: COMPAT_PAIRS.filter((p) => p.verdict === 'compatible').map((p) => [p.inverter, p.battery]),
+  yieldTirana: 1435,
+  // JSON keeps no functions: the two sentences with a figure travel as templates
+  words: { ...t, production: t.production('{y}'), bad: { ...t.bad, tooMuch: t.bad.tooMuch('{max}') } },
+};
+// the page opens on a sensible system: the first single-phase inverter (most homes), 12 panels, no battery
+const firstSingle = Math.max(0, inverters.findIndex((p) => Number(p.specs.phases) === 1));
+const name = (p: any) => `${p.brand} ${p.model.split(' (')[0]}`;
+const spec = (p: any) => {
+  const s = p.specs;
+  if (p.cat === 'solar-panels') return s.power_wp ? `${s.power_wp} Wp` : '';
+  if (p.cat === 'inverters') return [s.rated_ac_power_kw && `${num(Number(s.rated_ac_power_kw), 1, lang)} kW`, s.phases && (Number(s.phases) === 3 ? (lang === 'sq' ? 'trefazor' : 'three phase') : (lang === 'sq' ? 'njëfazor' : 'single phase')), (s.hybrid === 1 || s.battery_ready === 1) && (lang === 'sq' ? 'hibrid' : 'hybrid')].filter(Boolean).join(' · ');
+  if (p.cat === 'batteries') return [s.usable_capacity_kwh && `${num(Number(s.usable_capacity_kwh), 1, lang)} kWh`, s.nominal_voltage_v && `${s.nominal_voltage_v} V`].filter(Boolean).join(' · ');
+  return '';
+};
+const group = (key: string, label: string, list: any[], opts: { none?: string; qty?: { name: string; value: number; label: string } }) => ({ key, label, list, ...opts });
+const groups = [
+  group('panel', t.panels, panels, { qty: { name: 'panelQty', value: 12, label: t.qty } }),
+  group('inverter', t.inverter, inverters, {}),
+  group('battery', t.battery, batteries, { none: t.noBattery, qty: { name: 'batteryQty', value: 1, label: t.modules } }),
+  group('mount', t.mounting, mounts, { none: t.noMounting, qty: { name: 'mountQty', value: 1, label: t.qty } }),
+];
+---
+<Site lang={lang} title={t.title} description={t.description} alternate={href(other(lang), 'builder')}>
+  <header class="wrap sheet-head pg-head">
+    <nav aria-label={lang === 'sq' ? 'Gjurma' : 'Breadcrumb'}>
+      <ol class="crumbs"><li><a href={href(lang, 'home')}>{w.crumbsHome}</a></li><li><a href={href(lang, 'packages')}>{lang === 'sq' ? 'Paketat' : 'Packages'}</a></li><li aria-current="page">{t.h1}</li></ol>
+    </nav>
+    <p class="eyebrow">{t.eyebrow}</p>
+    <h1 class="poster poster--s pg-poster">{t.h1}</h1>
+    <div class="pg-head__row rule-double"><p class="lede">{t.lede}</p></div>
+  </header>
+
+  <div class="wrap bd" data-builder>
+    <noscript><p class="notice">{t.noJs} <a href={href(lang, 'calculator')}>{lang === 'sq' ? 'Kalkulatori' : 'Calculator'}</a> · <a href={href(lang, 'packages')}>{lang === 'sq' ? 'Paketat' : 'Packages'}</a></p></noscript>
+    <form class="bd__picks" data-builder-form>
+      <fieldset class="bd__group">
+        <legend class="title">{t.supply}</legend>
+        <div class="qz__choices bd__supply">
+          <label class="qz__choice"><input type="radio" name="supply" value="1" checked /><span>{tx(lang).quiz.single}</span></label>
+          <label class="qz__choice"><input type="radio" name="supply" value="3" /><span>{tx(lang).quiz.three}</span></label>
+        </div>
+      </fieldset>
+      {groups.map((g) => (
+        <fieldset class="bd__group">
+          <legend class="title">{g.label}</legend>
+          {g.qty && <label class="bd__qty"><span>{g.qty.label}</span><input class="input input--num" type="number" name={g.qty.name} min="1" max="200" value={g.qty.value} inputmode="numeric" /></label>}
+          <div class="bd__list">
+            {g.none && <label class="pick pick--none"><input type="radio" name={g.key} value="" checked /><span class="pick__name">{g.none}</span></label>}
+            {g.list.map((p, i) => (
+              <label class="pick">
+                <input type="radio" name={g.key} value={p.id} checked={!g.none && i === (g.key === 'inverter' ? firstSingle : 0)} />
+                <span class="pick__fig"><ProductPhoto src={p.image} brand={p.brand} model={p.model} /></span>
+                <span class="pick__name">{name(p)}</span>
+                <span class="pick__spec mono small">{spec(p)}</span>
+                <span class="pick__price mono">{lek(p.price, lang)} <span class="muted">/ {t.perUnit}</span></span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+    </form>
+
+    <aside class="bd__sum" aria-labelledby="bd-sum-h">
+      <div class="bd__card">
+        <h2 class="eyebrow" id="bd-sum-h">{t.summary}</h2>
+        <dl class="bd__figs">
+          <div><dt>{t.power}</dt><dd class="figure" data-b-kwp>—</dd></div>
+          <div><dt>{t.ratio}</dt><dd class="figure" data-b-ratio>—</dd></div>
+        </dl>
+        <p class="small muted" data-b-prod></p>
+        <h3 class="eyebrow">{t.checks}</h3>
+        <ul class="bd__checks" data-b-checks aria-live="polite"></ul>
+        <p class="bd__total"><span>{t.total}</span><b class="figure" data-b-total>—</b></p>
+        <form method="post" action="/api/cart" data-cart-form data-b-cart>
+          <input type="hidden" name="action" value="add-many" />
+          <span data-b-lines></span>
+          <button class="btn" type="submit" data-b-add disabled>{t.add} <span class="arrow" aria-hidden="true">→</span></button>
+        </form>
+      </div>
+    </aside>
+    <script type="application/json" id="bd-data" set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />
+  </div>
+  <script>
+    import '../scripts/builder';
+  </script>
+</Site>

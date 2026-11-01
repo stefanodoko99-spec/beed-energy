@@ -9,6 +9,9 @@ import { categoryHref, categoryName, groupCategories } from '../lib/energy-nav';
 import { tc } from '../i18n/common';
 import { tr } from '../i18n/renewables';
 import { contactSettings } from '../lib/pages-db';
+import { all } from '../lib/db';
+import { tx } from '../i18n/extras';
+import CurrencySwitch from './CurrencySwitch.astro';
 interface Props { lang: Lang; cats: Category[]; }
 const { lang, cats } = Astro.props;
 const t = tc(lang);
@@ -21,11 +24,16 @@ const products = cats.reduce((n, c) => n + (c.product_count ?? 0), 0);
 // Contact details only when settings.contact has them (no visible placeholders); NIPT and the operator line always.
 const contact = await contactSettings();
 const tel = contact.phone ? contact.phone.replace(/[^+\d]/g, '') : '';
+const x = tx(lang);
 const tools = [
   { key: 'packages', href: href(lang, 'packages'), text: f.tools.packages },
+  { key: 'quiz', href: href(lang, 'quiz'), text: [x.quiz.h1, x.quiz.lede.split('. ')[0] + '.'] as const },
   { key: 'guide', href: href(lang, 'guide'), text: f.tools.guide },
+  { key: 'builder', href: href(lang, 'builder'), text: [x.builder.h1, x.builder.lede.split('. ')[0] + '.'] as const },
   { key: 'calc', href: href(lang, 'calculator'), text: f.tools.calc },
 ] as const;
+// one solar page per city with PVGIS data (views/SolarCity.astro)
+const solarCities = await all<{ slug: string; name_sq: string; name_en: string }>('SELECT slug, name_sq, name_en FROM cities WHERE pv_yield IS NOT NULL ORDER BY sort, name_sq');
 ---
 <footer class="site-footer" data-tone="ink">
   <section class="fhero" aria-labelledby="fhero-title">
@@ -78,6 +86,10 @@ const tools = [
         </li>
       ))}
     </ul>
+    <nav class="fcities" aria-labelledby="fcities-h">
+      <h3 class="eyebrow" id="fcities-h">{x.city.eyebrow}</h3>
+      <ul>{solarCities.map((c) => <li><a href={href(lang, 'solarCity', { slug: c.slug })}>{lang === 'sq' ? c.name_sq : c.name_en}</a></li>)}</ul>
+    </nav>
   </section>
 
   <div class="footer__grid">
@@ -93,6 +105,9 @@ const tools = [
         <li><a href={href(lang, 'sellers')}>{t.nav.sellers}</a></li>
         <li><a href={href(lang, 'sell')}>{t.nav.sell}</a></li>
         <li><a href={href(lang, 'quote')}>{t.nav.quote}</a></li>
+        <li><a href={href(lang, 'installers')}>{x.installers.eyebrow}</a></li>
+        <li><a href={href(lang, 'projects')}>{x.projects.eyebrow}</a></li>
+        <li><a href={href(lang, 'track')}>{x.track.h1}</a></li>
         <li><a href={href(lang, 'contact')}>{t.nav.contact}</a></li>
       </ul>
     </div>
@@ -122,6 +137,7 @@ const tools = [
     <span>{f.demo}</span>
     <span class="row" style="gap:.25rem">
       <button class="saver" type="button" aria-pressed="false" data-saver><span class="saver__track" aria-hidden="true"></span><span>{t.saver.label}</span></button>
+      <CurrencySwitch lang={lang} />
       <a href="#top" class="link-arrow small">{f.top} ↑</a>
     </span>
   </div>

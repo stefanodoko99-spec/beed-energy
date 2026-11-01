@@ -1,0 +1,14 @@
+---
+// Lekë or euros (lib/currency.ts): two buttons posting to /api/currency, the current one pressed. Euros are for
+// orientation only; checkout and payment stay in lekë.
+import { tx } from '../i18n/extras';
+import type { Lang } from '../lib/i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = tx(lang).currency;
+const cur = Astro.locals.display?.cur === 'eur' ? 'eur' : Astro.cookies.get('beed_cur')?.value === 'eur' ? 'eur' : 'all';
+---
+<form class="cur" method="post" action="/api/currency" aria-label={c.label}>
+  <button type="submit" name="to" value="all" aria-pressed={cur === 'all' ? 'true' : 'false'}>L <span class="visually-hidden">{c.all}</span></button>
+  <button type="submit" name="to" value="eur" aria-pressed={cur === 'eur' ? 'true' : 'false'}>€ <span class="visually-hidden">{c.eur}</span></button>
+</form>

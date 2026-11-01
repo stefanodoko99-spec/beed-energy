@@ -2,6 +2,7 @@
 // The offers table: one row per seller offer, sorted by total delivered to the chosen city.
 // A real <table> on wide screens; on phones each row becomes a card (roles kept explicit so Safari keeps table semantics).
 import { href, date, type Lang } from '../lib/i18n';
+import ChatButtons from './ChatButtons.astro';
 import { price, unitPrice, type City, type OfferRow } from '../lib/shop-data';
 import { num } from '../lib/money';
 import { ts } from '../i18n/shop';
@@ -70,6 +71,7 @@ const hasUnit = !!unitLabel && rows.some((r) => r.perUnit !== null);
               </div>
               <p class="offer__meta">{rating}{sellerCity && <> · {sellerCity}</>}</p>
               <p class="offer__meta">{t.updated(date(r.updated_at, lang))}</p>
+              <ChatButtons lang={lang} phone={r.seller_phone} seller={r.seller_name} what={productName} compact />
             </th>
             <td role="cell" class="num offer__price" data-label={C.price}>
               <span class="price">{price(r.price_all, lang)}</span>

@@ -1,9 +1,9 @@
-// Serves product photos stored by src/lib/media.ts. Keys are content hashes, so a response never changes
+// Serves product photos (p/) and project photos (j/) stored by src/lib/media.ts. Keys are content hashes, so a response never changes
 // and browsers may keep it for a year without asking again.
 import type { APIRoute } from 'astro';
 import { getMedia } from '../../lib/media';
 
-const KEY = /^p\/\d+\/[0-9a-f]{20}\.(?:jpg|png|webp)$/;
+const KEY = /^[pj]\/\d+\/[0-9a-f]{20}\.(?:jpg|png|webp)$/;
 
 export const GET: APIRoute = async ({ params, request }) => {
   const key = params.key ?? '';

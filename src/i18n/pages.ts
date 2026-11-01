@@ -16,6 +16,7 @@ const PROJECTS = {
     insulation: 'Izolim termik dhe fasadë',
     windows: 'Dritare',
     materials: 'Materiale ndërtimi',
+    visit: 'Vizitë nga instaluesi',
     other: 'Tjetër',
   },
   en: {
@@ -25,6 +26,7 @@ const PROJECTS = {
     insulation: 'Insulation and facade',
     windows: 'Windows',
     materials: 'Construction materials',
+    visit: 'Installer visit',
     other: 'Other',
   },
 };

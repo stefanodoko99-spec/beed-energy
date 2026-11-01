@@ -1,0 +1,42 @@
+---
+// Order tracking (lib/track.ts): order code + phone → the order's page with its timeline.
+import Site from '../layouts/Site.astro';
+import '../styles/pages.css';
+import { href, other, type Lang } from '../lib/i18n';
+import type { TrackState } from '../lib/track';
+import { tx } from '../i18n/extras';
+import { tp } from '../i18n/pages';
+
+interface Props { lang: Lang; state: TrackState | null }
+const { lang, state } = Astro.props;
+const t = tx(lang).track;
+const w = tp(lang);
+const err = state?.error ? t[state.error] : null;
+---
+<Site lang={lang} title={t.title} description={t.description} alternate={href(other(lang), 'track')}>
+  <header class="wrap sheet-head pg-head">
+    <nav aria-label={lang === 'sq' ? 'Gjurma' : 'Breadcrumb'}>
+      <ol class="crumbs"><li><a href={href(lang, 'home')}>{w.crumbsHome}</a></li><li aria-current="page">{t.h1}</li></ol>
+    </nav>
+    <p class="eyebrow">{t.eyebrow}</p>
+    <h1 class="poster poster--s pg-poster">{t.h1}</h1>
+    <div class="pg-head__row rule-double"><p class="lede">{t.lede}</p></div>
+  </header>
+  <div class="wrap pg-formwrap">
+    <form class="pg-form track" method="post" action={href(lang, 'track')} novalidate>
+      {err && <p class="form-errors" role="alert">{err}</p>}
+      <div class="field">
+        <label for="tr-code">{t.code}</label>
+        <input class="input input--num" id="tr-code" name="code" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="BD-2611-00042" value={state?.code ?? ''} aria-describedby="tr-code-h" aria-invalid={state?.error === 'notFound' || undefined} />
+        <p class="hint" id="tr-code-h">{t.codeHint}</p>
+      </div>
+      <div class="field">
+        <label for="tr-phone">{t.phone}</label>
+        <input class="input" id="tr-phone" name="phone" type="tel" required autocomplete="tel" inputmode="tel" value={state?.phone ?? ''} aria-describedby="tr-phone-h" />
+        <p class="hint" id="tr-phone-h">{t.phoneHint}</p>
+      </div>
+      <p class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off" /></label></p>
+      <button class="btn" type="submit">{t.submit} <span class="arrow" aria-hidden="true">→</span></button>
+    </form>
+  </div>
+</Site>

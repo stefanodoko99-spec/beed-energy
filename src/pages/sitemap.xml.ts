@@ -7,7 +7,7 @@ import type { APIRoute } from 'astro';
 import { all } from '../lib/db';
 import { href, type RouteKey } from '../lib/i18n';
 
-const STATIC: RouteKey[] = ['home', 'shop', 'guide', 'packages', 'calculator', 'sellers', 'sell', 'quote', 'about', 'contact', 'terms', 'privacy'];
+const STATIC: RouteKey[] = ['home', 'shop', 'guide', 'packages', 'calculator', 'sellers', 'sell', 'quote', 'about', 'contact', 'terms', 'privacy', 'quiz', 'builder', 'installers', 'projects', 'track'];
 
 type Entry = { sq: string; en: string; lastmod?: string | null };
 
@@ -26,6 +26,8 @@ export const GET: APIRoute = async ({ url, site }) => {
   for (const c of cats) entries.push({ sq: href('sq', 'category', { slug: c.slug_sq }), en: href('en', 'category', { slug: c.slug_en }) });
   for (const p of products) entries.push({ sq: href('sq', 'product', { slug: p.slug }), en: href('en', 'product', { slug: p.slug }), lastmod: day(p.updated_at) });
   for (const s of sellers) entries.push({ sq: href('sq', 'seller', { slug: s.slug }), en: href('en', 'seller', { slug: s.slug }) });
+  const cities = await all<{ slug: string }>('SELECT slug FROM cities WHERE pv_yield IS NOT NULL ORDER BY sort');
+  for (const c of cities) entries.push({ sq: href('sq', 'solarCity', { slug: c.slug }), en: href('en', 'solarCity', { slug: c.slug }) });
 
   const alternates = (e: Entry) =>
     `<xhtml:link rel="alternate" hreflang="sq" href="${esc(origin + e.sq)}"/>` +

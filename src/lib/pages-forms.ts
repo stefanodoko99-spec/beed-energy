@@ -194,3 +194,50 @@ export function jsonResult(r: FormResult): Response {
   if (r.redirect) return Response.json({ ok: true, next: r.redirect }, { status: 200 });
   return Response.json({ ok: false, errors: r.errors, tooMany: !!r.tooMany }, { status: r.status });
 }
+
+/** A visit request from the installer finder (/instaluesit): a quote request addressed to one installer, answered in
+ *  the same thread as any quote. */
+export async function handleVisit(ctx: Ctx, lang: Lang): Promise<FormResult> {
+  const form = await ctx.request.formData();
+  const e = tp(lang).form.err;
+  const values = {
+    seller: str(form, 'seller', 12),
+    city: str(form, 'city', 40),
+    name: str(form, 'name', 120),
+    phone: str(form, 'phone', 30),
+    email: str(form, 'email', 160).toLowerCase(),
+    details: str(form, 'details', 4000),
+  };
+  if (isBot(form)) return { status: 303, redirect: href(lang, 'installers', {}, { dergua: 1 }), values, errors: {} };
+  if (rateLimited(`visit:${addr(ctx)}`, 6)) return { status: 429, values, errors: {}, tooMany: true };
+  const errors: Record<string, string> = {};
+  const installer = await get<{ id: number; name: string }>(
+    "SELECT id, name FROM sellers WHERE id = ? AND status = 'active' AND kind IN ('installer', 'contractor')",
+    Number(values.seller) || 0,
+  );
+  if (!installer) errors.seller = e.project;
+  const city = await cityId(values.city);
+  if (!city) errors.city = e.city;
+  if (values.name.length < 3 || !/\s/.test(values.name)) errors.name = e.name;
+  const phone = normalisePhone(values.phone);
+  if (!phone) errors.phone = e.phone;
+  if (values.email && !EMAIL_RE.test(values.email)) errors.email = e.email;
+  if (values.details.length < 20) errors.details = e.details;
+  if (Object.keys(errors).length || !city || !phone || !installer) return { status: 422, values, errors };
+  const { code, token } = await createQuote({
+    project_type: 'visit',
+    city_id: city,
+    name: values.name,
+    phone,
+    email: values.email || null,
+    company: null,
+    nipt: null,
+    details: `${lang === 'sq' ? 'Vizitë nga' : 'Visit from'} ${installer.name}.\n\n${values.details}`,
+    budget_all: null,
+    items: [],
+    lang,
+    seller_id: installer.id,
+  });
+  return { status: 303, redirect: href(lang, 'quoteThread', { code }, { k: token, dergua: 1 }), values, errors: {} };
+}
+

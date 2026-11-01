@@ -1,0 +1,63 @@
+---
+// Completed projects: real installations by the platform's sellers (admin/projects), shown only when published and
+// the owner agreed to the photo and the figures. Until the first one exists, an honest empty page.
+import Site from '../layouts/Site.astro';
+import '../styles/pages.css';
+import { all } from '../lib/db';
+import { href, other, type Lang } from '../lib/i18n';
+import { lekLong, num } from '../lib/money';
+import { tx } from '../i18n/extras';
+import { tp } from '../i18n/pages';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = tx(lang).projects;
+const w = tp(lang);
+const rows = await all<any>(
+  `SELECT j.*, s.name AS seller, s.slug AS seller_slug, c.name_sq AS city_sq, c.name_en AS city_en
+     FROM projects j LEFT JOIN sellers s ON s.id = j.seller_id LEFT JOIN cities c ON c.id = j.city_id
+    WHERE j.status = 'published' AND j.consent = 1 ORDER BY j.year DESC, j.created_at DESC`,
+);
+---
+<Site lang={lang} title={t.title} description={t.description} alternate={href(other(lang), 'projects')}>
+  <header class="wrap sheet-head pg-head">
+    <nav aria-label={lang === 'sq' ? 'Gjurma' : 'Breadcrumb'}>
+      <ol class="crumbs"><li><a href={href(lang, 'home')}>{w.crumbsHome}</a></li><li aria-current="page">{t.h1}</li></ol>
+    </nav>
+    <p class="eyebrow">{t.eyebrow}</p>
+    <h1 class="poster poster--s pg-poster">{t.h1}</h1>
+    <div class="pg-head__row rule-double"><p class="lede">{t.lede}</p></div>
+  </header>
+  <div class="wrap pj">
+    {rows.length === 0 ? (
+      <div class="pj__empty">
+        <p>{t.empty}</p>
+        <a class="btn" href={href(lang, 'contact', {}, { tema: 'selling' })}>{t.emptyCta} <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+    ) : (
+      <ul class="pj__list">
+        {rows.map((p) => {
+          const title = (lang === 'en' && p.title_en) || p.title_sq;
+          const story = (lang === 'en' && p.story_en) || p.story_sq;
+          const city = lang === 'sq' ? p.city_sq : p.city_en;
+          return (
+            <li class="pj__card">
+              {p.image && <img class="pj__img" src={p.image} alt="" loading="lazy" decoding="async" />}
+              <div class="pj__body">
+                <p class="mono small muted">{[t.kinds[p.kind], city, p.year].filter(Boolean).join(' · ')}</p>
+                <h2 class="pj__title">{title}</h2>
+                <p class="pj__figs">
+                  {p.kwp && <span class="tag tag--copper">{t.kwp(num(p.kwp, 1, lang))}</span>}
+                  {p.battery_kwh && <span class="tag">{t.battery(num(p.battery_kwh, 1, lang))}</span>}
+                </p>
+                {story && <p>{story}</p>}
+                {p.saving_all && <p class="small">{t.saving(lekLong(p.saving_all, lang))}</p>}
+                {p.seller && <p class="small muted">{t.by} <a href={href(lang, 'seller', { slug: p.seller_slug })}>{p.seller}</a></p>}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </div>
+</Site>

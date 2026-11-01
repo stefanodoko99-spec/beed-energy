@@ -1,0 +1,12 @@
+---
+import Installers from '../views/Installers.astro';
+import { handleVisit, type FormResult } from '../lib/pages-forms';
+
+let state: FormResult | null = null;
+if (Astro.request.method === 'POST') {
+  state = await handleVisit(Astro, 'sq');
+  if (state.redirect) return Astro.redirect(state.redirect, 303);
+  Astro.response.status = state.status;
+}
+---
+<Installers lang="sq" state={state} />

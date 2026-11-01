@@ -28,6 +28,8 @@ declare namespace App {
   interface Locals {
     lang: import('./lib/i18n').Lang;
     user: import('./lib/auth').User | null;
+    /** Lekë or euros on this page (lib/currency.ts, set by the middleware). */
+    display?: { cur: 'all' | 'eur'; rate: number };
     /** The Worker's execution context, set by @astrojs/cloudflare. Absent outside a Worker. */
     cfContext?: { waitUntil(p: Promise<unknown>): void; passThroughOnException(): void };
   }

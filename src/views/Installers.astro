@@ -1,0 +1,99 @@
+---
+// Installer finder: installers and building companies by city, each with WhatsApp/Viber/call, and a visit request
+// that becomes a quote addressed to that installer (lib/pages-forms.ts handleVisit), answered in the quote thread.
+import Site from '../layouts/Site.astro';
+import ChatButtons from '../components/ChatButtons.astro';
+import '../styles/pages.css';
+import { all } from '../lib/db';
+import { href, other, type Lang } from '../lib/i18n';
+import { num } from '../lib/money';
+import type { FormResult } from '../lib/pages-forms';
+import { tx } from '../i18n/extras';
+import { tp } from '../i18n/pages';
+
+interface Props { lang: Lang; state: FormResult | null }
+const { lang, state } = Astro.props;
+const t = tx(lang).installers;
+const w = tp(lang);
+const f = w.form;
+const cityQ = Astro.url.searchParams.get(lang === 'sq' ? 'qyteti' : 'city') ?? '';
+const cities = await all<{ id: number; slug: string; name_sq: string; name_en: string }>('SELECT id, slug, name_sq, name_en FROM cities ORDER BY sort, name_sq');
+const city = cities.find((c) => c.slug === cityQ);
+const rows = await all<any>(
+  `SELECT s.*, c.name_sq AS city_sq, c.name_en AS city_en, c.slug AS city_slug FROM sellers s LEFT JOIN cities c ON c.id = s.city_id
+    WHERE s.status = 'active' AND s.kind IN ('installer', 'contractor') ${city ? 'AND s.city_id = ?' : ''}
+    ORDER BY s.verified DESC, s.rating DESC, s.name`,
+  ...(city ? [city.id] : []),
+);
+const pick = Number(Astro.url.searchParams.get('instalues') ?? state?.values.seller ?? 0) || 0;
+const v: Record<string, string> = { seller: pick ? String(pick) : '', city: city?.slug ?? 'tirane', name: '', phone: '', email: '', details: '', ...(state?.values ?? {}) };
+const err = state?.errors ?? {};
+const sent = Astro.url.searchParams.get('dergua') === '1';
+const allInstallers = await all<{ id: number; name: string }>("SELECT id, name FROM sellers WHERE status = 'active' AND kind IN ('installer', 'contractor') ORDER BY name");
+const cityName = (c: { name_sq: string; name_en: string }) => (lang === 'sq' ? c.name_sq : c.name_en);
+const cParam = lang === 'sq' ? 'qyteti' : 'city';
+---
+<Site lang={lang} title={t.title} description={t.description} alternate={href(other(lang), 'installers')}>
+  <header class="wrap sheet-head pg-head">
+    <nav aria-label={lang === 'sq' ? 'Gjurma' : 'Breadcrumb'}>
+      <ol class="crumbs"><li><a href={href(lang, 'home')}>{w.crumbsHome}</a></li><li aria-current="page">{t.h1}</li></ol>
+    </nav>
+    <p class="eyebrow">{t.eyebrow}</p>
+    <h1 class="poster poster--s pg-poster">{t.h1}</h1>
+    <div class="pg-head__row rule-double"><p class="lede">{t.lede}</p></div>
+  </header>
+
+  <div class="wrap ins">
+    <form class="ins__filter" method="get" action={href(lang, 'installers')}>
+      <label class="field"><span>{t.city}</span>
+        <select class="select" name={cParam}>
+          <option value="">{t.all}</option>
+          {cities.map((c) => <option value={c.slug} selected={c.slug === cityQ}>{cityName(c)}</option>)}
+        </select>
+      </label>
+      <button class="btn btn--ghost" type="submit">{t.filter}</button>
+    </form>
+
+    {rows.length === 0 ? (
+      <p class="empty muted">{t.none} <a href={href(lang, 'quote')}>{lang === 'sq' ? 'Kërko ofertë' : 'Request a quote'}</a></p>
+    ) : (
+      <ul class="ins__list">
+        {rows.map((s) => (
+          <li class="ins__card">
+            <p class="ins__name"><a href={href(lang, 'seller', { slug: s.slug })}>{s.name}</a>{!!s.verified && <span class="tag tag--ok"><span aria-hidden="true">✓</span> {t.verified}</span>}</p>
+            <p class="mono small muted">{[lang === 'sq' ? s.city_sq : s.city_en, s.rating ? t.rating(num(s.rating, 1, lang), s.rating_count) : null].filter(Boolean).join(' · ')}</p>
+            {(lang === 'sq' ? s.about_sq : s.about_en) && <p class="ins__about">{lang === 'sq' ? s.about_sq : s.about_en}</p>}
+            <ChatButtons lang={lang} phone={s.phone} seller={s.name} />
+            <a class="btn btn--s" href={`${href(lang, 'installers', {}, { [cParam]: cityQ || undefined, instalues: s.id })}#vizita`}>{t.visit} <span class="arrow" aria-hidden="true">→</span></a>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    <section class="ins__form" id="vizita" aria-labelledby="vz-h">
+      <h2 class="title" id="vz-h">{t.formH2}</h2>
+      <p class="muted">{t.formLede}</p>
+      {state?.tooMany && <p class="form-errors" role="alert">{f.tooMany}</p>}
+      {Object.keys(err).length > 0 && <div class="form-errors" role="alert"><p>{f.errorsTitle(Object.keys(err).length)}</p></div>}
+      <form class="pg-form" method="post" action={href(lang, 'installers')} novalidate>
+        <div class="field"><label for="vz-seller">{t.installer}</label>
+          <select class="select" id="vz-seller" name="seller" required aria-invalid={err.seller ? 'true' : undefined}>
+            <option value="">{t.pick}</option>
+            {allInstallers.map((s) => <option value={s.id} selected={String(s.id) === v.seller}>{s.name}</option>)}
+          </select>
+        </div>
+        <div class="field"><label for="vz-city">{t.city}</label>
+          <select class="select" id="vz-city" name="city" required aria-invalid={err.city ? 'true' : undefined}>
+            {cities.map((c) => <option value={c.slug} selected={c.slug === v.city}>{cityName(c)}</option>)}
+          </select>
+        </div>
+        <div class="field"><label for="vz-name">{f.name}</label><input class="input" id="vz-name" name="name" required autocomplete="name" value={v.name} aria-invalid={err.name ? 'true' : undefined} />{err.name && <p class="err">{err.name}</p>}</div>
+        <div class="field"><label for="vz-phone">{f.phone}</label><input class="input" id="vz-phone" name="phone" type="tel" required autocomplete="tel" value={v.phone} aria-invalid={err.phone ? 'true' : undefined} />{err.phone && <p class="err">{err.phone}</p>}</div>
+        <div class="field"><label for="vz-email">{f.email}</label><input class="input" id="vz-email" name="email" type="email" autocomplete="email" value={v.email} aria-invalid={err.email ? 'true' : undefined} />{err.email && <p class="err">{err.email}</p>}</div>
+        <div class="field"><label for="vz-details">{t.details}</label><textarea class="textarea" id="vz-details" name="details" required minlength="20" rows="4" aria-invalid={err.details ? 'true' : undefined}>{v.details}</textarea>{err.details && <p class="err">{err.details}</p>}</div>
+        <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off" /></div>
+        <button class="btn" type="submit">{t.send} <span class="arrow" aria-hidden="true">→</span></button>
+      </form>
+    </section>
+  </div>
+</Site>

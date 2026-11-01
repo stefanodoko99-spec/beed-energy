@@ -1,6 +1,8 @@
 ---
 // Product page: the "Fleta teknike" (drawing + title block), the offers table sorted by total delivered,
 // specifications, price history, price alert, related products and the phone action bar.
+import { productReviews } from '../lib/reviews';
+import { tx } from '../i18n/extras';
 import Site from '../layouts/Site.astro';
 import ProductPhoto from '../components/ProductPhoto.astro';
 import ProductCard from '../components/ProductCard.astro';
@@ -14,7 +16,7 @@ import { COMPAT_METHOD } from '../content/battery-compat';
 import { tc } from '../i18n/compat';
 import { attributes, categoryById, offersFor, priceHistory, productCardsByIds, productImages, productSpecs, related } from '../lib/catalog';
 import { readCompare } from '../lib/basket';
-import { href, type Lang } from '../lib/i18n';
+import { date, href, type Lang } from '../lib/i18n';
 import { cities as allCities, drawingNo, fitDesc, fitTitle, offerRows, parseSources, price, priceLong, unitPrice } from '../lib/shop-data';
 import { num } from '../lib/money';
 import { chosenCitySlug } from '../lib/city-pref';
@@ -59,6 +61,9 @@ const sellerCount = new Set(rows.map((r) => r.seller_id)).size;
 const anyDemo = rows.some((r) => r.isDemo);
 const history = await priceHistory(p.id, 90);
 const rel = await related(p, 4);
+// Verified reviews (lib/reviews.ts): only from delivered orders, shown once approved.
+const reviews = await productReviews(p.id);
+const rv = tx(lang).reviews;
 const compared = new Set(readCompare(Astro.cookies));
 const sources = parseSources(p.sources_json);
 const dno = drawingNo(cat.id, p.id);
@@ -84,6 +89,8 @@ const jsonld: Record<string, unknown>[] = [
     url: origin + path,
     ...(photos.length ? { image: photos.map((ph) => origin + ph.path) } : {}),
     ...(p.weight_kg ? { weight: { '@type': 'QuantitativeValue', value: p.weight_kg, unitCode: 'KGM' } } : {}),
+    // only real, approved reviews from delivered orders
+    ...(reviews.count && reviews.avg ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: Math.round(reviews.avg * 10) / 10, reviewCount: reviews.count, bestRating: 5, worstRating: 1 } } : {}),
     ...(rows.length && lowPrice !== null
       ? {
           offers: {
@@ -339,6 +346,23 @@ const key = (n: number) => String(n + (works && n >= 3 ? 1 : 0)).padStart(2, '0'
           </form>
         )}
       </div>
+    </section>
+
+    <section class="wrap product__section" id="vleresimet" aria-labelledby="reviews-title">
+      <div class="section-head">
+        <h2 id="reviews-title" class="title section-head__title">{rv.h2}</h2>
+        {reviews.count > 0 && reviews.avg && <p class="mono small muted"><span class="rv-avg" aria-hidden="true">{'★'.repeat(Math.round(reviews.avg))}{'☆'.repeat(5 - Math.round(reviews.avg))}</span> {num(reviews.avg, 1, lang)} · {rv.avg(reviews.count)}</p>}
+      </div>
+      {reviews.count === 0 ? <p class="muted">{rv.none}</p> : (
+        <ul class="rv-list">
+          {reviews.list.map((r) => (
+            <li class="rv">
+              <p class="rv__head"><span class="rv__stars" role="img" aria-label={rv.stars(r.rating)}>{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span> <b>{r.name}</b> <span class="tag tag--ok"><span aria-hidden="true">✓</span> {rv.verified}</span> <time class="mono small muted" datetime={r.created_at.replace(' ', 'T') + 'Z'}>{date(r.created_at, lang)}</time></p>
+              {r.body && <p class="rv__body">{r.body}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
 
     {rel.length > 0 && (

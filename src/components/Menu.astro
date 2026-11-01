@@ -15,6 +15,9 @@ const r = tr(lang).nav;
 const groups = groupCategories(cats);
 const heading = { energy: t.groups.energy, 'efficiency-build': r.efficiencyBuild } as const;
 let n = 0;
+import CurrencySwitch from './CurrencySwitch.astro';
+import { tx } from '../i18n/extras';
+const x = tx(lang);
 ---
 <div class="menu on-ink" id="site-menu" hidden data-menu role="dialog" aria-modal="true" aria-label={t.nav.menu}>
   <div class="menu__top">
@@ -47,6 +50,9 @@ let n = 0;
         <a href={href(lang, 'packages')}>{r.packages}</a>
         <a href={href(lang, 'guide')}>{r.guide}</a>
         <a href={href(lang, 'calculator')}>{r.calculator}</a>
+        <a href={href(lang, 'quiz')}>{x.quiz.h1}</a>
+        <a href={href(lang, 'builder')}>{x.builder.h1}</a>
+        <a href={href(lang, 'installers')}>{x.installers.eyebrow}</a>
         <a href={href(lang, 'quote')}>{t.nav.quote}</a>
         <a href={href(lang, 'sellers')}>{t.nav.sellers}</a>
         <a href={href(lang, 'sell')}>{t.nav.sell}</a>
@@ -61,8 +67,13 @@ let n = 0;
       <ul class="stack-s" style="list-style:none;padding:0">
         <li><a class="link-arrow" href={href(lang, 'about')}><span>{t.nav.about}</span><span class="arrow" aria-hidden="true">→</span></a></li>
         <li><a class="link-arrow" href={href(lang, 'contact')}><span>{t.nav.contact}</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a class="link-arrow" href={href(lang, 'projects')}><span>{x.projects.eyebrow}</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a class="link-arrow" href={href(lang, 'track')}><span>{x.track.h1}</span><span class="arrow" aria-hidden="true">→</span></a></li>
       </ul>
-      <button class="saver" type="button" aria-pressed="false" data-saver><span class="saver__track" aria-hidden="true"></span><span>{t.saver.label}</span></button>
+      <div class="row" style="gap:.75rem;align-items:center">
+        <button class="saver" type="button" aria-pressed="false" data-saver><span class="saver__track" aria-hidden="true"></span><span>{t.saver.label}</span></button>
+        <CurrencySwitch lang={lang} />
+      </div>
     </div>
   </div>
 </div>

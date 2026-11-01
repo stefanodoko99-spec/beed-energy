@@ -196,3 +196,19 @@ html.js .stepper__save { display: none; }
 /* The zone hint applies only while no city is chosen. */
 .sumcard__city .hint { display: none; }
 .sumcard__city:has(option[value=""]:checked) .hint { display: block; }
+
+/* ---------- verified reviews on a delivered order (lib/reviews.ts) ---------- */
+.rv-forms { display: grid; gap: 1rem; margin-top: 1rem; }
+.rv-form { display: grid; gap: 0.75rem; padding: 1.1rem 1.25rem; border-radius: var(--radius-l); background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+.rv-form__name { margin: 0; }
+.rv-done { margin: 0; padding: 0.85rem 1.1rem; border-radius: var(--radius-m); background: var(--teal-tint); }
+/* five stars, highest first in the markup, drawn right to left so a hover lights the stars up to the pointer */
+.rv-stars { border: 0; padding: 0; margin: 0; }
+.rv-stars legend { padding: 0; margin-bottom: 0.25rem; font-weight: 600; font-size: 0.875rem; }
+.rv-stars__row { display: inline-flex; flex-direction: row-reverse; gap: 0.15rem; }
+.rv-stars label { position: relative; display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer; font-size: 1.6rem; color: var(--teal-tint-2); }
+.rv-stars input { position: absolute; inset: 0; opacity: 0; cursor: pointer; margin: 0; }
+.rv-stars label:has(input:checked), .rv-stars label:has(input:checked) ~ label { color: var(--amber-deep); }
+/* fill the stars up to the pointer: the row runs 5…1 in the markup and is drawn reversed */
+.rv-stars label:has(input:focus-visible) { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 8px; }
+@media (hover: hover) and (pointer: fine) { .rv-stars__row:hover label { color: var(--teal-tint-2); } .rv-stars__row label:hover, .rv-stars__row label:hover ~ label { color: var(--amber-deep); } }
