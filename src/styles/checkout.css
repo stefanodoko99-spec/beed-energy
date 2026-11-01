@@ -42,7 +42,7 @@
 .totals dd { margin: 0; text-align: right; }
 .totals__grand { border-bottom: 3px solid var(--sun) !important; }
 .totals__grand dt { font-weight: 700; }
-.totals__grand dd { font-size: var(--step-2); font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
+.totals__grand dd { font-size: var(--step-2); font-weight: 600; letter-spacing: -0.02em; word-spacing: 0.08em; color: var(--text); }
 .totals__vat dt, .totals__vat dd { font-size: 0.8125rem; color: var(--ink-2); }
 .totals__vat { border-bottom: 0 !important; }
 html.js .co-nojs { display: none; }
@@ -125,7 +125,7 @@ html.js .stepper__save { display: none; }
 .co-form { display: grid; gap: 0; }
 .co-sec { border-top: 1px solid var(--line-strong); padding: 1.5rem 0 2.25rem; display: grid; gap: 1.25rem; }
 .co-sec:first-of-type { border-top: 3px solid var(--teal); }
-.co-sec__h { display: flex; align-items: baseline; gap: 0.9rem; font-stretch: 75%; font-weight: 750; font-size: var(--step-3); line-height: 1; letter-spacing: -0.01em; }
+.co-sec__h { display: flex; align-items: baseline; gap: 0.9rem; font-stretch: 75%; font-weight: 750; font-size: var(--step-3); line-height: 1; letter-spacing: -0.01em; word-spacing: 0.06em; }
 .co-sec__h .key { font-size: 0.875rem; color: var(--text); background: var(--sun); font-stretch: 100%; padding: 0.25rem 0.4rem; border: 1px solid var(--sun); }
 .co-fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .co-legend { display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 0.5rem; padding: 0; }

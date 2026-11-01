@@ -294,16 +294,6 @@ const jsonld = [
                 <p class="chapter__key mono"><span class="tag tag--copper">{pad(l.n)} / {total}</span> {l.short[lang]}</p>
                 <h2 class="title chapter__title">{l.name[lang]}</h2>
                 {fact && <p class="chapter__fact"><strong class="chapter__value figure">{fact.value}</strong> {fact.text}</p>}
-                {fact?.source && <p class="small muted mono chapter__src">{t.source}: <a href={fact.source.url} rel="noopener" target="_blank">{fact.source.label}</a>{fact.also && <>; <a href={fact.also.url} rel="noopener" target="_blank">{fact.also.label}</a></>}</p>}
-                {fact?.product && <p class="small muted mono chapter__src">{t.datasheet}: <a href={href(lang, 'product', { slug: fact.product.slug })}>{fact.product.name}</a></p>}
-                {more.map((x) => (
-                  <p class="chapter__extra">
-                    <span class="chapter__extra-value figure">{x.value}</span>{/^[:;,.]/.test(x.text) ? '' : ' '}{x.text}
-                    {x.source && <> <a class="small mono muted" href={x.source.url} rel="noopener" target="_blank">↗ {x.source.label}</a></>}
-                    {x.also && <> <a class="small mono muted" href={x.also.url} rel="noopener" target="_blank">↗ {x.also.label}</a></>}
-                    {x.product && <> <a class="small mono muted" href={href(lang, 'product', { slug: x.product.slug })}>{t.datasheet}: {x.product.name}</a></>}
-                  </p>
-                ))}
                 <ul class="chapter__cats" aria-label={t.inShop}>
                   {l.categories.map((s) => {
                     const c = bySlug.get(s);
@@ -319,6 +309,21 @@ const jsonld = [
                     );
                   })}
                 </ul>
+                {(fact?.source || fact?.product || more.length > 0) && (
+                  <details class="chapter__more">
+                    <summary class="mono">{t.more}</summary>
+                    {fact?.source && <p class="small muted mono chapter__src">{t.source}: <a href={fact.source.url} rel="noopener" target="_blank">{fact.source.label}</a>{fact.also && <>; <a href={fact.also.url} rel="noopener" target="_blank">{fact.also.label}</a></>}</p>}
+                    {fact?.product && <p class="small muted mono chapter__src">{t.datasheet}: <a href={href(lang, 'product', { slug: fact.product.slug })}>{fact.product.name}</a></p>}
+                    {more.map((x) => (
+                      <p class="chapter__extra">
+                        <span class="chapter__extra-value figure">{x.value}</span>{/^[:;,.]/.test(x.text) ? '' : ' '}{x.text}
+                        {x.source && <> <a class="small mono muted" href={x.source.url} rel="noopener" target="_blank">↗ {x.source.label}</a></>}
+                        {x.also && <> <a class="small mono muted" href={x.also.url} rel="noopener" target="_blank">↗ {x.also.label}</a></>}
+                        {x.product && <> <a class="small mono muted" href={href(lang, 'product', { slug: x.product.slug })}>{t.datasheet}: {x.product.name}</a></>}
+                      </p>
+                    ))}
+                  </details>
+                )}
               </div>
             </li>
           );

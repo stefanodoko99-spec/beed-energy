@@ -28,11 +28,11 @@ export const GET: APIRoute = async ({ url, redirect }) => {
   const sq = o.lang === 'sq';
   const html = `<!doctype html><html lang="${o.lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><title>${sq ? 'Pagesë provë' : 'Test payment'} · ${esc(o.code)}</title>
-<style>body{font:16px/1.5 system-ui,sans-serif;margin:0;min-height:100svh;display:grid;place-items:center;background:#f3f8f5;color:#10262b}
-main{max-width:28rem;padding:2rem;border:1px solid #0c4c37;border-top:4px solid #f5a524;background:#fff}h1{font-size:1.25rem;margin:0 0 .5rem}
-.tag{display:inline-block;font:600 12px/1 ui-monospace,monospace;letter-spacing:.06em;padding:.4rem .6rem;background:#f5a524;color:#10262b;margin-bottom:1rem}
-form{display:flex;gap:.75rem;margin-top:1.5rem}button{font:inherit;min-height:44px;padding:0 1.25rem;border:1px solid #0c4c37;color:#0c4c37;background:#fff;cursor:pointer}
-button[value=pay]{background:#0c4c37;color:#f3f8f5}</style></head><body><main>
+<style>body{font:16px/1.5 system-ui,sans-serif;margin:0;min-height:100svh;display:grid;place-items:center;background:#e8ede9;color:#10262b}
+main{max-width:28rem;padding:2rem;border:1px solid #33423e;border-top:4px solid #ece44c;background:#fff}h1{font-size:1.25rem;margin:0 0 .5rem}
+.tag{display:inline-block;font:600 12px/1 ui-monospace,monospace;letter-spacing:.06em;padding:.4rem .6rem;background:#ece44c;color:#10262b;margin-bottom:1rem}
+form{display:flex;gap:.75rem;margin-top:1.5rem}button{font:inherit;min-height:44px;padding:0 1.25rem;border:1px solid #33423e;color:#33423e;background:#fff;cursor:pointer}
+button[value=pay]{background:#33423e;color:#e8ede9}</style></head><body><main>
 <span class="tag">${sq ? 'PORTË PROVE · ASNJË PARA NUK LËVIZ' : 'TEST GATEWAY · NO MONEY MOVES'}</span>
 <h1>${sq ? 'Porosia' : 'Order'} ${esc(o.code)}</h1>
 <p>${sq ? 'Shuma' : 'Amount'}: <strong>${lek(o.total_all, o.lang)}</strong></p>

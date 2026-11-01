@@ -36,7 +36,8 @@ const clamp = (v: number, a: number) => Math.max(-a, Math.min(a, v));
 
 function geo(): Geo | null {
   if (!view || !frame) return null;
-  // the cards cover the left of the shot on wide screens: what the camera looks at goes right of them
+  // the cards cover the left of the shot on wide screens, the lower part on phones: what the camera looks at goes
+  // right of them, or above them
   return { vw: view.clientWidth, vh: view.clientHeight, fw: frame.offsetWidth, fh: frame.offsetHeight, side: matchMedia('(min-width: 900.02px)').matches };
 }
 
@@ -50,7 +51,7 @@ function pose(g: Geo, [sx, sy]: number[], s: number): Pose {
   const px = (sx / FRAME_W - 0.5) * g.fw;
   const py = (sy / FRAME_H - 0.5) * g.fh;
   const tx = (g.side ? 0.66 : 0.5) * g.vw - g.vw / 2;
-  const ty = (g.side ? 0.46 : 0.5) * g.vh - g.vh / 2;
+  const ty = (g.side ? 0.46 : 0.3) * g.vh - g.vh / 2;
   return {
     x: clamp(tx - px * s, Math.max(0, (g.fw * s - g.vw) / 2)),
     y: clamp(ty - py * s, Math.max(0, (g.fh * s - g.vh) / 2)),
@@ -58,11 +59,14 @@ function pose(g: Geo, [sx, sy]: number[], s: number): Pose {
   };
 }
 
-/** A close-up's push: scaled about its centre, slid so the equipment sits right of the cards where it can, and
- *  turned `turn` degrees in perspective (the orbit). The slide keeps 8 % back, so the turned far edge never shows. */
-function push(g: Geo, fx: number, s: number, turn: number) {
-  const want = g.side ? (0.62 - fx * s - 0.5 * (1 - s)) * g.vw : 0;
-  return { scale: s, x: clamp(want, Math.max(0, (s - 1.08) / 2) * g.vw), rotationY: turn, rotationX: turn / -4, transformPerspective: 1400 };
+/** A close-up's push: scaled about its centre, slid so the equipment sits right of the cards (above them on
+ *  phones) where it can, and turned `turn` degrees in perspective (the orbit). The slide keeps 8 % back, so the
+ *  turned far edge never shows. */
+function push(g: Geo, [fx, fy]: number[], s: number, turn: number) {
+  const room = Math.max(0, (s - 1.08) / 2);
+  const x = g.side ? (0.62 - fx * s - 0.5 * (1 - s)) * g.vw : 0;
+  const y = g.side ? 0 : (0.3 - fy * s - 0.5 * (1 - s)) * g.vh;
+  return { scale: s, x: clamp(x, room * g.vw), y: clamp(y, room * g.vh), rotationY: turn, rotationX: turn / -4, transformPerspective: 1400 };
 }
 
 // ---------- the live chapter: its key, its tag and the caption ----------
@@ -89,14 +93,15 @@ function setLayer(n: number) {
   });
 }
 
-/** Scroll positions (px from the moment the shot pins) at which each chapter card is in the middle of what is
- *  left of the screen: the whole screen beside the cards, the part under the pinned band on phones. */
+/** Scroll positions (px from the moment the shot pins) at which each chapter card is where it is read: the middle
+ *  of the screen on wide screens, resting above the dock on phones. */
 function centres(g: Geo): Map<number, { c: number; h: number }> {
   const top = cine!.getBoundingClientRect().top;
-  const eye = g.side ? window.innerHeight / 2 : (g.vh + window.innerHeight) / 2;
+  const vh = window.innerHeight;
   return new Map(chapters.map((c) => {
     const card = c.querySelector<HTMLElement>('.chapter__card') ?? c;
     const r = card.getBoundingClientRect();
+    const eye = g.side ? vh / 2 : Math.max(vh * 0.55, vh - 96 - r.height / 2);
     return [Number(c.dataset.chapter), { c: r.top - top + r.height / 2 - eye, h: r.height }];
   }));
 }
@@ -107,8 +112,8 @@ function buildFilm() {
   const vh = window.innerHeight;
   const total = Math.max(1, cine.offsetHeight - vh);
   const at = centres(g);
-  // the camera's beat: a screen on wide screens, the strip under the pinned band on phones
-  const u = g.side ? vh : vh - g.vh;
+  // the camera's beat: one screen
+  const u = vh;
   // every later tween on the camera starts from where the one before left it: none may render ahead of its turn
   const tl = gsap.timeline({ defaults: { ease: 'none', immediateRender: false } });
   const ordered = chapters.map((c) => Number(c.dataset.chapter)).sort((a, b) => a - b);
@@ -139,7 +144,7 @@ function buildFilm() {
     }
     const spot = ch.dataset.spot.split(' ').map(Number);
     const zoom = Number(ch.dataset.zoom || 2.6);
-    const [fx] = (ch.dataset.focus ?? '0.5 0.5').split(' ').map(Number);
+    const focus = (ch.dataset.focus ?? '0.5 0.5').split(' ').map(Number);
     const near = pose(g, spot, zoom);
     const past = pose(g, spot, zoom * 1.22);
     // fly in on the equipment while the card comes up (the spots fade as the camera leaves the whole house)
@@ -154,7 +159,7 @@ function buildFilm() {
     const out = Math.max(cut + 0.4 * u, Math.min(c + Math.max(0.35 * u, h / 2 - 0.2 * u), nextFly - 0.24 * u));
     // the orbit turns the other way on every other chapter
     const turn = i % 2 ? -4 : 4;
-    tl.fromTo(shot, push(g, fx, 1.12, turn), { ...push(g, fx, 1.24, turn * -0.6), duration: out + 0.2 * u - cut }, cut);
+    tl.fromTo(shot, push(g, focus, 1.12, turn), { ...push(g, focus, 1.24, turn * -0.6), duration: out + 0.2 * u - cut }, cut);
     tl.fromTo(shot, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.2 * u }, out);
     tl.fromTo(cam, past, { ...wide(1.1), duration: 0.22 * u, ease: 'power2.out' }, out - 0.02 * u);
     tl.to(spots, { autoAlpha: 1, duration: 0.1 * u }, out + 0.12 * u);

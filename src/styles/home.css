@@ -59,6 +59,13 @@
   .chapter__cats a:hover .chapter__cat { color: var(--sun); }
   .chapter__cats a:hover .arrow { transform: translateX(4px); }
 }
+.chapter__more { border-top: 1px solid var(--line); padding-top: 0.6rem; }
+.chapter__more summary { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--on-teal-2); cursor: pointer; list-style: none; }
+.chapter__more summary::-webkit-details-marker { display: none; }
+.chapter__more summary::before { content: '+'; display: inline-grid; place-items: center; width: 1.25rem; height: 1.25rem; border-radius: 50%; background: rgb(236 228 76 / 0.16); color: var(--sun); font-size: 0.9rem; transition: transform 200ms var(--ease-out); }
+.chapter__more[open] summary::before { transform: rotate(45deg); }
+.chapter__more > :not(summary) { margin-top: 0.6rem; }
+@media (hover: hover) and (pointer: fine) { .chapter__more summary:hover { color: #fff; } }
 .chapter--final { grid-column: 1 / -1; }
 .chapter--final .chapter__card { background: radial-gradient(90% 120% at 100% 0%, rgb(236 228 76 / 0.12), transparent 60%), rgb(255 255 255 / 0.05); }
 .final { display: grid; gap: 0.5rem; max-width: 28rem; padding: 1.25rem; border-radius: 18px; background: rgb(0 0 0 / 0.16); box-shadow: inset 0 0 0 1px var(--line-on-teal); }
@@ -108,41 +115,49 @@ html.js[data-motion="on"] .cine__tags { display: block; position: absolute; inse
 @keyframes cine-ping { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(3); } }
 html.js[data-motion="on"] .cine__spot::after { animation: cine-ping 2.2s var(--ease-out) infinite; }
 
+/* the chapter cards scroll over the pinned shot, a screen and a third apart (the camera flies in, holds the
+   close-up while the card is read, pulls back); the first comes in after a moment on the house. Wide screens: slate
+   glass on the left. Phones: the same glass across the lower part of the screen, the shot full screen behind. */
+html.js[data-motion="on"] .chapters { grid-area: 1 / 1; z-index: 2; display: block; max-width: none; margin: 0; padding: 90svh var(--gutter) 0; pointer-events: none; }
+html.js[data-motion="on"] .chapter { min-height: 135svh; display: flex; align-items: center; padding-block: 8svh; }
+html.js[data-motion="on"] .chapter__card { height: auto; pointer-events: auto; gap: 0.8rem;
+  background: rgb(30 40 37 / 0.66); -webkit-backdrop-filter: blur(18px) saturate(130%); backdrop-filter: blur(18px) saturate(130%); box-shadow: inset 0 1px 0 var(--glass-line), inset 0 0 0 1px rgb(255 255 255 / 0.06), 0 30px 60px rgb(0 0 0 / 0.28); }
+html.js[data-motion="on"] .chapter__shot { display: none; }
+html.js[data-motion="on"] .chapter--final { min-height: 100svh; }
 @media (min-width: 900.02px) {
-  /* the chapter cards scroll over the left of the pinned shot, a screen and a third apart (the camera flies in,
-     holds the close-up while the card is read, pulls back); the first comes in after a moment on the house */
-  html.js[data-motion="on"] .chapters { grid-area: 1 / 1; z-index: 2; display: block; max-width: none; margin: 0; padding: 90svh 0 0 max(var(--gutter), calc((100vw - var(--max)) / 2)); pointer-events: none; }
-  html.js[data-motion="on"] .chapter { min-height: 135svh; display: flex; align-items: center; padding-block: 8svh; }
-  html.js[data-motion="on"] .chapter__card { width: min(34rem, 36vw); height: auto; pointer-events: auto; gap: 0.8rem;
-    background: rgb(36 47 44 / 0.62); -webkit-backdrop-filter: blur(16px) saturate(130%); backdrop-filter: blur(16px) saturate(130%); box-shadow: inset 0 1px 0 var(--glass-line), 0 30px 60px rgb(0 0 0 / 0.25); }
-  html.js[data-motion="on"] .chapter__shot { display: none; }
-  html.js[data-motion="on"] .chapter__title { font-size: clamp(2rem, 1rem + 2.6vw, 3.75rem); }
-  html.js[data-motion="on"] .chapter__value { font-size: clamp(2.25rem, 1rem + 3vw, 4.25rem); }
-  html.js[data-motion="on"] .chapter--final { min-height: 100svh; }
+  html.js[data-motion="on"] .chapters { padding-left: max(var(--gutter), calc((100vw - var(--max)) / 2)); }
+  html.js[data-motion="on"] .chapter__card { width: min(32rem, 34vw); padding: 1.75rem 2rem; }
+  html.js[data-motion="on"] .chapter__title { font-size: clamp(2rem, 1rem + 2.4vw, 3.5rem); }
+  html.js[data-motion="on"] .chapter__value { font-size: clamp(2.25rem, 1rem + 2.8vw, 4rem); }
 }
-/* short laptop screens (1366 × 768, 1280 × 720): tighter cards, so most of a chapter is read in one screen */
+/* short laptop screens (1366 × 768, 1280 × 720): tighter cards, so a chapter is read in one screen */
 @media (min-width: 900.02px) and (max-height: 860px) {
   html.js[data-motion="on"] .chapter__card { gap: 0.5rem; padding: 1.1rem 1.4rem; }
   html.js[data-motion="on"] .chapter__title { font-size: clamp(1.75rem, 0.9rem + 2vw, 2.75rem); }
   html.js[data-motion="on"] .chapter__value { font-size: clamp(2rem, 0.9rem + 2.4vw, 3.25rem); }
   html.js[data-motion="on"] .chapter__fact { font-size: 1rem; }
-  html.js[data-motion="on"] .chapter__extra { font-size: 0.875rem; }
   html.js[data-motion="on"] .chapter__cats { margin-top: 0.25rem; }
   html.js[data-motion="on"] .chapter__cats a { padding-block: 0.45rem; }
 }
 @media (max-width: 900px) {
-  /* phones: the shot is a band pinned under the header, the chapters scroll below it */
-  html.js[data-motion="on"] .cine { display: block; }
-  html.js[data-motion="on"] .cine__view { height: 52svh; top: 0; }
-  html.js[data-motion="on"]:not([data-header="hidden"]) .cine__view { top: var(--header-h); }
-  html.js[data-motion="on"] .chapters { display: block; padding-top: 1rem; }
-  html.js[data-motion="on"] .chapter { min-height: 72svh; display: flex; align-items: center; padding-block: 1.5rem; }
-  html.js[data-motion="on"] .chapter__card { background: none; box-shadow: none; padding-inline: 0; }
-  html.js[data-motion="on"] .chapter__shot { display: none; }
-  .cine__tag { right: auto; left: var(--gutter); bottom: 3.6rem; width: min(17rem, calc(100vw - 2 * var(--gutter))); padding: 0.6rem 1.3rem 0.6rem 0.7rem; gap: 0.4rem; }
-  .cine__tag-pick { grid-template-columns: minmax(0, 1fr); }
-  .cine__tag-fig { display: none; } /* the band is small: the product's name is enough */
-  .cine__tag-name { font-size: 0.8125rem; }
+  /* phones: the card is a compact sheet; the shop rows drop their prices to one line, the tag and the keys go
+     (the card names the shelves), the caption keeps the AI stamp under the header */
+  html.js[data-motion="on"] .chapter { align-items: flex-end; padding-block: 0 calc(var(--stack-clear, 5rem) + 1rem); }
+  html.js[data-motion="on"] .chapter__card { width: 100%; gap: 0.5rem; padding: 1.1rem 1.15rem 0.6rem; border-radius: 22px; }
+  html.js[data-motion="on"] .chapter__key { font-size: 0.6875rem; }
+  html.js[data-motion="on"] .chapter__title { font-size: 1.85rem; }
+  html.js[data-motion="on"] .chapter__value { font-size: 2.25rem; margin-bottom: 0.2rem; }
+  html.js[data-motion="on"] .chapter__fact { font-size: 0.9375rem; }
+  html.js[data-motion="on"] .chapter__cats { margin-top: 0.15rem; }
+  html.js[data-motion="on"] .chapter__cats a { grid-template-columns: minmax(0, 1fr) auto; padding-block: 0.5rem; min-height: 44px; }
+  html.js[data-motion="on"] .chapter__cats .arrow { display: none; }
+  html.js[data-motion="on"] .chapter__cat { font-size: 0.9375rem; }
+  html.js[data-motion="on"] .chapter__meta { font-size: 0.6875rem; }
+  html.js[data-motion="on"] .chapter__more summary { min-height: 40px; }
+  html.js[data-motion="on"] .cine__tags, html.js[data-motion="on"] .stage__keys { display: none; }
+  html.js[data-motion="on"] .cine__caption { top: calc(var(--header-h) + 0.35rem); }
+  html.js[data-motion="on"] .cine__caption > :first-child { display: none; }
+  html.js[data-motion="on"] .cine__stamp { display: inline; }
 }
 
 /* ---------- teasers: solar packages + guide (src/components/HomeTeasers.astro), static in every mode ---------- */
@@ -188,7 +203,7 @@ html.js[data-motion="on"] .cine__spot::after { animation: cine-ping 2.2s var(--e
 @media (hover: hover) and (pointer: fine) { .teaser__sections a:hover span:last-child { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; } }
 
 /* ---------- manifesto ---------- */
-.manifesto__text { font-size: clamp(1.9rem, 1rem + 3vw, 4.4rem); line-height: 1.1; font-weight: 300; letter-spacing: -0.035em; max-width: 28ch; }
+.manifesto__text { font-size: clamp(1.9rem, 1rem + 3vw, 4.4rem); line-height: 1.1; font-weight: 300; letter-spacing: -0.035em; word-spacing: 0.11em; max-width: 28ch; }
 html.js[data-motion="on"] .manifesto__text .w { opacity: var(--o, 1); }
 
 /* ---------- how it works ---------- */
@@ -273,7 +288,7 @@ html.js[data-motion="on"] .manifesto__text .w { opacity: var(--o, 1); }
 .vhero__top { text-align: center; }
 .vhero__eyebrow { color: rgb(255 255 255 / 0.78); margin-bottom: clamp(0.5rem, 1.5svh, 1.25rem); }
 .vhero__title { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 0.14em; margin: 0;
-  font-weight: 200; font-size: min(clamp(3.25rem, 8.6vw, 11.5rem), 16svh); line-height: 1; letter-spacing: -0.055em; color: #fff;
+  font-weight: 200; font-size: min(clamp(3.25rem, 8.6vw, 11.5rem), 16svh); line-height: 1; letter-spacing: -0.055em; word-spacing: 0.15em; color: #fff;
   text-shadow: 0 2px 30px rgb(0 0 0 / 0.25); }
 .vhero__word { display: inline-block; overflow: hidden; padding: 0.04em 0.02em 0.1em; margin-block: -0.04em -0.1em; }
 .vhero__word > span { display: inline-block; }
@@ -290,7 +305,7 @@ html.js[data-motion="on"] .manifesto__text .w { opacity: var(--o, 1); }
 .vhero__card-text { font-size: 0.9rem; line-height: 1.35; color: rgb(255 255 255 / 0.88); }
 .vhero__card-cta { justify-self: start; margin-top: auto; font-size: 0.7rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; padding-bottom: 0.2rem; border-bottom: 1.5px solid currentColor; }
 .vhero__side { grid-column: 3; }
-.vhero__claim { margin: 0 0 1.4rem; font-size: clamp(1.4rem, 0.9rem + 1.05vw, 2.2rem); font-weight: 400; line-height: 1.16; letter-spacing: -0.025em; color: #fff; text-shadow: 0 2px 20px rgb(0 0 0 / 0.3); }
+.vhero__claim { margin: 0 0 1.4rem; font-size: clamp(1.4rem, 0.9rem + 1.05vw, 2.2rem); font-weight: 400; line-height: 1.16; letter-spacing: -0.025em; word-spacing: 0.09em; color: #fff; text-shadow: 0 2px 20px rgb(0 0 0 / 0.3); }
 .vhero__sun { color: var(--sun); white-space: nowrap; }
 .vhero__sun svg { display: inline-block; width: 0.78em; height: 0.78em; vertical-align: -0.08em; margin-right: 0.2em; }
 .vhero__cta { gap: 0.6rem; }
@@ -300,7 +315,7 @@ html.js[data-motion="on"] .manifesto__text .w { opacity: var(--o, 1); }
 .vcard { height: 100%; }
 .vcard--b { height: 112%; }
 .vcard a { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; height: 100%; overflow: hidden; padding: clamp(1.1rem, 1.8vw, 2rem); text-decoration: none; color: #fff; }
-.vcard__title { position: relative; z-index: 1; font-size: clamp(1.25rem, 0.85rem + 0.9vw, 1.9rem); font-weight: 400; line-height: 1.08; letter-spacing: -0.025em; max-width: 14ch; }
+.vcard__title { position: relative; z-index: 1; font-size: clamp(1.25rem, 0.85rem + 0.9vw, 1.9rem); font-weight: 400; line-height: 1.08; letter-spacing: -0.025em; word-spacing: 0.09em; max-width: 14ch; }
 .vcard__text { position: relative; z-index: 1; font-size: 0.875rem; line-height: 1.35; max-width: 24ch; opacity: 0.9; }
 .vcard__meta { position: relative; z-index: 1; font-size: 0.75rem; color: rgb(255 255 255 / 0.85); }
 .vcard__cta { position: relative; z-index: 1; margin-top: auto; font-size: 0.7rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sun); padding-bottom: 0.2rem; border-bottom: 1.5px solid currentColor; }

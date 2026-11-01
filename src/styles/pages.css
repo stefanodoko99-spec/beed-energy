@@ -246,7 +246,7 @@ fieldset.field > legend { padding: 0; margin-bottom: 0.4rem; }
 
 /* ---------- about ---------- */
 .ab-tb dd { font-size: 0.9375rem; }
-.ab-mission__text { margin-top: 1rem; font-weight: 650; font-stretch: 80%; font-size: clamp(1.75rem, 1rem + 2.6vw, 3.5rem); line-height: 1.05; letter-spacing: -0.01em; max-width: 26ch; }
+.ab-mission__text { margin-top: 1rem; font-weight: 650; font-stretch: 80%; font-size: clamp(1.75rem, 1rem + 2.6vw, 3.5rem); line-height: 1.05; letter-spacing: -0.01em; word-spacing: 0.06em; max-width: 26ch; }
 .ab-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem var(--gutter); }
 .ab-two .title { margin-bottom: 1.25rem; }
 .ab-list { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--line-strong); }
@@ -263,7 +263,7 @@ fieldset.field > legend { padding: 0; margin-bottom: 0.4rem; }
 .ab-n__item:not(:nth-child(4n)) { border-right: 1px solid var(--line-on-teal); }
 .ab-n__item:not(:nth-child(4n + 1)) { padding-left: 1.25rem; }
 .ab-n__k { color: var(--sun); }
-.ab-n__big { font-weight: 800; font-stretch: 62%; font-size: clamp(2.5rem, 1.2rem + 3.4vw, 4.75rem); line-height: 0.9; letter-spacing: -0.02em; color: var(--sun); overflow-wrap: anywhere; }
+.ab-n__big { font-weight: 800; font-stretch: 62%; font-size: clamp(2.5rem, 1.2rem + 3.4vw, 4.75rem); line-height: 0.9; letter-spacing: -0.02em; word-spacing: 0.08em; color: var(--sun); overflow-wrap: anywhere; }
 .ab-n__txt { color: var(--paper); }
 .ab-n__src { font: 400 0.75rem/1.4 var(--font-mono); color: var(--on-teal-2); }
 .ab-n__src a { color: var(--paper); text-decoration-color: var(--sun); display: inline; }

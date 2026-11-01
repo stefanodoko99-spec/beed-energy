@@ -94,7 +94,7 @@ h1, h2, h3 { line-height: 1.1; }
 .display {
   font-size: var(--step-display);
   line-height: 0.95;
-  letter-spacing: -0.03em; /* tighten as size grows: about -0.02em to -0.06em */
+  letter-spacing: -0.03em; word-spacing: 0.1em; /* tighten as size grows: about -0.02em to -0.06em */
 }
 .eyebrow { font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.06em; }
 :target { scroll-margin-top: var(--header-h); }
