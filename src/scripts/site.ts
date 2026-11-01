@@ -48,7 +48,7 @@ function openMenu(from: HTMLElement) {
   root.style.overflow = 'hidden';
   if (motionOn()) {
     gsap.fromTo(menu, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 0.42, ease: 'power3.out' });
-    gsap.fromTo(menu.querySelectorAll('.menu__cat, .menu__big a'), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.018, ease: 'power2.out', delay: 0.08 });
+    gsap.fromTo(menu.querySelectorAll('.menu__cat, .menu__big a, .menu__links a'), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.018, ease: 'power2.out', delay: 0.08 });
   }
   menu.querySelector<HTMLElement>('[data-menu-close]')?.focus();
 }

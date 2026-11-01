@@ -18,6 +18,12 @@ let n = 0;
 import CurrencySwitch from './CurrencySwitch.astro';
 import { tx } from '../i18n/extras';
 const x = tx(lang);
+// the four main destinations stay large; everything else sits in a compact two-column list under them
+const links = [
+  ['quiz', x.quiz.h1], ['builder', x.builder.h1], ['installers', x.installers.eyebrow], ['quote', t.nav.quote],
+  ['sellers', t.nav.sellers], ['sell', t.nav.sell], ['projects', x.projects.eyebrow], ['track', x.track.h1],
+  ['about', t.nav.about], ['contact', t.nav.contact],
+] as const;
 ---
 <div class="menu on-ink" id="site-menu" hidden data-menu role="dialog" aria-modal="true" aria-label={t.nav.menu}>
   <div class="menu__top">
@@ -45,17 +51,18 @@ const x = tx(lang);
       ))}
     </div>
     <div class="menu__side">
-      <nav class="menu__big" aria-label={t.nav.menu}>
-        <a href={href(lang, 'shop')}>{t.nav.shop}</a>
-        <a href={href(lang, 'packages')}>{r.packages}</a>
-        <a href={href(lang, 'guide')}>{r.guide}</a>
-        <a href={href(lang, 'calculator')}>{r.calculator}</a>
-        <a href={href(lang, 'quiz')}>{x.quiz.h1}</a>
-        <a href={href(lang, 'builder')}>{x.builder.h1}</a>
-        <a href={href(lang, 'installers')}>{x.installers.eyebrow}</a>
-        <a href={href(lang, 'quote')}>{t.nav.quote}</a>
-        <a href={href(lang, 'sellers')}>{t.nav.sellers}</a>
-        <a href={href(lang, 'sell')}>{t.nav.sell}</a>
+      <nav class="menu__nav" aria-label={t.nav.menu}>
+        <div class="menu__big">
+          <a href={href(lang, 'shop')}>{t.nav.shop}</a>
+          <a href={href(lang, 'packages')}>{r.packages}</a>
+          <a href={href(lang, 'guide')}>{r.guide}</a>
+          <a href={href(lang, 'calculator')}>{r.calculator}</a>
+        </div>
+        <ul class="menu__links">
+          {links.map(([key, label]) => (
+            <li><a href={href(lang, key)}><span>{label}</span><span class="arrow" aria-hidden="true">→</span></a></li>
+          ))}
+        </ul>
       </nav>
       <form class="stack-s" action={href(lang, 'search')} method="get" role="search">
         <label class="eyebrow" for="menu-q">{t.nav.search}</label>
@@ -64,12 +71,6 @@ const x = tx(lang);
           <button class="btn btn--copper" type="submit">{t.nav.search}</button>
         </div>
       </form>
-      <ul class="stack-s" style="list-style:none;padding:0">
-        <li><a class="link-arrow" href={href(lang, 'about')}><span>{t.nav.about}</span><span class="arrow" aria-hidden="true">→</span></a></li>
-        <li><a class="link-arrow" href={href(lang, 'contact')}><span>{t.nav.contact}</span><span class="arrow" aria-hidden="true">→</span></a></li>
-        <li><a class="link-arrow" href={href(lang, 'projects')}><span>{x.projects.eyebrow}</span><span class="arrow" aria-hidden="true">→</span></a></li>
-        <li><a class="link-arrow" href={href(lang, 'track')}><span>{x.track.h1}</span><span class="arrow" aria-hidden="true">→</span></a></li>
-      </ul>
       <div class="row" style="gap:.75rem;align-items:center">
         <button class="saver" type="button" aria-pressed="false" data-saver><span class="saver__track" aria-hidden="true"></span><span>{t.saver.label}</span></button>
         <CurrencySwitch lang={lang} />

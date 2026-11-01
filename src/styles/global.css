@@ -303,24 +303,36 @@ html[data-header="hidden"] .site-header:not(:focus-within) { transform: translat
 .saver[aria-pressed="true"] .saver__track { background: var(--sun); box-shadow: inset 0 0 0 1.5px var(--amber-deep); }
 .saver[aria-pressed="true"] .saver__track::after { transform: translateX(16px); background: var(--text); }
 
-/* ---------- full-screen menu ---------- */
-.menu { position: fixed; inset: 0; z-index: 60; background: var(--teal); color: var(--paper); display: grid; grid-template-rows: auto 1fr auto; overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--gutter) 2rem; }
+/* ---------- full-screen menu ----------
+   Compact (2026-11-01): fits a 1440 × 900 laptop without scrolling. Four main destinations stay large; the other ten
+   links sit in a two-column list; category rows are one line of name with count and price beside it. */
+.menu { position: fixed; inset: 0; z-index: 60; background: var(--teal); color: var(--paper); display: grid; grid-template-rows: auto 1fr auto; overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--gutter) 1.5rem; }
 .menu[hidden] { display: none; }
 .menu__top { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line-on-teal); }
-.menu__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2rem var(--gutter); padding-top: 2rem; }
-.menu__cats { grid-column: span 8; display: grid; gap: 2rem; align-content: start; }
-.menu .menu__group-h { display: flex; gap: 0.4rem; align-items: baseline; padding-bottom: 0.55rem; border-bottom: 3px solid var(--sun); color: var(--paper); }
+.menu__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1.5rem var(--gutter); padding-top: 1.25rem; }
+.menu__cats { grid-column: span 8; display: grid; gap: 1.25rem; align-content: start; }
+.menu .menu__group-h { display: flex; gap: 0.4rem; align-items: baseline; padding-bottom: 0.4rem; border-bottom: 3px solid var(--sun); color: var(--paper); }
 .menu__group-n { color: var(--on-teal-2); }
 .menu__group-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr)); column-gap: var(--gutter); }
-.menu__cat { display: grid; grid-template-columns: 2.5rem 1fr auto; align-items: baseline; gap: 0.75rem; padding: 0.8rem 0; border-bottom: 1px solid var(--line-on-teal); text-decoration: none; min-height: 44px; }
-.menu__cat .n { font: 500 0.75rem var(--font-mono); color: var(--sun); }
-.menu__cat .name { font-weight: 500; font-size: 1.125rem; letter-spacing: -0.01em; word-spacing: 0.06em; }
-.menu__cat .meta { font: 400 0.75rem var(--font-mono); color: var(--on-teal-2); text-align: right; white-space: nowrap; }
+.menu__cat { display: grid; grid-template-columns: 2rem 1fr auto; align-items: center; gap: 0.6rem; padding: 0.35rem 0; border-bottom: 1px solid var(--line-on-teal); text-decoration: none; min-height: 44px; }
+.menu__cat .n { font: 500 0.6875rem var(--font-mono); color: var(--sun); }
+.menu__cat .name { font-weight: 500; font-size: 1rem; line-height: 1.25; letter-spacing: -0.01em; word-spacing: 0.06em; }
+.menu__cat .meta { font: 400 0.6875rem/1.3 var(--font-mono); color: var(--on-teal-2); text-align: right; white-space: nowrap; }
 @media (hover: hover) and (pointer: fine) { .menu__cat:hover .name { color: var(--glow); } }
-.menu__side { grid-column: span 4; display: grid; gap: 1.5rem; align-content: start; }
-.menu__big a { display: block; font-weight: 250; letter-spacing: -0.04em; word-spacing: 0.12em; font-size: clamp(2.25rem, 1.4rem + 3vw, 4rem); line-height: 0.95; text-decoration: none; padding-block: 0.15rem; }
+.menu__side { grid-column: span 4; display: grid; gap: 1.25rem; align-content: start; }
+.menu__nav { display: grid; gap: 0.9rem; }
+.menu__big a { display: block; font-weight: 250; letter-spacing: -0.04em; word-spacing: 0.12em; font-size: clamp(1.875rem, 1.3rem + 1.6vw, 2.75rem); line-height: 1; text-decoration: none; padding-block: 0.1rem; }
 @media (hover: hover) and (pointer: fine) { .menu__big a:hover { color: var(--sun); } }
+.menu__links { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1rem; }
+.menu__links a { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; min-height: 44px; padding: 0.3rem 0; border-bottom: 1px solid var(--line-on-teal); text-decoration: none; font-weight: 500; font-size: 0.9375rem; line-height: 1.2; }
+.menu__links .arrow { flex: none; color: var(--sun); transition: transform 160ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .menu__links a:hover { color: var(--glow); } .menu__links a:hover .arrow { transform: translateX(3px); } }
 @media (max-width: 960px) { .menu__cats, .menu__side { grid-column: 1 / -1; } }
+/* phones: the row numbers go, so long names keep to one line */
+@media (max-width: 600px) {
+  .menu__cat { grid-template-columns: 1fr auto; }
+  .menu__cat .n { display: none; }
+}
 
 /* ---------- phone dock ---------- */
 .dock { display: none; }
