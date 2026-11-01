@@ -270,8 +270,22 @@ img.ph { object-fit: contain; background: transparent; mix-blend-mode: multiply;
 .site-header { --line: var(--line-on-teal); --line-strong: var(--line-on-teal-strong); --ink-2: var(--on-teal-2); --text-2: var(--on-teal-2); }
 html[data-header="hidden"] .site-header:not(:focus-within) { transform: translateY(calc(-100% - 16px - var(--safe-top))); }
 /* the installed app on iPhone draws the page under the status bar (black-translucent): a slate strip keeps the clock
-   readable over light pages. It has no height in a browser tab, where --safe-top is 0. */
-body::before { content: ''; position: fixed; z-index: 58; inset: 0 0 auto; height: var(--safe-top); background: rgb(36 47 44 / 0.92); pointer-events: none; }
+   readable while the header is hidden on the way down. It has no height in a browser tab, where --safe-top is 0. */
+body::before { content: ''; position: fixed; z-index: 49; inset: 0 0 auto; height: var(--safe-top); background: var(--teal); pointer-events: none; }
+/* Phones: colour edge to edge. The bar is solid slate from the very top of the screen (under the clock) and side to
+   side, so the status bar, the browser's bar (theme-color, Site.astro) and the header read as one colour; the
+   floating glass with slanted ends stays on wider screens. */
+@media (max-width: 760px) {
+  .site-header {
+    inset: 0 0 auto; height: calc(var(--header-h) - 1rem); padding: var(--safe-top) var(--gutter) 0;
+    clip-path: none; background: var(--teal); -webkit-backdrop-filter: none; backdrop-filter: none;
+    box-shadow: inset 0 -1px 0 var(--line-on-teal), 0 8px 24px -14px rgb(24 34 31 / 0.5);
+  }
+  html[data-header="hidden"] .site-header:not(:focus-within) { transform: translateY(-100%); }
+  /* the page's canvas: what shows past the top and bottom when a phone bounces the scroll, and behind the home
+     indicator. Deep slate, the colour of the header, footer and dock, instead of a band of mist. */
+  html { background-color: var(--teal-deep); }
+}
 .brand { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; min-height: 44px; font-weight: 700; font-size: 1.375rem; letter-spacing: -0.01em; word-spacing: 0.06em; white-space: nowrap; flex: none; }
 /* the logo (Logo.astro): the lemon label with dark letters on every ground; "Energy" follows the text colour */
 .logo { display: block; flex: none; overflow: visible; --logo-label: var(--leaf); --logo-on-label: var(--text); }
@@ -362,18 +376,20 @@ body::before { content: ''; position: fixed; z-index: 58; inset: 0 0 auto; heigh
 .dock { display: none; }
 @media (max-width: 760px) {
   .dock {
-    position: fixed; z-index: 45; left: 50%; bottom: calc(10px + env(safe-area-inset-bottom)); transform: translateX(-50%);
-    display: grid; grid-template-columns: repeat(5, 1fr); width: min(28rem, calc(100% - 20px));
-    background: var(--teal); color: var(--paper); border-radius: var(--pill); padding: 4px; box-shadow: var(--shadow-2), inset 0 0 0 1px var(--line-on-teal);
+    /* edge to edge: flush with the bottom and both sides, its slate running down behind the home indicator */
+    position: fixed; z-index: 45; left: 0; right: 0; bottom: 0;
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    background: var(--teal); color: var(--paper); padding: 4px max(4px, calc(var(--gutter) - 12px)) calc(4px + env(safe-area-inset-bottom));
+    box-shadow: inset 0 1px 0 var(--line-on-teal), 0 -10px 30px -14px rgb(24 34 31 / 0.45);
   }
   .dock a, .dock button { display: grid; place-items: center; gap: 2px; min-height: 52px; border-radius: var(--pill); text-decoration: none; font: 500 0.6875rem var(--font-mono); letter-spacing: 0.03em; background: none; border: 0; color: inherit; cursor: pointer; }
   .dock a[aria-current="page"] { background: var(--teal-deep); color: var(--sun); }
   .dock .count { height: 1.1rem; min-width: 1.3rem; font-size: 0.625rem; background: var(--sun); color: var(--text); }
   .dock .count[data-zero="true"] { background: transparent; color: inherit; } /* amber only when something is in it */
-  /* The phone's bottom stack: the dock (52 px buttons + 2 × 4 px padding, 10 px off the edge), on a product page the
-     action bar above it (--bar-h, shop.css), and the one-row compare tray on top when it shows (60 px + 8 px gap).
-     Content and the footer keep 16 px clear of the top of the stack. */
-  :root { --dock-clear: calc(60px + 10px + env(safe-area-inset-bottom) + 16px); --bar-h: 0px; --tray-h: 0px; --stack-clear: calc(var(--dock-clear) + var(--bar-h) + var(--tray-h)); }
+  /* The phone's bottom stack: the dock (52 px buttons + 2 × 4 px padding, flush with the bottom edge, plus the home
+     indicator's strip), on a product page the action bar above it (--bar-h, shop.css), and the one-row compare tray on
+     top when it shows (60 px + 8 px gap). Content and the footer keep 16 px clear of the top of the stack. */
+  :root { --dock-clear: calc(60px + env(safe-area-inset-bottom) + 16px); --bar-h: 0px; --tray-h: 0px; --stack-clear: calc(var(--dock-clear) + var(--bar-h) + var(--tray-h)); }
   html:has(.tray:not([hidden])) { --tray-h: 68px; }
   html { scroll-padding-bottom: var(--stack-clear); }
   main { padding-bottom: var(--stack-clear); }
@@ -384,9 +400,9 @@ body::before { content: ''; position: fixed; z-index: 58; inset: 0 0 auto; heigh
    five items, each as wide as its word, spread edge to edge on a slightly wider dock with no letter-spacing:
    ≥ 14 px between neighbouring words. */
 @media (max-width: 359.98px) {
-  .dock { width: calc(100% - 12px); grid-template-columns: repeat(5, auto); justify-content: space-between; }
+  .dock { grid-template-columns: repeat(5, auto); justify-content: space-between; padding-inline: 6px; }
   .dock a, .dock button { letter-spacing: 0; padding-inline: 0.35rem; min-width: 44px; }
-  .tray { right: 6px; width: calc(100% - 12px); } /* stays flush with the dock under it */
+  .tray { right: 6px; width: calc(100% - 12px); }
 }
 
 /* ---------- footer: a mini website ----------
@@ -519,7 +535,7 @@ html[data-preloader="on"] .loader { animation: loader-gone 0.01s 3s forwards; }
 .tray__item button { background: none; border: 0; color: inherit; cursor: pointer; min-width: 32px; min-height: 32px; }
 @media (max-width: 760px) {
   /* one row, 8 px above the dock: "Krahasimi · 2/4", Pastro, Krahaso tani (the picked products are on the compare page) */
-  .tray { bottom: calc(78px + env(safe-area-inset-bottom)); right: 10px; width: calc(100% - 20px); display: flex; align-items: center; gap: 0.5rem; min-height: 60px; padding: 0.5rem 0.5rem 0.5rem 0.9rem; }
+  .tray { bottom: calc(68px + env(safe-area-inset-bottom)); right: 10px; width: calc(100% - 20px); display: flex; align-items: center; gap: 0.5rem; min-height: 60px; padding: 0.5rem 0.5rem 0.5rem 0.9rem; }
   .tray > .row { flex: 1 1 auto; min-width: 0; flex-wrap: nowrap; gap: 0.5rem; }
   .tray > .row > strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .tray__items { display: none; }

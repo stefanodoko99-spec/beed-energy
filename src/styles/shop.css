@@ -342,9 +342,10 @@ html[data-motion="off"] .fan-layer { display: none; }
 .actionbar { display: none; }
 @media (max-width: 760px) {
   .actionbar {
-    position: fixed; z-index: 44; left: 10px; right: 10px; bottom: calc(76px + env(safe-area-inset-bottom));
+    /* edge to edge, sitting straight on the dock: one bottom panel from side to side */
+    position: fixed; z-index: 44; left: 0; right: 0; bottom: calc(60px + env(safe-area-inset-bottom));
     display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 0.5rem;
-    padding: 0.5rem 0.5rem 0.5rem 0.9rem; background: var(--paper); border: 1px solid var(--teal); box-shadow: inset 0 3px 0 var(--sun), var(--shadow-2);
+    padding: 0.5rem var(--gutter); background: var(--paper); border-top: 1px solid var(--teal); box-shadow: inset 0 3px 0 var(--sun), 0 -10px 30px -14px rgb(24 34 31 / 0.35);
   }
   .actionbar:not(:has(.actionbar__form)) { grid-template-columns: auto minmax(0, 1fr); }
   .actionbar__form { display: grid; min-width: 0; }
@@ -352,10 +353,10 @@ html[data-motion="off"] .fan-layer { display: none; }
   .actionbar__t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .actionbar__price { display: grid; line-height: 1.15; min-width: 0; }
   .actionbar__price .price { font-size: 1rem; }
-  /* the bar joins the phone's bottom stack (global.css --stack-clear: main, footer, scroll-padding): 62 px + 6 px gap;
+  /* the bar joins the phone's bottom stack (global.css --stack-clear: main, footer, scroll-padding): 61 px, no gap;
      the one-row compare tray sits 8 px above the bar, never over it or the dock */
-  html:has(body.has-actionbar) { --bar-h: 68px; }
-  body.has-actionbar .tray { bottom: calc(146px + env(safe-area-inset-bottom)); }
+  html:has(body.has-actionbar) { --bar-h: 61px; }
+  body.has-actionbar .tray { bottom: calc(129px + env(safe-area-inset-bottom)); }
 }
 
 /* ---------- compare ---------- */
