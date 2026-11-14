@@ -23,6 +23,7 @@ export const common = {
       terms: 'Kushtet e përdorimit', privacy: 'Privatësia', returns: 'Kthimet dhe e drejta e heqjes dorë nga kontrata', delivery: 'Dërgesa', payments: 'Pagesat',
       demo: 'Prototip: shitësit, çmimet dhe stoku janë shembuj deri në nisjen e tregut.',
       top: 'Kthehu lart',
+      credit: 'Faqja nga ODD FORM STUDIO',
       // the footer as a mini website (2026-11-01): a closing hero, the shop, the tools, the map of the site
       heroEyebrow: 'Gati për diellin?',
       heroTitle: 'Ndizni shtëpinë tuaj me energjinë e diellit.',
@@ -62,6 +63,7 @@ export const common = {
       terms: 'Terms of use', privacy: 'Privacy', returns: 'Returns and withdrawal', delivery: 'Delivery', payments: 'Payments',
       demo: 'Prototype: sellers, prices and stock are samples until the marketplace launches.',
       top: 'Back to top',
+      credit: 'Website by ODD FORM STUDIO',
       heroEyebrow: 'Ready for the sun?',
       heroTitle: 'Switch your home on with the sun.',
       heroText: 'See what your roof can make, compare offers from Albanian sellers and order in one place.',
